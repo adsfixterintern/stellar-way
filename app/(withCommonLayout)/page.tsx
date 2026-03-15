@@ -1,7 +1,12 @@
 import React from 'react'
+import AboutSection from '../_components/AboutSection'
 
 export default function page() {
   return (
-    <div></div>
+    <div>
+
+
+      <AboutSection/>
+    </div>
   )
 }

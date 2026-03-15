@@ -4,6 +4,8 @@ import React from 'react';
 import { motion, Variants } from 'framer-motion';
 import Image from 'next/image';
 import aboutImage from '@/public/assets/home/homeAbout.png'; 
+import qualityIcon from '@/public/assets/home/icon1.png'; 
+import reputationIcon from '@/public/assets/home/icon2.png';
 
 const AboutSection: React.FC = () => {
 
@@ -37,7 +39,6 @@ const AboutSection: React.FC = () => {
   };
 
   return (
-   
     <section className="py-16 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         
@@ -49,7 +50,6 @@ const AboutSection: React.FC = () => {
           viewport={{ once: true }}
           className="relative w-full h-[350px] md:h-[550px]"
         >
-      
           <Image
             src={aboutImage}
             alt="About Our Restaurant"
@@ -80,26 +80,39 @@ const AboutSection: React.FC = () => {
           </motion.p>
 
           <motion.div className="grid grid-cols-1 sm:grid-cols-2 gap-8 my-4" variants={textItemVariants}>
-            <div className="flex gap-4">
-              <div className="text-primary flex-shrink-0">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 15h18"/><path d="M3 19h18"/><path d="m19 11-7-7-7 7"/><path d="M2 11h20"/></svg>
+            
+            {/* Feature 1: Super Quality Food */}
+            <div className="flex gap-4 items-start">
+              <div className="relative w-12 h-12 flex-shrink-0">
+                 <Image 
+                    src={qualityIcon} 
+                    alt="Quality Icon" 
+                    fill 
+                    className="object-contain"
+                 />
               </div>
               <div>
                 <h4 className="cardTitle !mb-1 !text-[20px]">Super Quality Food</h4>
                 <p className="cardDescription !text-sm !mb-0 text-gray">
-                  Original interactive art and music for your soul.
+                   A group of visionaries and action takers creating original interactive art and music.
                 </p>
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <div className="text-primary flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+            {/* Feature 2: Well Reputation */}
+            <div className="flex gap-4 items-start">
+              <div className="relative w-12 h-12 flex-shrink-0">
+                <Image 
+                    src={reputationIcon} 
+                    alt="Reputation Icon" 
+                    fill 
+                    className="object-contain"
+                 />
               </div>
               <div>
                 <h4 className="cardTitle !mb-1 !text-[20px]">Well Reputation</h4>
                 <p className="cardDescription !text-sm !mb-0 text-gray">
-                  Recognized for our excellence and taste.
+                   A group of visionaries and action takers creating original interactive art and music.
                 </p>
               </div>
             </div>

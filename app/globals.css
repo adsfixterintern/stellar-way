@@ -1,26 +1,123 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+.primary-color { color: #1A4E11; }
+.gray-color { color: #939393; }
+.primary-bg { background-color: #1A4E11; }
+.white-text { color: #FFFFFF; }
+
+.secTitle {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 110%;
+    letter-spacing: 0;
+    vertical-align: middle;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.superTitle {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    vertical-align: middle;
+    color: #1A4E11;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.description {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 140%;
+    text-transform: capitalize;
+    vertical-align: middle;
+    color: #939393;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.subTitle {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 30px;
+    text-align: center;
+}
+
+.nameText {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 150%;
+    text-align: center;
+}
+
+.designationText {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 132%;
+    text-align: center;
+    color: #939393;
+}
+
+.blockBtn {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 169px;
+    height: 50px;
+    gap: 16px;
+    padding: 14px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background-color: #1A4E11;
+    color: #FFFFFF;
+    transition: all 0.3s ease;
+}
+
+.blockBtn:hover {
+    opacity: 0.9;
+    filter: brightness(1.1);
+}
+
+@media (min-width: 768px) {
+    .secTitle {
+        font-size: 40px;
+    }
+    .superTitle {
+        font-size: 16px;
+        letter-spacing: 1.8px;
+    }
+    .subTitle {
+        font-size: 28px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .secTitle {
+        font-size: 48px;
+        line-height: 100%;
+    }
+    .superTitle {
+        font-size: 18px;
+        line-height: 24px;
+        letter-spacing: 1.97px;
+    }
+    .description {
+        font-size: 18px;
+        line-height: 132%;
+    }
+    .subTitle {
+        font-size: 30px;
+        line-height: 36px;
+    }
+    .designationText {
+        font-size: 16px;
+    }
+    .blockBtn {
+        padding: 14px 32px;
+    }
 }

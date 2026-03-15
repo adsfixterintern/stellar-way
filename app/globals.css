@@ -1,55 +1,45 @@
 @import "tailwindcss";
 
-
-:root {
-    --primary-green: #1A4E11;
-    --gray-text: #939393;
-    --white: #FFFFFF;
-}
-
-/* Color Utility Classes */
-.text-primary { color: var(--primary-green); }
-.text-gray { color: var(--gray-text); }
-.bg-primary { background-color: var(--primary-green); }
-
-/* ----------------------------------------- */
-
-/* 2. Typography Styles */
+.primary-color { color: #1A4E11; }
+.gray-color { color: #939393; }
+.primary-bg { background-color: #1A4E11; }
+.white-text { color: #FFFFFF; }
 
 .secTitle {
     font-family: 'Inter Tight', sans-serif;
     font-weight: 600;
-    font-size: 48px;
-    line-height: 100%;
+    font-size: 32px;
+    line-height: 110%;
+    letter-spacing: 0;
     vertical-align: middle;
 }
 
 .superTitle {
     font-family: 'Inter Tight', sans-serif;
     font-weight: 700;
-    font-size: 18px;
-    line-height: 24px;
-    letter-spacing: 1.97px;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
     vertical-align: middle;
-    color: var(--primary-green); 
+    color: #1A4E11;
 }
 
 .description {
     font-family: 'Inter Tight', sans-serif;
     font-weight: 400;
-    font-size: 18px;
-    line-height: 132%;
+    font-size: 16px;
+    line-height: 140%;
     text-transform: capitalize;
     vertical-align: middle;
-    color: var(--gray-text);
+    color: #939393;
 }
 
 .subTitle {
     font-family: 'Inter Tight', sans-serif;
     font-weight: 600;
-    font-size: 30px;
-    line-height: 36px;
+    font-size: 24px;
+    line-height: 30px;
     text-align: center;
 }
 
@@ -64,38 +54,70 @@
 .designationText {
     font-family: 'Inter Tight', sans-serif;
     font-weight: 400;
-    font-size: 16px;
+    font-size: 14px;
     line-height: 132%;
     text-align: center;
-    color: var(--gray-text);
+    color: #939393;
 }
-
-/* 3. Component Styles */
 
 .blockBtn {
     display: inline-flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    
-    /* Layout */
-    width: 169px; 
+    width: 100%;
+    max-width: 169px;
     height: 50px;
     gap: 16px;
-    
-    /* Spacing & Style */
-    padding: 14px 32px;
+    padding: 14px 24px;
     border-radius: 8px;
     border: none;
     cursor: pointer;
-    
-    /* Colors */
-    background-color: var(--primary-green);
-    color: var(--white);
-    
-    transition: background 0.3s ease;
+    background-color: #1A4E11;
+    color: #FFFFFF;
+    transition: all 0.3s ease;
 }
 
 .blockBtn:hover {
+    opacity: 0.9;
     filter: brightness(1.1);
+}
+
+@media (min-width: 768px) {
+    .secTitle {
+        font-size: 40px;
+    }
+    .superTitle {
+        font-size: 16px;
+        letter-spacing: 1.8px;
+    }
+    .subTitle {
+        font-size: 28px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .secTitle {
+        font-size: 48px;
+        line-height: 100%;
+    }
+    .superTitle {
+        font-size: 18px;
+        line-height: 24px;
+        letter-spacing: 1.97px;
+    }
+    .description {
+        font-size: 18px;
+        line-height: 132%;
+    }
+    .subTitle {
+        font-size: 30px;
+        line-height: 36px;
+    }
+    .designationText {
+        font-size: 16px;
+    }
+    .blockBtn {
+        padding: 14px 32px;
+    }
 }

@@ -1,26 +1,101 @@
 @import "tailwindcss";
 
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+    --primary-green: #1A4E11;
+    --gray-text: #939393;
+    --white: #FFFFFF;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Color Utility Classes */
+.text-primary { color: var(--primary-green); }
+.text-gray { color: var(--gray-text); }
+.bg-primary { background-color: var(--primary-green); }
+
+/* ----------------------------------------- */
+
+/* 2. Typography Styles */
+
+.secTitle {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 600;
+    font-size: 48px;
+    line-height: 100%;
+    vertical-align: middle;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.superTitle {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: 1.97px;
+    text-transform: uppercase;
+    vertical-align: middle;
+    color: var(--primary-green); 
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.description {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 132%;
+    text-transform: capitalize;
+    vertical-align: middle;
+    color: var(--gray-text);
+}
+
+.subTitle {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 600;
+    font-size: 30px;
+    line-height: 36px;
+    text-align: center;
+}
+
+.nameText {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 150%;
+    text-align: center;
+}
+
+.designationText {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 132%;
+    text-align: center;
+    color: var(--gray-text);
+}
+
+/* 3. Component Styles */
+
+.blockBtn {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    
+    /* Layout */
+    width: 169px; 
+    height: 50px;
+    gap: 16px;
+    
+    /* Spacing & Style */
+    padding: 14px 32px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    
+    /* Colors */
+    background-color: var(--primary-green);
+    color: var(--white);
+    
+    transition: background 0.3s ease;
+}
+
+.blockBtn:hover {
+    filter: brightness(1.1);
 }

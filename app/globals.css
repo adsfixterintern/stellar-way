@@ -1,45 +1,46 @@
 @import "tailwindcss";
 
-.primary-color { color: #1A4E11; }
-.gray-color { color: #939393; }
-.primary-bg { background-color: #1A4E11; }
-.white-text { color: #FFFFFF; }
+:root {
+    --primary-green: #1A4E11;
+    --gray-text: #939393;
+    --white: #FFFFFF;
+}
+
+.text-primary { color: var(--primary-green); }
+.text-gray { color: var(--gray-text); }
+.bg-primary { background-color: var(--primary-green); }
 
 .secTitle {
     font-family: 'Inter Tight', sans-serif;
     font-weight: 600;
-    font-size: 32px;
-    line-height: 110%;
-    letter-spacing: 0;
-    vertical-align: middle;
+    font-size: 48px;
+    line-height: 100%;
 }
 
 .superTitle {
     font-family: 'Inter Tight', sans-serif;
     font-weight: 700;
-    font-size: 14px;
-    line-height: 20px;
-    letter-spacing: 1.5px;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: 1.97px;
     text-transform: uppercase;
-    vertical-align: middle;
-    color: #1A4E11;
+    color: var(--primary-green); 
 }
 
 .description {
     font-family: 'Inter Tight', sans-serif;
     font-weight: 400;
-    font-size: 16px;
-    line-height: 140%;
+    font-size: 18px;
+    line-height: 132%;
     text-transform: capitalize;
-    vertical-align: middle;
-    color: #939393;
+    color: var(--gray-text);
 }
 
 .subTitle {
     font-family: 'Inter Tight', sans-serif;
     font-weight: 600;
-    font-size: 24px;
-    line-height: 30px;
+    font-size: 30px;
+    line-height: 36px;
     text-align: center;
 }
 
@@ -54,70 +55,56 @@
 .designationText {
     font-family: 'Inter Tight', sans-serif;
     font-weight: 400;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 132%;
     text-align: center;
-    color: #939393;
+    color: var(--gray-text);
 }
 
 .blockBtn {
     display: inline-flex;
-    flex-direction: row;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    max-width: 169px;
+    width: 169px; 
     height: 50px;
     gap: 16px;
-    padding: 14px 24px;
+    padding: 14px 32px;
     border-radius: 8px;
     border: none;
     cursor: pointer;
-    background-color: #1A4E11;
-    color: #FFFFFF;
-    transition: all 0.3s ease;
+    background-color: var(--primary-green);
+    color: var(--white);
+    transition: background 0.3s ease;
 }
 
 .blockBtn:hover {
-    opacity: 0.9;
     filter: brightness(1.1);
 }
 
-@media (min-width: 768px) {
-    .secTitle {
-        font-size: 40px;
-    }
-    .superTitle {
-        font-size: 16px;
-        letter-spacing: 1.8px;
-    }
-    .subTitle {
-        font-size: 28px;
-    }
+/* Responsive Media Queries */
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+    .secTitle { font-size: 36px; }
+    .subTitle { font-size: 26px; }
 }
 
-@media (min-width: 1024px) {
-    .secTitle {
-        font-size: 48px;
-        line-height: 100%;
+/* Mobile (max 767px) */
+@media (max-width: 767px) {
+    .secTitle { 
+        font-size: 28px; 
+        line-height: 120%; 
     }
-    .superTitle {
-        font-size: 18px;
-        line-height: 24px;
-        letter-spacing: 1.97px;
+    .superTitle { 
+        font-size: 14px; 
+        letter-spacing: 1px; 
     }
-    .description {
-        font-size: 18px;
-        line-height: 132%;
-    }
-    .subTitle {
-        font-size: 30px;
-        line-height: 36px;
-    }
-    .designationText {
-        font-size: 16px;
-    }
+    .description { font-size: 16px; }
+    .subTitle { font-size: 22px; }
+    
     .blockBtn {
-        padding: 14px 32px;
+        width: 100%; 
+        max-width: 200px;
+        height: 45px;
     }
 }

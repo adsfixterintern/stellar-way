@@ -7,16 +7,18 @@ import CustomButton from "./CustomBtn";
 interface CommonHeroProps {
   title: React.ReactNode;
   description: string;
-  buttonText: string;
   mainImage: string;
+  buttonText: string;
+  buttonPath: string;
   isAboutPage?: boolean;
 }
 
 const CommonHero = ({
   title,
   description,
-  buttonText,
   mainImage,
+  buttonText,
+  buttonPath,
   isAboutPage = false,
 }: CommonHeroProps) => {
   return (
@@ -88,8 +90,8 @@ const CommonHero = ({
           </div>
 
          <CustomButton
-          title="Reserve Your Table"
-          link="/"
+          title={buttonText}
+          link={buttonPath}
          />
         </div>
 

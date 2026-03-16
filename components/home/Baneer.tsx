@@ -25,6 +25,15 @@ const Baneer = () => {
       </div>
       
       <div className="relative z-20 max-w-7xl mx-auto px-6 pt-32 flex flex-col lg:flex-row items-center justify-between gap-10">
+        {/* pata icon */}
+        <div className='absolute top-24 left-28 rotate-[65deg]'>
+          <Image
+          width={44}
+          height={84}
+          alt='pata icon'
+          src={"https://res.cloudinary.com/dn5t9fhya/image/upload/v1773631792/5ac3ee29ac4640e424f5dc9bacca419667a64f4f_seh1ho.png"}
+          />
+        </div>
         {/* tomato icon */}
         <div className='absolute -right-26 top-10'>
           <Image 

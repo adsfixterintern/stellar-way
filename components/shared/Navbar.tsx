@@ -65,7 +65,7 @@ const Navbar = () => {
             {session?.user ? (
               <div className="group relative flex items-center gap-2 cursor-pointer bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
                 <div className="w-6 h-6 rounded-full bg-[#c2a15e] flex items-center justify-center text-[10px] font-bold text-black uppercase">
-                  {session.user.name?.charAt(0) || "U"}
+                  {session.user.image || "U"}
                 </div>
                 <span className="text-xs font-medium text-white">{session.user.name?.split(' ')[0]}</span>
                
@@ -84,7 +84,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Conditional Desktop Button */}
+       
           {status === "loading" ? (
              <div className="hidden sm:block w-24 h-9 bg-white/10 animate-pulse rounded-xl"></div>
           ) : session?.user ? (
@@ -137,7 +137,7 @@ const Navbar = () => {
                <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-center gap-3">
                      <div className="w-10 h-10 rounded-full bg-[#c2a15e] flex items-center justify-center text-black font-bold">
-                        {session.user.name?.charAt(0)}
+                        {session.user?.image || "U"}
                      </div>
                      <span className="text-white font-medium">{session.user.name}</span>
                   </div>

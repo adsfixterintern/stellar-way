@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import Navbar from "../shared/Navbar";
 import { Play } from "lucide-react";
-import CustomButton from "./CustomBtn";
+import CustomBtn from "./CustomBtn";
 
 interface CommonHeroProps {
   title: React.ReactNode;
@@ -89,7 +89,7 @@ const CommonHero = ({
             </p>
           </div>
 
-         <CustomButton
+         <CustomBtn
           title={buttonText}
           link={buttonPath}
          />

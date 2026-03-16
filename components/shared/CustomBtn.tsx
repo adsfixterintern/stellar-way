@@ -9,7 +9,7 @@ interface CustomButtonProps {
   children?: React.ReactNode; 
 }
 
-const CustomButton = ({ title, link, className = "", onClick, children }: CustomButtonProps) => {
+const CustomBtn = ({ title, link, className = "", onClick, children }: CustomButtonProps) => {
   // কমন স্টাইল
   const commonClasses = `transition-all active:scale-95 inline-flex items-center justify-center cursor-pointer bg-white py-4 px-8 rounded-lg ${className}`;
 
@@ -35,4 +35,4 @@ const CustomButton = ({ title, link, className = "", onClick, children }: Custom
   );
 };
 
-export default CustomButton;
+export default CustomBtn;

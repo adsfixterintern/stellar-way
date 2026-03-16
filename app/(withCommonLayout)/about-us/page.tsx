@@ -1,6 +1,7 @@
 import CommonHero from "@/components/shared/CommonHero";
 import React from "react";
 import ChefsP from "./_components/ChefsP";
+import Gallery from "./_components/Gallery";
 
 export default function page() {
   return (
@@ -13,6 +14,7 @@ export default function page() {
         mainImage="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4"
       />
       <ChefsP></ChefsP>
+      <Gallery></Gallery>
     </div>
   );
 }

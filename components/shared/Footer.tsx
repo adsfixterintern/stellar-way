@@ -8,7 +8,7 @@ import {
   FaLinkedinIn,
 } from "react-icons/fa";
 import { IoCallOutline, IoMailOutline } from "react-icons/io5";
-import logo from "../../assets/img/flogo.png";
+import logo from "../../assets/img/flogo.png"
 
 const footerData = {
   explore: [

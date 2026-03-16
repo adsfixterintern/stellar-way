@@ -9,10 +9,19 @@ export const registerUserApi = async (userData: IRegisterData): Promise<IAuthRes
 export const loginUserApi = async (credentials: ILoginCredentials): Promise<IAuthResponse> => {
   const response = await api.post("/auth/login", credentials);
   return response.data;
-  console.log(response.data)
 };
 
 export const logoutUserApi = async (): Promise<{ success: boolean; message: string }> => {
   const response = await api.post("/auth/logout");
+  return response.data;
+};
+
+export const resetPasswordApi = async (token: string, password: string): Promise<IAuthResponse> => {
+  const response = await api.patch(`/auth/reset-password/${token}`, { password });
+  return response.data;
+};
+
+export const forgetPasswordApi = async (email: string): Promise<IAuthResponse> => {
+  const response = await api.post("/auth/forget-password", { email });
   return response.data;
 };

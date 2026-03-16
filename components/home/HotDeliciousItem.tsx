@@ -44,7 +44,7 @@ const HotDeliciousItem = () => {
       </div>
 
       {/* Grid Content */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mt-18">
         {isLoading ? (
        
           Array.from({ length: 4 }).map((_, idx) => <SkeletonCard key={idx} />)

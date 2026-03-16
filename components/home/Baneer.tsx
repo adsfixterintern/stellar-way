@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import Navbar from '../shared/Navbar';
 import { Play, Star, Heart } from 'lucide-react';
+import CustomButton from '../shared/CustomButton';
 
 const Baneer = () => {
   return (
@@ -24,9 +25,9 @@ const Baneer = () => {
         <Navbar />
       </div>
       
-      <div className="relative z-20 max-w-7xl mx-auto px-6 pt-32 flex flex-col lg:flex-row items-center justify-between gap-10">
+      <div className="relative z-20 max-w-7xl mx-auto  pt-32 flex flex-col lg:flex-row items-center justify-between gap-10">
         {/* pata icon */}
-        <div className='absolute top-24 left-28 rotate-[65deg]'>
+        <div className='absolute top-28 left-28 rotate-[65deg]'>
           <Image
           width={44}
           height={84}
@@ -73,9 +74,10 @@ const Baneer = () => {
           </div>
 
           <div className="flex justify-center lg:justify-start">
-            <button className="bg-[#2d4a22] hover:bg-[#3a5e2c] text-white px-10 py-3.5 rounded-lg transition-all font-semibold text-lg shadow-lg">
-              Order Now
-            </button>
+           <CustomButton 
+           title='Order Now'
+           path='/'
+           />
           </div>
         </div>
 

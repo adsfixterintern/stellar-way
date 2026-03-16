@@ -4,7 +4,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, User, ShoppingCart, Menu, X } from "lucide-react";
 import Image from "next/image";
 import { Search, User, ShoppingCart, Menu, X, LogOut } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";

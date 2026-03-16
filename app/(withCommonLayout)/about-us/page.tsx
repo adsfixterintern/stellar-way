@@ -2,6 +2,7 @@ import CommonHero from "@/components/shared/CommonHero";
 import React from "react";
 import ChefsP from "./_components/ChefsP";
 import Gallery from "./_components/Gallery";
+import TableBooking from "@/components/shared/TableBooking";
 
 export default function page() {
   return (
@@ -16,6 +17,7 @@ export default function page() {
       />
       <ChefsP></ChefsP>
       <Gallery></Gallery>
+      <TableBooking></TableBooking>
     </div>
   );
 }

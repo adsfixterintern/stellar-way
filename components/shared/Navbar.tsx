@@ -1,13 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, User, ShoppingCart, Menu, X } from "lucide-react";
+import Image from "next/image";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname(); 
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -18,24 +33,27 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-8 left-0 right-0 z-50 px-4">
-      <div className="max-w-7xl mx-auto bg-white/15 backdrop-blur-lg border-2 border-white/24 rounded-2xl px-6 py-4 flex items-center justify-between">
+    <nav className="fixed top-8 left-0 right-0 z-50 px-4 transition-all duration-300">
+      <div className={`max-w-7xl mx-auto border-2 rounded-2xl px-6 py-4 flex items-center justify-between transition-all duration-300 ${
+        scrolled 
+        ? "bg-[#1e3316]/90 backdrop-blur-xl border-white/10 shadow-2xl"
+        : "bg-white/15 backdrop-blur-lg border-white/24"
+      }`}>
 
         {/* Logo */}
         <div className="flex items-center gap-1">
-          <span className="text-white text-2xl font-serif italic font-bold tracking-tight">
-            Savory
-          </span>
-          <span className="text-[#c2a15e] text-xl">🍴</span>
-          <span className="text-white text-2xl font-serif italic font-bold tracking-tight">
-            Nest
-          </span>
+          <Image
+            width={180}
+            height={32}
+            alt="savory logo"
+            src={"https://res.cloudinary.com/dn5t9fhya/image/upload/v1773643312/Frame_2147225948_ezhifw.png"}
+            className="brightness-0 invert"
+          />
         </div>
 
         {/* Desktop Menu */}
         <ul className="hidden lg:flex items-center gap-8 text-gray-300 font-medium">
           {navLinks.map((link, index) => {
-            // চেক করা হচ্ছে বর্তমান পাথ এবং লিঙ্কের পাথ এক কি না
             const isActive = pathname === link.path;
 
             return (
@@ -45,7 +63,7 @@ const Navbar = () => {
                   className={`${
                     isActive 
                     ? "text-white border-b-2 border-white pb-1" 
-                    : "hover:text-white transition"
+                    : "hover:text-white transition opacity-80 hover:opacity-100"
                   }`}
                 >
                   {link.name}
@@ -68,7 +86,9 @@ const Navbar = () => {
             </div>
           </div>
 
-          <button className="hidden sm:block bg-[#1e3316] hover:bg-[#2d4a22] text-white px-6 py-2 rounded-xl transition text-sm font-semibold">
+          <button className={`hidden sm:block px-6 py-2 rounded-xl transition text-sm font-semibold ${
+            scrolled ? "bg-white text-[#1e3316]" : "bg-[#1e3316] text-white"
+          }`}>
             Sign in
           </button>
 
@@ -80,32 +100,6 @@ const Navbar = () => {
           </button>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {open && (
-        <div className="lg:hidden mt-4 max-w-7xl mx-auto bg-black/80 backdrop-blur-lg border border-white/10 rounded-2xl p-6 text-center">
-          <ul className="flex flex-col gap-5 text-gray-300 font-medium">
-            {navLinks.map((link, index) => (
-              <li key={index}>
-                <Link 
-                  href={link.path} 
-                  onClick={() => setOpen(false)} 
-                  className={`${
-                    pathname === link.path 
-                    ? "text-white font-bold" 
-                    : "hover:text-white transition"
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <button className="mt-6 bg-[#1e3316] hover:bg-[#2d4a22] text-white px-6 py-2 rounded-xl font-semibold w-full">
-            Sign in
-          </button>
-        </div>
-      )}
     </nav>
   );
 };

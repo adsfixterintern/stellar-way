@@ -2,21 +2,23 @@ import React from "react";
 import Image from "next/image";
 import Navbar from "../shared/Navbar";
 import { Play } from "lucide-react";
-import CustomButton from "./CustomBtn";
+import CustomBtn from "./CustomBtn";
 
 interface CommonHeroProps {
   title: React.ReactNode;
   description: string;
-  buttonText: string;
   mainImage: string;
+  buttonText: string;
+  buttonPath: string;
   isAboutPage?: boolean;
 }
 
 const CommonHero = ({
   title,
   description,
-  buttonText,
   mainImage,
+  buttonText,
+  buttonPath,
   isAboutPage = false,
 }: CommonHeroProps) => {
   return (
@@ -87,9 +89,9 @@ const CommonHero = ({
             </p>
           </div>
 
-         <CustomButton
-          title="Reserve Your Table"
-          link="/"
+         <CustomBtn
+          title={buttonText}
+          link={buttonPath}
          />
         </div>
 

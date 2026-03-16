@@ -12,11 +12,11 @@ export default function page() {
     <div>
 
 
-      <AboutSection/>
+      <Baneer></Baneer>
+
+      <AboutSection />
       <HotDeliciousItem></HotDeliciousItem>
       <OurExquisiteMenu></OurExquisiteMenu>
-      <Baneer></Baneer>
-      <AboutSection />
       <Exp></Exp>
       <Reserve></Reserve>
       <FAQ></FAQ>

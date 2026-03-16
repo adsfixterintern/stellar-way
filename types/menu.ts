@@ -1,3 +1,5 @@
+import { ICategory } from "./category";
+
 export interface IReview {
   rating: number;
   comment: string;
@@ -19,6 +21,7 @@ export interface IMenu {
   title: string;
   price: number;
   stock: number;
+  categoryId: ICategory;
   status: string;
   image?: {
     url: string;

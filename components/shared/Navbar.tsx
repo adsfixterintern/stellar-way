@@ -1,16 +1,32 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Search, User, ShoppingCart, Menu, X } from "lucide-react";
+import Image from "next/image";
 import { Search, User, ShoppingCart, Menu, X, LogOut } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname(); 
   const { data: session, status } = useSession();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -21,19 +37,23 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-8 left-0 right-0 z-50 px-4">
-      <div className="max-w-7xl mx-auto bg-white/15 backdrop-blur-lg border-2 border-white/24 rounded-2xl px-6 py-4 flex items-center justify-between">
+    <nav className="fixed top-8 left-0 right-0 z-50 px-4 transition-all duration-300">
+      <div className={`max-w-7xl mx-auto border-2 rounded-2xl px-6 py-4 flex items-center justify-between transition-all duration-300 ${
+        scrolled 
+        ? "bg-[#1e3316]/90 backdrop-blur-xl border-white/10 shadow-2xl"
+        : "bg-white/15 backdrop-blur-lg border-white/24"
+      }`}>
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-1">
-          <span className="text-white text-2xl font-serif italic font-bold tracking-tight">
-            Savory
-          </span>
-          <span className="text-[#c2a15e] text-xl">🍴</span>
-          <span className="text-white text-2xl font-serif italic font-bold tracking-tight">
-            Nest
-          </span>
-        </Link>
+        <div className="flex items-center gap-1">
+          <Image
+            width={180}
+            height={32}
+            alt="savory logo"
+            src={"https://res.cloudinary.com/dn5t9fhya/image/upload/v1773643312/Frame_2147225948_ezhifw.png"}
+            className="brightness-0 invert"
+          />
+        </div>
 
         {/* Desktop Menu */}
         <ul className="hidden lg:flex items-center gap-8 text-gray-300 font-medium">
@@ -46,7 +66,7 @@ const Navbar = () => {
                   className={`${
                     isActive 
                     ? "text-white border-b-2 border-white pb-1" 
-                    : "hover:text-white transition"
+                    : "hover:text-white transition opacity-80 hover:opacity-100"
                   }`}
                 >
                   {link.name}

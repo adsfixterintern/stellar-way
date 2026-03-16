@@ -3,9 +3,9 @@
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
 import Image from 'next/image';
-import aboutImage from '@/public/assets/home/homeAbout.png'; 
-import qualityIcon from '@/public/assets/home/icon1.png'; 
-import reputationIcon from '@/public/assets/home/icon2.png';
+import aboutImage from '@/assets/home/homeAbout.png'; 
+import qualityIcon from '@/assets/home/icon1.png'; 
+import reputationIcon from '@/assets/home/icon2.png';
 
 const AboutSection: React.FC = () => {
 
@@ -15,8 +15,7 @@ const AboutSection: React.FC = () => {
       opacity: 1, 
       x: 0,
       transition: { duration: 0.8, ease: "easeOut" }
-    }
-  };
+    }};
 
   const contentContainerVariants: Variants = {
     hidden: { opacity: 0 },

@@ -4,6 +4,7 @@
   --primary-green: #1a4e11;
   --gray-text: #939393;
   --white: #ffffff;
+  --section-bg-secondary: #F5F5DC;
 }
 
 .text-primary {
@@ -14,6 +15,9 @@
 }
 .bg-primary {
   background-color: var(--primary-green);
+}
+.bg-secondary {
+  background-color: var(--section-bg-secondary);
 }
 
 /* Typography */

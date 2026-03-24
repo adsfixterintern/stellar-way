@@ -1,134 +1,192 @@
-
-
 "use client";
 
-import React, { useState } from 'react';
-import Image from 'next/image';
-import { IMenu, IReview } from '@/types/menu';
-import { ICategory } from '@/types/category';
-import { SkeletonCard } from '../shared/SkeletonCard';
-import { useMenu } from '@/app/hooks/useMenu';
-import { useCategories } from '@/app/hooks/useCategories';
-import { ShoppingCart, ArrowLeft, ArrowRight } from 'lucide-react';
+import React, { useState, useRef } from "react";
+import Image from "next/image";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
+import { ArrowLeft, ArrowRight, ShoppingCart, Star } from "lucide-react";
+
+import "swiper/css";
+import "swiper/css/navigation";
+
+import { useMenu } from "@/app/hooks/useMenu";
+import { useCategories } from "@/app/hooks/useCategories";
+import { IMenu, IReview } from "@/types/menu";
+import { ICategory } from "@/types/category";
+import { SkeletonCard } from "../shared/SkeletonCard";
 
 const OurExquisiteMenu = () => {
-  const [activeCategoryId, setActiveCategoryId] = useState<string>('All');
-  const [page, setPage] = useState(0);
-  const ITEMS_PER_PAGE = 4;
-
+  const [activeCategoryId, setActiveCategoryId] = useState<string>("All");
   const { data: categories = [] } = useCategories();
   const { data: allMenus, isLoading } = useMenu();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const swiperRef = useRef<any>(null);
+
   const getAverageRating = (reviews: IReview[]) => {
     if (!reviews || reviews.length === 0) return 0;
-    const total = reviews.reduce((acc, curr) => acc + (curr.rating || 0), 0);
-    return total / reviews.length;
+    return (
+      reviews.reduce((acc, curr) => acc + (curr.rating || 0), 0) /
+      reviews.length
+    );
   };
 
-  const filteredMenus = activeCategoryId === 'All'
-    ? allMenus
-    : allMenus?.filter((item: IMenu) => (item.categoryId)?._id === activeCategoryId);
+  const filteredMenus =
+    activeCategoryId === "All"
+      ? allMenus
+      : allMenus?.filter(
+          (item: IMenu) => item.categoryId?._id === activeCategoryId,
+        );
 
+  const handlePrev = () => {
+    if (swiperRef.current) {
+      swiperRef.current.slideTo(swiperRef.current.activeIndex - 4);
+    }
+  };
 
-  const paginatedMenus = filteredMenus?.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
-  const totalPages = Math.ceil((filteredMenus?.length || 0) / ITEMS_PER_PAGE);
+  const handleNext = () => {
+    if (swiperRef.current) {
+      swiperRef.current.slideTo(swiperRef.current.activeIndex + 4);
+    }
+  };
 
   return (
     <section className="bg-secondary py-16 px-4 md:px-16">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <p className="superTitle mb-4">Our Menu</p>
-          <h2 className="secTitle text-primary">Our Exquisite Menu</h2>
+
+        <div className=" mb-10 ">
+          <div className="text-center md:text-left">
+            <p className="superTitle mb-4">Our Menu</p>
+            <h2 className="secTitle text-primary">Our Exquisite Menu</h2>
+          </div>
         </div>
 
-        {/* Category Tabs & Navigation Row */}
-        <div className="flex items-center justify-between my-20 ">
-          <div className="flex gap-8 overflow-x-auto border-b border-gray-200">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6 ">
+       
+          <div className="flex gap-4 md:gap-8 overflow-x-auto pb-2 scrollbar-hide border-b border-gray-200">
             <button
-              onClick={() => { setActiveCategoryId('All'); setPage(0); }}
-              className={`pb-2 text-lg font-semibold transition-all ${activeCategoryId === 'All' ? 'text-primary border-b-2 border-primary' : 'text-gray-400 hover:text-primary'}`}
+              onClick={() => setActiveCategoryId("All")}
+              className={`whitespace-nowrap pb-2 text-lg font-semibold transition-all ${
+                activeCategoryId === "All"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-gray-400"
+              }`}
             >
               All
             </button>
             {categories.map((cat: ICategory) => (
               <button
                 key={cat._id}
-                onClick={() => { setActiveCategoryId(cat._id); setPage(0); }}
-                className={`pb-2 text-lg font-semibold transition-all ${activeCategoryId === cat._id ? 'text-primary border-b-2 border-primary' : 'text-gray-400 hover:text-primary'}`}
+                onClick={() => setActiveCategoryId(cat._id)}
+                className={`whitespace-nowrap pb-2 text-lg font-semibold transition-all ${
+                  activeCategoryId === cat._id
+                    ? "text-primary border-b-2 border-primary"
+                    : "text-gray-400"
+                }`}
               >
                 {cat.name}
               </button>
             ))}
           </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex gap-4 ">
-            <button 
-              disabled={page === 0}
-              onClick={() => setPage(p => p - 1)}
-              className="p-3 rounded-lg border border-gray-400 hover:bg-gray-200 disabled:opacity-30 transition-all"
+        
+          <div className="hidden md:flex gap-4 pb-2">
+            <button
+              onClick={handlePrev}
+              className="p-3 rounded-lg border border-gray-400 hover:bg-gray-200 transition-all text-primary"
             >
               <ArrowLeft size={20} />
             </button>
-            <button 
-              disabled={page >= totalPages - 1}
-              onClick={() => setPage(p => p + 1)}
-              className="p-3 rounded-lg bg-primary text-white hover:opacity-90 disabled:opacity-30 transition-all"
+            <button
+              onClick={handleNext}
+              className="p-3 rounded-lg bg-primary text-white hover:opacity-90 transition-all"
             >
               <ArrowRight size={20} />
             </button>
           </div>
         </div>
 
-        {/* Menu Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-10">
-          {isLoading ? (
-            Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-          ) : (
-            paginatedMenus?.map((item: IMenu) => {
-              const avgRating = getAverageRating(item.reviews);
-              const reviewCount = item.reviews?.length || 0;
+        {/* Swiper Slider */}
+        <div className="relative">
+          <Swiper
+            key={activeCategoryId}
+            onBeforeInit={(swiper) => {
+              swiperRef.current = swiper;
+            }}
+            modules={[Navigation]}
+            spaceBetween={20}
+            slidesPerView={4}
+            slidesPerGroup={1}
+            breakpoints={{
+              320: { slidesPerView: 1, slidesPerGroup: 1 },
+              768: { slidesPerView: 2, slidesPerGroup: 1 },
+              1024: { slidesPerView: 4, slidesPerGroup: 1 },
+            }}
+            className="px-2 py-20"
+          >
+            {isLoading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <SwiperSlide key={i}>
+                    <SkeletonCard />
+                  </SwiperSlide>
+                ))
+              : filteredMenus?.map((item: IMenu) => {
+                  const avgRating = getAverageRating(item.reviews);
+                  return (
+                    <SwiperSlide key={item._id} className="h-auto">
+                      <div className="bg-white p-6 rounded-3xl flex flex-col items-center text-center shadow-sm relative mt-20 h-102">
+                        <div className="absolute -top-16 w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-lg border-4 border-white z-20">
+                          <Image
+                            src={item.image?.url || "/fallback-food.png"}
+                            alt={item.title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                            className="object-cover"
+                          />
+                        </div>
 
-              return (
-                <div key={item._id} className="bg-white p-8 rounded-3xl flex flex-col items-center text-center shadow-sm relative pt-24">
-                  <div className="absolute -top-16 w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden z-10 shadow-lg">
-                    <Image
-                      src={item.image?.url || '/fallback-food.png'}
-                      alt={item.title}
-                      fill
-                      sizes="(max-width: 220px) 128px, 160px"
-                      className="object-cover"
-                    />
-                  </div>
+                        <div className="mt-20 flex flex-col grow w-full">
+                          <h4 className="cardTitle text-primary mb-2">
+                            {item.title}
+                          </h4>
 
-                  <h4 className="cardTitle mt-6 text-primary">{item.title}</h4>
+                          <div className="flex gap-1 mb-3 items-center justify-center">
+                            {[...Array(5)].map((_, i) => (
+                              <span
+                                key={i}
+                                className={
+                                  i < Math.round(avgRating)
+                                    ? "text-yellow-400"
+                                    : "text-gray-300"
+                                }
+                              >
+                                <Star  size={16} fill="currentColor" />
+                              </span>
+                            ))}
+                            <span className="text-gray-400 text-sm ml-2">
+                              ({item.reviews?.length || 0})
+                            </span>
+                          </div>
 
-                  <div className="flex gap-1 mb-3 items-center justify-center">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i} className={i < Math.round(avgRating) ? "text-yellow-400" : "text-gray-300"}>★</span>
-                    ))}
-                    <span className="text-gray-400 text-sm ml-2">({reviewCount})</span>
-                  </div>
+                          <p className="text-primary py-4 text-sm">
+                            Delight in a crispy mixed pizza, topped with fresh
+                            veggies, savory meats, and melty cheese.
+                          </p>
 
-                  <p className="cardDescription text-primary mb-6 grow">
-                    Delight in a crispy mixed pizza, topped with fresh veggies, savory meats, and melty cheese.
-                  </p>
-
-                  <div className="flex items-center justify-between w-full mt-auto pt-4 border-t h-16">
-                    <span className="price pt-4">৳{item.price?.toFixed(2)}</span>
-                    <button className="bg-primary p-2 rounded-lg text-white hover:opacity-90 transition-all">
-                      <ShoppingCart />
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-
-        <div className="text-center mt-16">
-          <button className="blockBtn">See More</button>
+                          <div className="flex items-center justify-between w-full mt-auto pt-4">
+                            <span className="price font-bold pt-6">
+                              ৳{item.price?.toFixed(2)}
+                            </span>
+                            <button className="bg-primary p-2 rounded-lg text-white hover:opacity-90 transition-all">
+                              <ShoppingCart size={20} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </SwiperSlide>
+                  );
+                })}
+          </Swiper>
         </div>
       </div>
     </section>

@@ -5,12 +5,11 @@ const API = axios.create({
 });
 
 export const getMenus = async (categoryId?: string) => {
-  // এখানে categoryId পাঠানো হচ্ছে যা ব্যাকএন্ডের req.query.categoryId এর সাথে মিলবে
   const { data } = await API.get('/menu', {
     params: { 
-      categoryId: (categoryId === 'All' || !categoryId) ? undefined : categoryId 
+      categoryId: (categoryId === 'All' || !categoryId) ? undefined : categoryId,
+      limit: 100 
     }
   });
-  console.log(data.data)
   return data.data; 
 };

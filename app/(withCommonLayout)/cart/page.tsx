@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -7,7 +6,6 @@ import Link from "next/link";
 import { Trash2, Plus, Minus, X, ShoppingBag } from "lucide-react";
 import { ICartItem } from "@/types/menu";
 import SingleHero from "@/components/shared/SingleHero";
-
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState<ICartItem[]>([]);
@@ -52,7 +50,10 @@ const CartPage = () => {
     }
   };
 
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const subtotal = cartItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0,
+  );
   const taxes = cartItems.length > 0 ? 10 : 0;
   const grandTotal = subtotal + taxes;
 
@@ -60,12 +61,11 @@ const CartPage = () => {
 
   return (
     <div className="bg-white min-h-screen pb-20">
-  
       <SingleHero
         subtitle="Cart"
         title="Your Cart"
         description="Review Your Selected Items And Proceed To Checkout When You're Ready."
-        buttonTitle="" 
+        buttonTitle=""
         buttonLink=""
         isCenter={true}
       />
@@ -78,14 +78,18 @@ const CartPage = () => {
             <div className="bg-gray-50 p-10 rounded-full mb-6 text-gray-300">
               <ShoppingBag size={80} strokeWidth={1} />
             </div>
-            <h3 className="text-2xl font-bold text-gray-400">Your cart is empty</h3>
-            <Link href="/" className="mt-4 text-primary font-bold hover:underline">
+            <h3 className="text-2xl font-bold text-gray-400">
+              Your cart is empty
+            </h3>
+            <Link
+              href="/"
+              className="mt-4 text-primary font-bold hover:underline"
+            >
               Go back to shop
             </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            
             {/* Left Side: Cart Items List */}
             <div className="lg:col-span-2">
               <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
@@ -144,7 +148,10 @@ const CartPage = () => {
                         ৳{item.price.toFixed(2)}
                       </p>
                       <p className="text-xs text-gray-400 mt-1 mb-4 uppercase">
-                        Size: <span className="text-gray-600 font-bold">{item.size || "Medium"}</span>
+                        Size:{" "}
+                        <span className="text-gray-600 font-bold">
+                          {item.size || "Medium"}
+                        </span>
                       </p>
 
                       <div className="flex items-center border border-gray-200 w-fit rounded-lg px-1 py-1 gap-4">
@@ -182,7 +189,9 @@ const CartPage = () => {
                   </div>
 
                   <div className="mt-4">
-                    <p className="text-sm text-gray-400 mb-2 font-medium">Enter Discount Code</p>
+                    <p className="text-sm text-gray-400 mb-2 font-medium">
+                      Enter Discount Code
+                    </p>
                     <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden h-12">
                       <input
                         type="text"
@@ -200,10 +209,14 @@ const CartPage = () => {
                   <div className="pt-4 space-y-3">
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-600 font-medium">Taxes</span>
-                      <span className="text-gray-900 font-bold">৳{taxes.toFixed(2)}</span>
+                      <span className="text-gray-900 font-bold">
+                        ৳{taxes.toFixed(2)}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600 font-medium">Delivery Fee</span>
+                      <span className="text-gray-600 font-medium">
+                        Delivery Fee
+                      </span>
                       <span className="text-gray-900 font-bold uppercase tracking-tighter">
                         Free
                       </span>
@@ -213,19 +226,23 @@ const CartPage = () => {
                   <hr className="border-gray-100 my-4" />
 
                   <div className="flex justify-between items-center mb-6">
-                    <span className="text-gray-600 font-medium text-lg">Grand Total</span>
+                    <span className="text-gray-600 font-medium text-lg">
+                      Grand Total
+                    </span>
                     <span className="text-gray-900 font-extrabold text-xl">
                       ৳{grandTotal.toFixed(2)}
                     </span>
                   </div>
 
-                  <button className="w-full bg-white border border-gray-300 text-gray-800 py-3.5 rounded-lg font-bold text-sm uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm">
-                    Proceed to Checkout
-                  </button>
+                  {/* Proceed to Checkout Button */}
+                  <Link href="/checkout" className="block w-full">
+                    <button className="w-full bg-white border border-gray-300 text-gray-800 py-3.5 rounded-lg font-bold text-sm uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm">
+                      Proceed to Checkout
+                    </button>
+                  </Link>
                 </div>
               </div>
             </div>
-
           </div>
         )}
       </div>

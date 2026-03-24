@@ -6,6 +6,6 @@ const API = axios.create({
 
 export const getCategories = async () => {
   const { data } = await API.get('/categories');
-  console.log(data.data)
+  // console.log(data.data)
   return data.data; 
 };

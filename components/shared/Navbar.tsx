@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
 
@@ -11,7 +12,7 @@ import { useSession, signOut } from "next-auth/react";
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const pathname = usePathname(); 
+  const pathname = usePathname();
   const { data: session, status } = useSession();
 
   useEffect(() => {
@@ -27,6 +28,38 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const [cartCount, setCartCount] = useState(0); 
+
+  useEffect(() => {
+    const updateCartBadge = () => {
+      const savedCart = localStorage.getItem("cart");
+      if (savedCart) {
+        try {
+          const cart = JSON.parse(savedCart);
+          const totalItems = cart.reduce(
+            (acc: number, item: any) => acc + (item.quantity || 0),
+            0,
+          );
+          setCartCount(totalItems);
+        } catch (error) {
+          console.log(error);
+          setCartCount(0);
+        }
+      } else {
+        setCartCount(0);
+      }
+    };
+
+    updateCartBadge();
+    window.addEventListener("cartUpdated", updateCartBadge);
+    window.addEventListener("storage", updateCartBadge);
+
+    return () => {
+      window.removeEventListener("cartUpdated", updateCartBadge);
+      window.removeEventListener("storage", updateCartBadge);
+    };
+  }, []);
+
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "About", path: "/about-us" },
@@ -37,19 +70,22 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-8 left-0 right-0 z-50 px-4 transition-all duration-300">
-      <div className={`max-w-7xl mx-auto border-2 rounded-2xl px-6 py-4 flex items-center justify-between transition-all duration-300 ${
-        scrolled 
-        ? "bg-[#1e3316]/90 backdrop-blur-xl border-white/10 shadow-2xl"
-        : "bg-white/15 backdrop-blur-lg border-white/24"
-      }`}>
-
+      <div
+        className={`max-w-7xl mx-auto border-2 rounded-2xl px-6 py-4 flex items-center justify-between transition-all duration-300 ${
+          scrolled
+            ? "bg-[#1e3316]/90 backdrop-blur-xl border-white/10 shadow-2xl"
+            : "bg-white/15 backdrop-blur-lg border-white/24"
+        }`}
+      >
         {/* Logo */}
         <div className="flex items-center gap-1">
           <Image
             width={180}
             height={32}
             alt="savory logo"
-            src={"https://res.cloudinary.com/dn5t9fhya/image/upload/v1773643312/Frame_2147225948_ezhifw.png"}
+            src={
+              "https://res.cloudinary.com/dn5t9fhya/image/upload/v1773643312/Frame_2147225948_ezhifw.png"
+            }
             className="brightness-0 invert"
           />
         </div>
@@ -60,12 +96,12 @@ const Navbar = () => {
             const isActive = pathname === link.path;
             return (
               <li key={index}>
-                <Link 
-                  href={link.path} 
+                <Link
+                  href={link.path}
                   className={`${
-                    isActive 
-                    ? "text-white border-b-2 border-white pb-1" 
-                    : "hover:text-white transition opacity-80 hover:opacity-100"
+                    isActive
+                      ? "text-white border-b-2 border-white pb-1"
+                      : "hover:text-white transition opacity-80 hover:opacity-100"
                   }`}
                 >
                   {link.name}
@@ -79,35 +115,43 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex items-center gap-4 text-white/90">
             <Search size={20} strokeWidth={1.5} className="cursor-pointer" />
-            
+
             {/* User Profile Logic */}
             {session?.user ? (
               <div className="group relative flex items-center gap-2 cursor-pointer bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
                 <div className="w-6 h-6 rounded-full bg-[#c2a15e] flex items-center justify-center text-[10px] font-bold text-black uppercase">
                   {session.user.image || "U"}
                 </div>
-                <span className="text-xs font-medium text-white">{session.user.name?.split(' ')[0]}</span>
-               
+                <span className="text-xs font-medium text-white">
+                  {session.user.name?.split(" ")[0]}
+                </span>
               </div>
             ) : (
               <Link href="/login">
-                <User size={20} strokeWidth={1.5} className="cursor-pointer hover:text-white transition" />
+                <User
+                  size={20}
+                  strokeWidth={1.5}
+                  className="cursor-pointer hover:text-white transition"
+                />
               </Link>
             )}
 
             <div className="relative cursor-pointer">
-              <ShoppingCart size={20} strokeWidth={1.5} />
-              <span className="absolute -top-2 -right-2 bg-[#2d4a22] text-[10px] text-white w-4 h-4 rounded-full flex items-center justify-center font-bold">
-                2
-              </span>
+              <Link href="/cart">
+                <ShoppingCart size={20} strokeWidth={1.5} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-primary text-[10px] text-white w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
             </div>
           </div>
 
-       
           {status === "loading" ? (
-             <div className="hidden sm:block w-24 h-9 bg-white/10 animate-pulse rounded-xl"></div>
+            <div className="hidden sm:block w-24 h-9 bg-white/10 animate-pulse rounded-xl"></div>
           ) : session?.user ? (
-            <button 
+            <button
               onClick={() => signOut()}
               className="hidden sm:flex items-center gap-2 bg-red-600/20 hover:bg-red-600 border border-red-600/50 text-white px-5 py-2 rounded-xl transition text-sm font-semibold"
             >
@@ -136,13 +180,13 @@ const Navbar = () => {
           <ul className="flex flex-col gap-5 text-gray-300 font-medium">
             {navLinks.map((link, index) => (
               <li key={index}>
-                <Link 
-                  href={link.path} 
-                  onClick={() => setOpen(false)} 
+                <Link
+                  href={link.path}
+                  onClick={() => setOpen(false)}
                   className={`${
-                    pathname === link.path 
-                    ? "text-[#c2a15e] font-bold" 
-                    : "hover:text-white transition"
+                    pathname === link.path
+                      ? "text-[#c2a15e] font-bold"
+                      : "hover:text-white transition"
                   }`}
                 >
                   {link.name}
@@ -150,23 +194,25 @@ const Navbar = () => {
               </li>
             ))}
           </ul>
-          
+
           <div className="mt-8 pt-6 border-t border-white/10">
             {session?.user ? (
-               <div className="flex flex-col gap-4">
-                  <div className="flex items-center justify-center gap-3">
-                     <div className="w-10 h-10 rounded-full bg-[#c2a15e] flex items-center justify-center text-black font-bold">
-                        {session.user?.image || "U"}
-                     </div>
-                     <span className="text-white font-medium">{session.user.name}</span>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#c2a15e] flex items-center justify-center text-black font-bold">
+                    {session.user?.image || "U"}
                   </div>
-                  <button 
-                    onClick={() => signOut()}
-                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-semibold w-full flex items-center justify-center gap-2"
-                  >
-                    <LogOut size={18} /> Logout
-                  </button>
-               </div>
+                  <span className="text-white font-medium">
+                    {session.user.name}
+                  </span>
+                </div>
+                <button
+                  onClick={() => signOut()}
+                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-semibold w-full flex items-center justify-center gap-2"
+                >
+                  <LogOut size={18} /> Logout
+                </button>
+              </div>
             ) : (
               <Link href="/login" onClick={() => setOpen(false)}>
                 <button className="bg-[#1e3316] hover:bg-[#2d4a22] text-white px-6 py-3 rounded-xl font-semibold w-full">

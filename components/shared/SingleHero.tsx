@@ -54,7 +54,7 @@ const SingleHero = ({
               <span className="text-gray-300 uppercase tracking-widest text-sm font-bold ">
                 {subtitle}
               </span>
-              <div className="w-12 h-[2px] bg-gray-300"></div>
+              <div className="w-12 h-0.5 bg-gray-300"></div>
             </div>
           )}
 
@@ -66,15 +66,20 @@ const SingleHero = ({
             {description}
           </p>
 
-          <div className={`pt-4 ${isCenter ? "flex justify-center" : ""}`}>
-            <CustomBtn
-              title={buttonTitle}
-              link={buttonLink}
-              className={
-                isCenter ? "bg-white text-[#1e3316]" : "bg-[#1e3316] text-white"
-              }
-            />
-          </div>
+          {/* বাটন যদি buttonTitle থাকে তবেই দেখাবে, নাহলে দেখাবে না */}
+          {buttonTitle && (
+            <div className={`pt-4 ${isCenter ? "flex justify-center" : ""}`}>
+              <CustomBtn
+                title={buttonTitle}
+                link={buttonLink}
+                className={
+                  isCenter
+                    ? "bg-white text-[#1e3316]"
+                    : "bg-[#1e3316] text-white"
+                }
+              />
+            </div>
+          )}
         </div>
 
         {/* Right Image (Only if mainImage is provided) */}

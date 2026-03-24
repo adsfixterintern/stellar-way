@@ -1,3 +1,4 @@
+import LatestBlog from "@/components/LatestBlog";
 import SingleHero from "@/components/shared/SingleHero";
 import React from "react";
 
@@ -12,6 +13,7 @@ export default function page() {
         buttonTitle="Order Now"
         buttonLink="/blog"
       />
+      <LatestBlog></LatestBlog>
     </div>
   );
 }

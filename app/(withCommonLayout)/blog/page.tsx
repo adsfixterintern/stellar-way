@@ -1,5 +1,7 @@
+
 import LatestBlog from "@/components/LatestBlog";
 import SingleHero from "@/components/shared/SingleHero";
+import Testimonial from "@/components/Testimonial";
 import React from "react";
 
 export default function page() {
@@ -14,6 +16,7 @@ export default function page() {
         buttonLink="/blog"
       />
       <LatestBlog></LatestBlog>
+      <Testimonial></Testimonial>
     </div>
   );
 }

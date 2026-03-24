@@ -18,13 +18,13 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'i.pravatar.cc',
-        port: '',
-        pathname: '/**', 
+        hostname: 'example.com', // আপনার এরর ফিক্স করার জন্য এটি যোগ করা হলো
       },
       {
         protocol: 'https',
-        hostname: 'res.cloudinary.com',
+        hostname: 'i.pravatar.cc',
+        port: '',
+        pathname: '/**', 
       },
     ],
   },

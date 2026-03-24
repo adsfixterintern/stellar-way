@@ -107,6 +107,22 @@
   filter: brightness(1.1);
 }
 
+/* Swiper Slide Responsive Fix */
+.swiper-wrapper {
+  padding-bottom: 50px; /* অ্যারো বাটন যেন কার্ডের ওপর না উঠে যায় */
+}
+
+/* স্লাইডার নেভিগেশন বাটন ডিজাইন */
+.swiper-button-next,
+.swiper-button-prev {
+  color: var(--primary-green) !important;
+  background: white;
+  padding: 25px;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transform: scale(0.7); /* বাটন ছোট করার জন্য */
+}
+
 /* Responsive Media Queries */
 @media (max-width: 1024px) {
   .secTitle {

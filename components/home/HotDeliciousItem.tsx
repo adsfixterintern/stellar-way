@@ -65,7 +65,7 @@ const HotDeliciousItem = () => {
               <h4 className="subTitle mb-2 group-hover:text-primary transition-colors">
                 {item.title}
               </h4>
-              <p className="description mb-4">
+              <p className="menuDescription mb-4">
                 Classic taste with fresh ingredients.
               </p>
             </div>

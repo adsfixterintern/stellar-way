@@ -32,3 +32,12 @@ export interface IMenu {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ICartItem {
+  _id: string;
+  title: string;
+  price: number;
+  image: { url: string };
+  quantity: number;
+  size?: string;
+}

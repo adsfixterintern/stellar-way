@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -8,7 +7,7 @@ import { Navigation } from "swiper/modules";
 import { ArrowLeft, ArrowRight, ShoppingCart } from "lucide-react";
 import "swiper/css";
 import "swiper/css/navigation";
-
+import popularBg from "@/assets/img/popularItem_bg.png";
 import SingleHero from "@/components/shared/SingleHero";
 import { ICategory } from "@/types/category";
 import { IMenu, ICartItem } from "@/types/menu";
@@ -64,7 +63,14 @@ const MenuPage = () => {
   if (loading) {
     return (
       <div className="bg-white min-h-screen pb-20">
-        <SingleHero subtitle="MENU" title="Our Exquisite Menu" description="Enjoy Savory Nest From The Comfort Of Your Home" buttonTitle="" buttonLink="" isCenter={true} />
+        <SingleHero
+          subtitle="MENU"
+          title="Our Exquisite Menu"
+          description="Enjoy Savory Nest From The Comfort Of Your Home"
+          buttonTitle=""
+          buttonLink=""
+          isCenter={true}
+        />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20">
           <div className="space-y-16">
             {[1, 2].map((i) => (
@@ -84,32 +90,55 @@ const MenuPage = () => {
   }
 
   return (
-    <div className="bg-white min-h-screen pb-20">
-      <SingleHero subtitle="MENU" title="Our Exquisite Menu" description="Enjoy Savory Nest From The Comfort Of Your Home" buttonTitle="" buttonLink="" isCenter={true} />
+    <div className="bg-white min-h-screen pb-10">
+      <SingleHero
+        subtitle="MENU"
+        title="Our Exquisite Menu"
+        description="Enjoy Savory Nest From The Comfort Of Your Home"
+        buttonTitle=""
+        buttonLink=""
+        isCenter={true}
+      />
 
       {/* Popular Categories Section */}
-      <div className="bg-[#f2f6f2] py-20">
+
+      <div
+        className="py-20 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `linear-gradient(rgba(228, 245, 220, 0.9), rgba(228, 245, 220, 0.9)), url(${popularBg.src})`,
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="superTitle">customer favorites</p>
           <h2 className="secTitle mt-2 mb-12">Popular Categories</h2>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.slice(0, 4).map((cat) => {
-             
-               const firstItemImage = menuItems.find(item => {
-                  const id = typeof item.categoryId === 'object' ? (item.categoryId as ICategory)._id : item.categoryId;
-                  return id === cat._id;
-               })?.image?.url;
+              const firstItemImage = menuItems.find((item) => {
+                const id =
+                  typeof item.categoryId === "object"
+                    ? (item.categoryId as ICategory)._id
+                    : item.categoryId;
+                return id === cat._id;
+              })?.image?.url;
 
-               return (
-                <div key={cat._id} className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex flex-col items-center">
+              return (
+                <div
+                  key={cat._id}
+                  className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex flex-col items-center"
+                >
                   <div className="relative w-32 h-32 mb-6">
-                    <Image src={firstItemImage || "/placeholder.png"} alt={cat.name} fill className="object-contain" />
+                    <Image
+                      src={firstItemImage || "/placeholder.png"}
+                      alt={cat.name}
+                      fill
+                      className="object-contain rounded-full"
+                    />
                   </div>
                   <h3 className="nameText text-xl">{cat.name}</h3>
                   <p className="designationText mt-1">(02 Items)</p>
                 </div>
-               )
+              );
             })}
           </div>
           <button className="blockBtn mt-12">See More</button>
@@ -123,13 +152,13 @@ const MenuPage = () => {
           <h2 className="secTitle mt-2">Our Exquisite Menu</h2>
         </div>
 
-        <div className="space-y-32">
+        <div className="space-y-3">
           {categories.map((category) => {
-         
             const filteredItems = menuItems.filter((item) => {
-              const itemCatId = typeof item.categoryId === "object" 
-                ? (item.categoryId as ICategory)._id 
-                : (item.categoryId as unknown as string);
+              const itemCatId =
+                typeof item.categoryId === "object"
+                  ? (item.categoryId as ICategory)._id
+                  : (item.categoryId as unknown as string);
               return itemCatId === category._id;
             });
 
@@ -140,8 +169,16 @@ const MenuPage = () => {
                 <div className="flex justify-between items-center mb-10">
                   <p className="subTitle text-primary">{category.name}</p>
                   <div className="flex gap-3">
-                    <button className={`prev-${category._id} p-2 rounded-lg border border-gray-400 text-primary hover:bg-primary hover:text-white transition`}><ArrowLeft size={20} /></button>
-                    <button className={`next-${category._id} p-2 rounded-lg bg-primary text-white hover:bg-opacity-90 transition`}><ArrowRight size={20} /></button>
+                    <button
+                      className={`prev-${category._id} p-2 rounded-lg border border-gray-400 text-primary hover:bg-primary hover:text-white transition`}
+                    >
+                      <ArrowLeft size={20} />
+                    </button>
+                    <button
+                      className={`next-${category._id} p-2 rounded-lg bg-primary text-white hover:bg-opacity-90 transition`}
+                    >
+                      <ArrowRight size={20} />
+                    </button>
                   </div>
                 </div>
 
@@ -149,26 +186,50 @@ const MenuPage = () => {
                   modules={[Navigation]}
                   spaceBetween={30}
                   slidesPerView={1}
-                  navigation={{ prevEl: `.prev-${category._id}`, nextEl: `.next-${category._id}` }}
-                  breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }}
-                  className="pb-32!" 
+                  navigation={{
+                    prevEl: `.prev-${category._id}`,
+                    nextEl: `.next-${category._id}`,
+                  }}
+                  breakpoints={{
+                    640: { slidesPerView: 2 },
+                    1024: { slidesPerView: 3 },
+                  }}
+                  className="pb-32!"
                 >
                   {filteredItems.map((item) => (
                     <SwiperSlide key={item._id}>
                       <div className="group relative">
                         {/* Image Container */}
-                        <div className="relative h-80 w-full rounded-2xl overflow-hidden shadow-sm">
-                          <Image src={item.image?.url || ""} alt={item.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                        <div className="relative h-85 w-full rounded-2xl overflow-hidden shadow-sm">
+                          <Image
+                            src={item.image?.url || ""}
+                            alt={item.title}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-700"
+                          />
                           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                             <button onClick={() => addToCart(item)} className="bg-white text-primary p-3 rounded-full hover:scale-110 transition-transform shadow-xl"><ShoppingCart size={24} /></button>
+                            <button
+                              onClick={() => addToCart(item)}
+                              className="bg-white text-primary p-3 rounded-full hover:scale-110 transition-transform shadow-xl"
+                            >
+                              <ShoppingCart size={24} />
+                            </button>
                           </div>
                         </div>
 
                         {/* Floating Content Box */}
                         <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-[85%] bg-white rounded-2xl p-5 text-center shadow-[0_15px_35px_rgba(0,0,0,0.1)] border border-gray-50 z-10 transform group-hover:-translate-y-3 transition-all duration-500">
-                          <h4 className="cardTitle mb-1! text-lg line-clamp-1">{item.title}</h4>
-                          <p className="menuDescription italic line-clamp-1">{item.chefId ? "Chef Special Recommendation" : "Fresh and Delicious Meals"}</p>
-                          <div className="price mb-0! mt-3">৳{item.price.toFixed(2)}</div>
+                          <h4 className="cardTitle mb-1! text-lg line-clamp-1">
+                            {item.title}
+                          </h4>
+                          <p className="menuDescription italic line-clamp-1">
+                            {item.chefId
+                              ? "Chef Special Recommendation"
+                              : "Fresh and Delicious Meals"}
+                          </p>
+                          <div className="price mb-0! mt-3">
+                            ৳{item.price.toFixed(2)}
+                          </div>
                         </div>
                       </div>
                     </SwiperSlide>

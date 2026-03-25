@@ -89,10 +89,15 @@ const CommonHero = ({
             </p>
           </div>
 
-         <CustomBtn
-          title={buttonText}
-          link={buttonPath}
-         />
+         {buttonText && (
+            <div className={`pt-4`}>
+              <CustomBtn
+                title={buttonText}
+                link={buttonPath}
+              />
+            </div>
+          )}
+        
         </div>
 
         {/* Right Content Area (Image/Video) */}
@@ -107,6 +112,7 @@ const CommonHero = ({
               alt="Hero Visual"
               fill
               className={`${isAboutPage ? "object-cover" : "object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"}`}
+              priority
             />
 
             {isAboutPage && (

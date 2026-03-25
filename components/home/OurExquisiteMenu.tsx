@@ -115,8 +115,8 @@ const OurExquisiteMenu = () => {
             ) : (
               filteredMenus?.map((item: IMenu) => (
                 <SwiperSlide key={item._id}>
-                  <div className="bg-white p-6 rounded-3xl flex flex-col items-center text-center shadow-sm relative mt-20 h-102">
-                    <div className="absolute -top-16 w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-lg border-4 border-white z-20">
+                  <div className="bg-white p-6 rounded-3xl flex flex-col items-center text-center shadow-sm relative mt-22 h-102">
+                    <div className="absolute -top-22 w-44 h-44 rounded-full overflow-hidden shadow-lg border-4 border-white z-20">
                       <Image src={item.image?.url || "/fallback-food.png"} alt={item.title} fill sizes="160px" className="object-cover" />
                     </div>
 

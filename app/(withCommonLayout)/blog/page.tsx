@@ -3,6 +3,7 @@ import LatestBlog from "@/components/LatestBlog";
 import SingleHero from "@/components/shared/SingleHero";
 import Testimonial from "@/components/Testimonial";
 import React from "react";
+import BlogInitialPage from "./_components/BlogInitialPage";
 
 export default function page() {
   return (
@@ -16,6 +17,7 @@ export default function page() {
         buttonLink="/blog"
       />
       <LatestBlog></LatestBlog>
+      <BlogInitialPage></BlogInitialPage>
       <Testimonial></Testimonial>
     </div>
   );

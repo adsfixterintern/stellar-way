@@ -1,5 +1,5 @@
 import React from "react";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import Navbar from "../shared/Navbar";
 import { Play } from "lucide-react";
 import CustomBtn from "./CustomBtn";
@@ -7,7 +7,7 @@ import CustomBtn from "./CustomBtn";
 interface CommonHeroProps {
   title: React.ReactNode;
   description: string;
-  mainImage: string;
+  mainImage: string | StaticImageData;
   buttonText: string;
   buttonPath: string;
   isAboutPage?: boolean;

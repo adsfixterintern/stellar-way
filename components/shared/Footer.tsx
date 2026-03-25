@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import { IoCallOutline, IoMailOutline } from "react-icons/io5";
 import logo from "../../assets/img/flogo.png"
+import footerbg from "@/assets/img/footerbg.png";
 
 const footerData = {
   explore: [
@@ -38,7 +39,11 @@ const footerData = {
 
 const Footer = () => {
   return (
-    <footer className="w-full bg-[#f1f8f1] pt-16 border-t border-gray-100">
+    <footer className="w-full pt-16 bg-cover bg-center bg-no-repeat"
+    style={{
+          backgroundImage: `linear-gradient(rgba(228, 245, 220, 0.9), rgba(228, 245, 220, 0.9)), url(${footerbg.src})`,
+        }}
+    >
       <div className="max-w-7xl mx-auto px-6 md:px-12 pb-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           

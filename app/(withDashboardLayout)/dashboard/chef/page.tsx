@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, FormEvent } from "react";
+import React, { useState, FormEvent, ChangeEvent } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import {
@@ -8,70 +8,38 @@ import {
   IoTrashOutline,
   IoCloseOutline,
   IoImageOutline,
-  IoPersonOutline,
   IoCreateOutline,
   IoStarOutline,
-  IoBriefcaseOutline,
-  IoInformationCircleOutline,
-  IoSparklesOutline,
 } from "react-icons/io5";
 import Swal from "sweetalert2";
+import Image from "next/image";
 
-// --- Interfaces ---
-interface Chef {
-  _id: string;
-  name: string;
-  designation: string;
-  bio: string;
-  speciality: string;
-  rating: number;
-  status: "active" | "inactive";
-  image?: string;
-}
+// Hooks & Interfaces
+import { useChefs } from "@/app/hooks/useChefs";
+import { IChef } from "@/types/menu";
+import { TableSkeleton } from "@/components/shared/TableSkeleton";
 
 const ChefPage: React.FC = () => {
-  const BASE_URL = "http://localhost:8000/api/v1";
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  // List States
-  const [chefs, setChefs] = useState<Chef[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  // React Query Hook
+  const { data: chefs = [], isLoading, refetch } = useChefs();
+
   const [btnLoading, setBtnLoading] = useState<boolean>(false);
-
-  // Modal & Edit States
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editId, setEditId] = useState<string | null>(null);
 
   // Form Fields
-  const [name, setName] = useState("");
-  const [designation, setDesignation] = useState("");
-  const [bio, setBio] = useState("");
-  const [speciality, setSpeciality] = useState("");
-  const [rating, setRating] = useState("");
-  const [status, setStatus] = useState("active");
+  const [name, setName] = useState<string>("");
+  const [designation, setDesignation] = useState<string>("");
+  const [bio, setBio] = useState<string>("");
+  const [speciality, setSpeciality] = useState<string>("");
+  const [rating, setRating] = useState<string>("");
+  const [status, setStatus] = useState<string>("active");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
- 
-  const fetchChefs = async (): Promise<void> => {
-    setLoading(true);
-    try {
-      const { data } = await axios.get(`${BASE_URL}/chefs`);
-      if (data.success) {
-        setChefs(data.data);
-      }
-    } catch (err: any) {
-      toast.error("Failed to load chefs");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchChefs();
-  }, []);
-
-  // ২. ইমেজ প্রিভিউ হ্যান্ডলার
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
@@ -81,13 +49,12 @@ const ChefPage: React.FC = () => {
     }
   };
 
-
-  const openEditModal = (chef: Chef) => {
-    setEditId(chef._id); 
+  const openEditModal = (chef: IChef) => {
+    setEditId(chef._id);
     setName(chef.name);
     setDesignation(chef.designation);
-    setBio(chef.bio);
-    setSpeciality(chef.speciality);
+    setBio((chef as IChef).bio || "");
+    setSpeciality((chef as IChef).speciality || "");
     setRating(String(chef.rating));
     setStatus(chef.status);
     setImagePreview(chef.image || null);
@@ -107,72 +74,42 @@ const ChefPage: React.FC = () => {
     setImagePreview(null);
   };
 
-  //(Create vs Update Logic)
   const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     setBtnLoading(true);
 
     try {
-      let response;
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("designation", designation);
+      formData.append("bio", bio);
+      formData.append("speciality", speciality);
+      formData.append("rating", rating);
+      formData.append("status", status);
+      if (imageFile) formData.append("image", imageFile);
 
-      // ১. যদি নতুন ছবি (imageFile) সিলেক্ট করা থাকে
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append("name", name);
-        formData.append("designation", designation);
-        formData.append("bio", bio);
-        formData.append("speciality", speciality);
-        formData.append("rating", rating);
-        formData.append("status", status);
-        formData.append("image", imageFile);
+      const url = editId
+        ? `${BASE_URL}/chefs/${editId}`
+        : `${BASE_URL}/chefs/create-chef`;
+      const method = editId ? "patch" : "post";
 
-        if (editId) {
-          response = await axios.patch(
-            `${BASE_URL}/chefs/${editId}`,
-            formData,
-            {
-              headers: { "Content-Type": "multipart/form-data" },
-            },
-          );
-        } else {
-          response = await axios.post(
-            `${BASE_URL}/chefs/create-chef`,
-            formData,
-            {
-              headers: { "Content-Type": "multipart/form-data" },
-            },
-          );
-        }
-      }
-      // ২. যদি ছবি না থাকে (Postman এ আমরা যেভাবে JSON পাঠাই)
-      else {
-        const payload = {
-          name,
-          designation,
-          bio,
-          speciality,
-          rating: Number(rating),
-          status,
-        };
-
-        if (editId) {
-          // এটি সরাসরি JSON পাঠাবে, যা ব্যাকএন্ড সহজে আপডেট করতে পারবে
-          response = await axios.patch(`${BASE_URL}/chefs/${editId}`, payload);
-        } else {
-          response = await axios.post(`${BASE_URL}/chefs/create-chef`, payload);
-        }
-      }
+      const response = await axios({
+        method,
+        url,
+        data: formData,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (response.data.success) {
-        toast.success(
-          editId ? "Chef updated successfully!" : "Chef added successfully!",
-        );
+        toast.success(editId ? "Chef updated!" : "Chef added!");
         closeModal();
-        fetchChefs();
+        refetch();
       }
-    } catch (err: any) {
-      console.error("Update Error Payload:", err.response?.data);
-      toast.error(err.response?.data?.message || "Operation failed");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.log("Server Error Data:", err.response?.data); 
+        toast.error(err.response?.data?.message || "Operation failed");
+      }
     } finally {
       setBtnLoading(false);
     }
@@ -181,21 +118,22 @@ const ChefPage: React.FC = () => {
   const handleDelete = async (id: string): Promise<void> => {
     const result = await Swal.fire({
       title: "Are you sure?",
-      text: "This action cannot be undone!",
+      text: "This chef will be removed!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#1A4E11",
       confirmButtonText: "Yes, delete",
-      customClass: { popup: "rounded-[12px]" },
     });
 
-    if (result.isConfirmed) { try {
+    if (result.isConfirmed) {
+      try {
         const { data } = await axios.delete(`${BASE_URL}/chefs/${id}`);
         if (data.success) {
-          toast.success("Chef removed");
-          setChefs((prev) => prev.filter((item) => item._id !== id));
+          toast.success("Removed successfully");
+          refetch();
         }
       } catch (err) {
+        console.log(err);
         toast.error("Delete failed");
       }
     }
@@ -215,13 +153,13 @@ const ChefPage: React.FC = () => {
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#1A4E11] text-white px-6 py-3.5 rounded-[8px] font-bold text-[10px] uppercase tracking-widest hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-[#1A4E11]/10"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 blockBtn"
         >
           <IoAddOutline size={18} /> Add New Chef
         </button>
       </div>
 
-      {/* Table Card */}
+      {/* Table */}
       <div className="bg-white rounded-[10px] border border-gray-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -229,9 +167,6 @@ const ChefPage: React.FC = () => {
               <tr className="bg-gray-50/50 border-b border-gray-100">
                 <th className="p-5 text-[10px] font-black uppercase text-gray-400 tracking-widest">
                   Chef Info
-                </th>
-                <th className="p-5 text-[10px] font-black uppercase text-gray-400 tracking-widest">
-                  Speciality
                 </th>
                 <th className="p-5 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">
                   Rating
@@ -245,29 +180,25 @@ const ChefPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {loading ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="p-20 text-center text-gray-400 font-bold uppercase text-[10px] tracking-widest animate-pulse"
-                  >
-                    Loading...
-                  </td>
-                </tr>
+              {isLoading ? (
+                <TableSkeleton />
               ) : (
-                chefs.map((item) => (
+                chefs.map((item: IChef) => (
                   <tr
                     key={item._id}
                     className="hover:bg-gray-50/30 transition-colors group"
                   >
                     <td className="p-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-gray-50 overflow-hidden border border-gray-100">
-                          <img
+                        <div className="w-12 h-12 rounded-lg bg-gray-50 overflow-hidden border border-gray-100 relative">
+                          <Image
                             src={
                               item.image || "https://via.placeholder.com/150"
                             }
-                            className="w-full h-full object-cover"
+                            alt={item.name}
+                            fill
+                            className="object-cover"
+                            sizes="48px"
                           />
                         </div>
                         <div className="flex flex-col">
@@ -279,9 +210,6 @@ const ChefPage: React.FC = () => {
                           </span>
                         </div>
                       </div>
-                    </td>
-                    <td className="p-5 font-bold text-gray-700 text-sm">
-                      {item.speciality}
                     </td>
                     <td className="p-5 text-center">
                       <span className="inline-flex items-center gap-1 text-[11px] font-black text-amber-500 bg-amber-50 px-2 py-1 rounded-md">
@@ -317,37 +245,59 @@ const ChefPage: React.FC = () => {
         </div>
       </div>
 
-      {/* --- Add/Edit Modal --- */}
+      {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-10 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={closeModal}
           ></div>
-          <div className="relative bg-white w-full max-w-2xl shadow-2xl rounded-[12px] overflow-hidden">
-            <div className="flex justify-between items-center p-6 border-b border-gray-50">
-              <h2 className="text-xl font-black text-gray-900">
-                {editId ? "Update Chef Profile" : "Add New Chef"}
-              </h2>
+
+          <div className="relative bg-white w-full max-w-2xl shadow-2xl rounded-2xl overflow-hidden transform transition-all">
+            <div className="flex justify-between items-center p-6 border-b border-gray-50 bg-white">
+              <div>
+                <h2 className="text-xl font-black text-gray-900 tracking-tight">
+                  {editId ? "Update Chef Profile" : "Add New Chef"}
+                </h2>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
+                  Fill in the professional details
+                </p>
+              </div>
               <button
                 onClick={closeModal}
-                className="p-2 hover:bg-gray-100 rounded-full"
+                className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-900 transition-colors"
               >
                 <IoCloseOutline size={24} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-8 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2 flex justify-center mb-4">
-                  <label className="relative w-24 h-24 rounded-2xl border-2 border-dashed border-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-50 overflow-hidden group">
+            <form
+              onSubmit={handleSubmit}
+              className="p-8 max-h-[80vh] overflow-y-auto"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="md:col-span-2 flex flex-col items-center mb-4">
+                  <label className="text-[10px] font-black uppercase text-gray-400 mb-3 tracking-widest">
+                    Profile Photo
+                  </label>
+                  <label className="relative w-28 h-28 rounded-3xl border-2 border-dashed border-gray-200 flex items-center justify-center cursor-pointer hover:border-[#1A4E11] hover:bg-gray-50 overflow-hidden transition-all group">
                     {imagePreview ? (
-                      <img
+                      <Image
                         src={imagePreview}
-                        className="w-full h-full object-cover"
+                        alt="Preview"
+                        fill
+                        className="object-cover"
                       />
                     ) : (
-                      <IoImageOutline size={30} className="text-gray-200" />
+                      <div className="flex flex-col items-center gap-1">
+                        <IoImageOutline
+                          size={30}
+                          className="text-gray-300 group-hover:text-[#1A4E11]"
+                        />
+                        <span className="text-[8px] font-black text-gray-400 uppercase">
+                          Browse
+                        </span>
+                      </div>
                     )}
                     <input
                       type="file"
@@ -358,44 +308,48 @@ const ChefPage: React.FC = () => {
                   </label>
                 </div>
 
-                <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 mb-2 block">
+                {/* Input Fields */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1 tracking-widest">
                     Name
                   </label>
                   <input
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full border border-gray-100 p-4 rounded-xl outline-none focus:border-[#1A4E11] text-sm bg-gray-50 font-semibold"
+                    placeholder="e.g. Chef Saif"
+                    className="w-full bg-gray-50 border border-gray-100 p-4 rounded-xl outline-none focus:border-[#1A4E11] focus:bg-white text-sm font-bold transition-all"
                   />
                 </div>
 
-                <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 mb-2 block">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1 tracking-widest">
                     Designation
                   </label>
                   <input
                     required
                     value={designation}
                     onChange={(e) => setDesignation(e.target.value)}
-                    className="w-full border border-gray-100 p-4 rounded-xl outline-none focus:border-[#1A4E11] text-sm bg-gray-50 font-semibold"
+                    placeholder="e.g. Executive Chef"
+                    className="w-full bg-gray-50 border border-gray-100 p-4 rounded-xl outline-none focus:border-[#1A4E11] focus:bg-white text-sm font-bold transition-all"
                   />
                 </div>
 
-                <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 mb-2 block">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1 tracking-widest">
                     Speciality
                   </label>
                   <input
                     required
                     value={speciality}
                     onChange={(e) => setSpeciality(e.target.value)}
-                    className="w-full border border-gray-100 p-4 rounded-xl outline-none focus:border-[#1A4E11] text-sm bg-gray-50 font-semibold"
+                    placeholder="e.g. Italian Cuisine"
+                    className="w-full bg-gray-50 border border-gray-100 p-4 rounded-xl outline-none focus:border-[#1A4E11] focus:bg-white text-sm font-bold transition-all"
                   />
                 </div>
 
-                <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 mb-2 block">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1 tracking-widest">
                     Rating
                   </label>
                   <input
@@ -404,34 +358,40 @@ const ChefPage: React.FC = () => {
                     required
                     value={rating}
                     onChange={(e) => setRating(e.target.value)}
-                    className="w-full border border-gray-100 p-4 rounded-xl outline-none focus:border-[#1A4E11] text-sm bg-gray-50 font-semibold"
+                    className="w-full bg-gray-50 border border-gray-100 p-4 rounded-xl outline-none focus:border-[#1A4E11] focus:bg-white text-sm font-bold transition-all"
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="text-[10px] font-black uppercase text-gray-400 mb-2 block">
-                    Bio
+                <div className="md:col-span-2 space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1 tracking-widest">
+                    Professional Bio
                   </label>
                   <textarea
                     required
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    rows={2}
-                    className="w-full border border-gray-100 p-4 rounded-xl outline-none focus:border-[#1A4E11] text-sm bg-gray-50 font-semibold resize-none"
+                    rows={3}
+                    placeholder="Tell something about the chef's experience..."
+                    className="w-full bg-gray-50 border border-gray-100 p-4 rounded-xl outline-none focus:border-[#1A4E11] focus:bg-white text-sm font-bold transition-all resize-none"
                   />
                 </div>
 
-                <div className="md:col-span-2 flex items-center gap-4">
-                  <span className="text-[10px] font-black uppercase text-gray-400">
-                    Status:
+                {/* Status Toggle */}
+                <div className="md:col-span-2 flex items-center justify-between bg-gray-50 p-4 rounded-xl border border-gray-100">
+                  <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                    Availability Status
                   </span>
                   <div className="flex gap-2">
                     {["active", "inactive"].map((s) => (
                       <button
                         key={s}
                         type="button"
-                        onClick={() => setStatus(s as any)}
-                        className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest ${status === s ? "bg-[#1A4E11] text-white shadow-md" : "bg-gray-100 text-gray-400"}`}
+                        onClick={() => setStatus(s)}
+                        className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-[1px] transition-all ${
+                          status === s
+                            ? "bg-[#1A4E11] text-white shadow-lg shadow-[#1A4E11]/20 scale-105"
+                            : "bg-white text-gray-400 hover:text-gray-600"
+                        }`}
                       >
                         {s}
                       </button>
@@ -440,19 +400,23 @@ const ChefPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  disabled={btnLoading}
-                  className="w-full bg-[#1A4E11] text-white py-4 rounded-xl font-black text-[11px] uppercase tracking-[2px] shadow-xl shadow-[#1A4E11]/20"
-                >
-                  {btnLoading
-                    ? "Processing..."
-                    : editId
-                      ? "Confirm Update"
-                      : "Save Chef"}
-                </button>
-              </div>
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={btnLoading}
+                className="w-full bg-[#1A4E11] text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[3px] shadow-2xl shadow-[#1A4E11]/30 mt-8 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {btnLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Processing...
+                  </span>
+                ) : editId ? (
+                  "Save Changes"
+                ) : (
+                  "Register Chef"
+                )}
+              </button>
             </form>
           </div>
         </div>

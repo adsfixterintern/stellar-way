@@ -19,6 +19,7 @@ import { IChef, IMenu } from "@/types/menu";
 import { ICategory } from "@/types/category";
 import Image from "next/image";
 import { TableSkeleton } from "@/components/shared/TableSkeleton";
+import PaginationDashboard from "@/components/shared/PaginationDashboard";
 
 const MenuPage: React.FC = () => {
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -57,6 +58,14 @@ const MenuPage: React.FC = () => {
       reader.readAsDataURL(file);
     }
   };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const currentItems = menus.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
 
   const openEditModal = (menu: IMenu) => {
     setEditId(menu._id);
@@ -201,12 +210,15 @@ const MenuPage: React.FC = () => {
                 <TableSkeleton />
               ) : menus.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-20 text-center text-gray-400 font-bold uppercase text-[10px]">
+                  <td
+                    colSpan={5}
+                    className="p-20 text-center text-gray-400 font-bold uppercase text-[10px]"
+                  >
                     No menus found
                   </td>
                 </tr>
               ) : (
-                menus.map((item: IMenu) => (
+                currentItems.map((item: IMenu) => (
                   <tr
                     key={item._id}
                     className="hover:bg-gray-50/30 transition-colors"
@@ -280,6 +292,12 @@ const MenuPage: React.FC = () => {
             </tbody>
           </table>
         </div>
+        <PaginationDashboard
+          totalItems={menus.length}
+          itemsPerPage={itemsPerPage}
+          currentPage={currentPage}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </div>
 
       {/* --- Modal --- */}

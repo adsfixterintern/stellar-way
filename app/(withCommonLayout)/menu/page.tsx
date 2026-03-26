@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -101,7 +102,6 @@ const MenuPage = () => {
       />
 
       {/* Popular Categories Section */}
-
       <div
         className="py-20 bg-cover bg-center bg-no-repeat"
         style={{
@@ -115,10 +115,12 @@ const MenuPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.slice(0, 4).map((cat) => {
               const firstItemImage = menuItems.find((item) => {
+               
+                if (!item?.categoryId) return false;
                 const id =
                   typeof item.categoryId === "object"
-                    ? (item.categoryId as ICategory)._id
-                    : item.categoryId;
+                    ? (item.categoryId as ICategory)?._id
+                    : String(item.categoryId);
                 return id === cat._id;
               })?.image?.url;
 
@@ -136,7 +138,7 @@ const MenuPage = () => {
                     />
                   </div>
                   <h3 className="nameText text-xl">{cat.name}</h3>
-                  <p className="designationText mt-1">(02 Items)</p>
+                  <p className="designationText mt-1">(Popular Items)</p>
                 </div>
               );
             })}
@@ -154,18 +156,23 @@ const MenuPage = () => {
 
         <div className="space-y-3">
           {categories.map((category) => {
+           
             const filteredItems = menuItems.filter((item) => {
+             
+              if (!item || !item.categoryId) return false;
+
               const itemCatId =
                 typeof item.categoryId === "object"
-                  ? (item.categoryId as ICategory)._id
-                  : (item.categoryId as unknown as string);
+                  ? (item.categoryId as ICategory)?._id 
+                  : String(item.categoryId);
+              
               return itemCatId === category._id;
             });
 
             if (filteredItems.length === 0) return null;
 
             return (
-              <div key={category._id} className="relative">
+              <div key={category._id} className="relative mb-20">
                 <div className="flex justify-between items-center mb-10">
                   <p className="subTitle text-primary">{category.name}</p>
                   <div className="flex gap-3">
@@ -194,11 +201,11 @@ const MenuPage = () => {
                     640: { slidesPerView: 2 },
                     1024: { slidesPerView: 3 },
                   }}
-                  className="pb-32!"
+                   
                 >
                   {filteredItems.map((item) => (
                     <SwiperSlide key={item._id}>
-                      <div className="group relative">
+                      <div className="group relative mb-20">
                         {/* Image Container */}
                         <div className="relative h-85 w-full rounded-2xl overflow-hidden shadow-sm">
                           <Image

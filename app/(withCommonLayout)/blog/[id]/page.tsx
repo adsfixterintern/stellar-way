@@ -64,7 +64,7 @@ export default function BlogDetailsPage() {
               <Image src="/assets/img/FAQ1.png" alt="Author" fill className="object-cover" />
             </div>
             <div>
-              <h4 className="font-bold text-[#1a1a1a] text-lg">Abdul Kadir</h4>
+              <h4 className="font-bold text-[#1a1a1a] text-lg">Albert Flores</h4>
               <p className="text-gray-400 text-sm">Digital Marketer</p>
             </div>
           </div>

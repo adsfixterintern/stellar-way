@@ -18,6 +18,7 @@ import Image from "next/image";
 import { useChefs } from "@/app/hooks/useChefs";
 import { IChef } from "@/types/menu";
 import { TableSkeleton } from "@/components/shared/TableSkeleton";
+import PaginationDashboard from "@/components/shared/PaginationDashboard";
 
 const ChefPage: React.FC = () => {
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -48,6 +49,14 @@ const ChefPage: React.FC = () => {
       reader.readAsDataURL(file);
     }
   };
+
+  const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+  
+    const currentItems = chefs.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage,
+    );
 
   const openEditModal = (chef: IChef) => {
     setEditId(chef._id);
@@ -183,7 +192,7 @@ const ChefPage: React.FC = () => {
               {isLoading ? (
                 <TableSkeleton />
               ) : (
-                chefs.map((item: IChef) => (
+                currentItems.map((item: IChef) => (
                   <tr
                     key={item._id}
                     className="hover:bg-gray-50/30 transition-colors group"
@@ -243,6 +252,12 @@ const ChefPage: React.FC = () => {
             </tbody>
           </table>
         </div>
+        <PaginationDashboard
+          totalItems={chefs.length}
+          itemsPerPage={itemsPerPage}
+          currentPage={currentPage}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </div>
 
       {/* Modal */}

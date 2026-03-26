@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Search, User, ShoppingCart, Menu, X, LogOut } from "lucide-react";
+import { Search, User, ShoppingCart, Menu, X, LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const pathname = usePathname();
   const { data: session, status } = useSession();
 
@@ -118,15 +118,50 @@ const Navbar = () => {
           <div className="hidden sm:flex items-center gap-4 text-white/90">
             <Search size={20} strokeWidth={1.5} className="cursor-pointer" />
 
-            {/* User Profile Logic */}
+            {/* User Profile Logic with Dropdown Fixed */}
             {session?.user ? (
-              <div className="group relative flex items-center gap-2 cursor-pointer bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
-                <div className="w-6 h-6 rounded-full bg-[#c2a15e] flex items-center justify-center text-[10px] font-bold text-black uppercase">
-                  {session.user.image || "U"}
+              <div 
+                className="relative"
+                onMouseEnter={() => setIsDropdownOpen(true)}
+                onMouseLeave={() => setIsDropdownOpen(false)}
+              >
+                {/* Profile Toggle */}
+                <div className="flex items-center gap-2 cursor-pointer bg-white/10 px-3 py-1.5 rounded-full border border-white/10 hover:bg-white/20 transition-all">
+                  <div className="w-6 h-6 rounded-full bg-[#c2a15e] flex items-center justify-center text-[10px] font-bold text-black uppercase overflow-hidden">
+                    {session.user.image ? (
+                        <Image src={session.user.image} alt="user" width={24} height={24} className="object-cover" />
+                    ) : (
+                        session.user.name?.charAt(0) || "U"
+                    )}
+                  </div>
+                  <span className="text-xs font-medium text-white">
+                    {session.user.name?.split(" ")[0]}
+                  </span>
+                  <ChevronDown size={14} className={`transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                 </div>
-                <span className="text-xs font-medium text-white">
-                  {session.user.name?.split(" ")[0]}
-                </span>
+
+                {/* Dropdown Menu Container with Padding Bridge */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 top-full w-48 pt-2 z-50"> 
+                   
+                    <div className="bg-[#1e3316] border border-white/10 rounded-xl shadow-2xl py-2 animate-in fade-in zoom-in duration-200">
+                      {(session.user as any)?.role === "admin" && (
+                        <Link 
+                          href="/dashboard"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 hover:text-white transition-colors"
+                        >
+                          <LayoutDashboard size={16} /> Dashboard
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => signOut()}
+                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-white/10 transition-colors"
+                      >
+                        <LogOut size={16} /> Sign out
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <Link href="/login">
@@ -152,14 +187,7 @@ const Navbar = () => {
 
           {status === "loading" ? (
             <div className="hidden sm:block w-24 h-9 bg-white/10 animate-pulse rounded-xl"></div>
-          ) : session?.user ? (
-            <button
-              onClick={() => signOut()}
-              className="hidden sm:flex items-center gap-2 bg-red-600/20 hover:bg-red-600 border border-red-600/50 text-white px-5 py-2 rounded-xl transition text-sm font-semibold"
-            >
-              <LogOut size={16} /> Sign out
-            </button>
-          ) : (
+          ) : session?.user ? null : (
             <Link href="/login">
               <button className="hidden sm:block bg-[#1e3316] hover:bg-[#2d4a22] text-white px-6 py-2 rounded-xl transition text-sm font-semibold">
                 Sign in
@@ -176,7 +204,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Content (Keep it as it was) */}
       {open && (
         <div className="lg:hidden mt-4 max-w-7xl mx-auto bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center shadow-2xl">
           <ul className="flex flex-col gap-5 text-gray-300 font-medium">
@@ -201,13 +229,26 @@ const Navbar = () => {
             {session?.user ? (
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#c2a15e] flex items-center justify-center text-black font-bold">
-                    {session.user?.image || "U"}
+                  <div className="w-10 h-10 rounded-full bg-[#c2a15e] flex items-center justify-center text-black font-bold overflow-hidden">
+                    {session.user?.image ? (
+                        <Image src={session.user.image} alt="user" width={40} height={40} className="rounded-full" />
+                    ) : (
+                        session.user.name?.charAt(0) || "U"
+                    )}
                   </div>
                   <span className="text-white font-medium">
                     {session.user.name}
                   </span>
                 </div>
+                
+                {(session.user as any)?.role === "admin" && (
+                   <Link href="/dashboard" onClick={() => setOpen(false)}>
+                      <button className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-semibold w-full flex items-center justify-center gap-2 mb-2">
+                        <LayoutDashboard size={18} /> Dashboard
+                      </button>
+                   </Link>
+                )}
+
                 <button
                   onClick={() => signOut()}
                   className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-semibold w-full flex items-center justify-center gap-2"

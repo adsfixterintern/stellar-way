@@ -31,9 +31,25 @@ export interface OrderModalProps {
   order: OrderDetailsProps;
   isOpen: boolean;
   onClose: () => void;
-  // Added coordinates for dynamic map rendering
   location?: {
     lat: number;
     lng: number;
   };
+}
+
+export interface IOrderPayload {
+  customerInfo: {
+    user: string;
+    name: string;
+    email: string;
+  };
+  phone: string;
+  address: string;
+  items: {
+    menuId: string;
+    quantity: number;
+    price: number;
+  }[];
+  totalPrice: number;
+  paymentMethod: string;
 }

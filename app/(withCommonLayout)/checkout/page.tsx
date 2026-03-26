@@ -1,182 +1,281 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import SingleHero from "@/components/shared/SingleHero";
 import { ICartItem } from "@/types/menu";
+import { toast, Toaster } from "react-hot-toast";
+import {
+  createSSLOrder,
+  createStripeOrder,
+} from "@/app/modules/order/order.api";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const CheckoutPage = () => {
-  const [cartItems, setCartItems] = useState<ICartItem[]>([]);
+  const { data: session } = useSession();
+  const router = useRouter();
+  const [checkoutItems, setCheckoutItems] = useState<ICartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [discountCode, setDiscountCode] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("credit-card");
+  const [paymentMethod, setPaymentMethod] = useState("sslcommerz");
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    town: "",
+    district: "",
+  });
 
- useEffect(() => {
-    const loadCheckoutData = () => {
-      const savedCart = localStorage.getItem("cart");
-      if (savedCart) {
-        setCartItems(JSON.parse(savedCart));
-      }
-      setIsLoaded(true);
-    };
-    loadCheckoutData();
-  }, []);
+  useEffect(() => {
+    // ১. চেকআউট আইটেম লোড করা
+    const tempCart = localStorage.getItem("temp_checkout");
+    if (tempCart) {
+      setCheckoutItems(JSON.parse(tempCart));
+    } else {
+      router.push("/cart");
+    }
 
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const taxes = cartItems.length > 0 ? 10 : 0;
+    // ২. ইউজার সেশন থেকে ডাটা প্রি-ফিল করা
+    if (session?.user) {
+      const names = session.user.name?.split(" ") || ["", ""];
+      setFormData((prev) => ({
+        ...prev,
+        email: session.user.email || "",
+        firstName: names[0],
+        lastName: names.slice(1).join(" "),
+      }));
+    }
+    setIsLoaded(true);
+  }, [session, router]);
+
+  const subtotal = checkoutItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0,
+  );
+  const taxes = checkoutItems.length > 0 ? 10 : 0;
   const grandTotal = subtotal + taxes;
+
+  const handleOrderSubmit = async () => {
+    // ভ্যালিডেশন
+    if (!formData.phone || !formData.address || !formData.town) {
+      return toast.error("Please fill in Phone, Address and City!");
+    }
+
+    const pendingOrderId = localStorage.getItem("pending_order_id");
+
+    const orderData = {
+      orderId: pendingOrderId || null,
+      customerInfo: {
+        user: session?.user?.id || "65f1a2b3c4d5e6f7a8b9c0d1", // সেশন আইডি না থাকলে একটি ডিফল্ট আইডি
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+      },
+      phone: formData.phone,
+      address: `${formData.address}, ${formData.town}, ${formData.district}`,
+      town: formData.town,
+      district: formData.district,
+      items: checkoutItems.map((item) => ({
+        menuId: item._id,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+      totalPrice: grandTotal,
+      paymentMethod: paymentMethod === "sslcommerz" ? "SSLCommerz" : "Stripe",
+    };
+
+    const loadingToast = toast.loading(
+      "Order placing, redirecting to payment gateway...",
+    );
+
+    try {
+      const response =
+        paymentMethod === "stripe"
+          ? await createStripeOrder(orderData)
+          : await createSSLOrder(orderData);
+
+      if (response.success && response.data?.paymentUrl) {
+        // --- ৩. কার্ট ক্লিনিং লজিক (ব্যাকএন্ড পরিবর্তন ছাড়াই) ---
+        const mainCartRaw = localStorage.getItem("cart");
+        if (mainCartRaw) {
+          const mainCart = JSON.parse(mainCartRaw);
+          // শুধুমাত্র সেই আইটেমগুলো রাখুন যেগুলো এখন অর্ডার করা হচ্ছে না
+          const remainingCart = mainCart.filter(
+            (mainItem: any) =>
+              !checkoutItems.some(
+                (checkItem) => checkItem._id === mainItem._id,
+              ),
+          );
+          localStorage.setItem("cart", JSON.stringify(remainingCart));
+        }
+
+        // টেম্পোরারি স্টোরেজ ক্লিয়ার
+        localStorage.removeItem("temp_checkout");
+        localStorage.removeItem("pending_order_id");
+
+        toast.success("Redirecting to payment...");
+
+        // ৪. পেমেন্ট গেটওয়েতে রিডাইরেক্ট (window.location.href ব্যবহার করা হয়েছে)
+        window.location.href = response.data.paymentUrl;
+      } else {
+        toast.error(response.message || "Failed to initiate payment gateway.");
+      }
+    } catch (error) {
+      console.error("Payment Error:", error);
+      toast.error("Something went wrong! Please try again.");
+    } finally {
+      toast.dismiss(loadingToast);
+    }
+  };
+
   if (!isLoaded) return null;
 
   return (
     <div className="bg-white min-h-screen pb-20">
-      {/* Hero Section - Image Match */}
+      <Toaster position="top-center" />
       <SingleHero
         subtitle="Checkout"
-        title="Secure Checkout"
-        description="Enter Your Details And Confirm Your Order To Enjoy Delicious Meals From Savory Nest."
-        buttonTitle=""
-        buttonLink=""
+        title="Complete Your Order"
         isCenter={true}
       />
 
       <div className="max-w-7xl mx-auto px-4 mt-16">
         <h2 className="text-5xl font-bold text-[#1D3A15] mb-12">Checkout</h2>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Left Side: Checkout Form */}
-          <div className="lg:col-span-2 space-y-8">
-            <div className="border border-gray-100 rounded-4xl p-8 shadow-sm space-y-8">
-              {/* Contact Section */}
-              <section>
-                <h3 className="text-xl font-bold mb-6">Contact</h3>
+          {/* Shipping Form */}
+          <div className="lg:col-span-2 space-y-8 border border-gray-100 rounded-[40px] p-10 shadow-sm bg-white">
+            <section className="space-y-6">
+              <h3 className="text-xl font-bold">Contact & Shipping</h3>
+              <div className="grid grid-cols-2 gap-6">
                 <input
-                  type="email"
-                  placeholder="Email Address"
-                  className="w-full border-b border-gray-200 py-3 focus:outline-none focus:border-[#1D3A15] transition-colors"
+                  type="text"
+                  placeholder="First Name"
+                  value={formData.firstName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, firstName: e.target.value })
+                  }
+                  className="border-b py-3 outline-none focus:border-[#1D3A15] transition-all"
                 />
-                <div className="flex items-center gap-2 mt-4">
-                  <input type="checkbox" id="news" className="accent-[#1D3A15]" />
-                  <label htmlFor="news" className="text-sm text-gray-600">Email me with news and offers</label>
-                </div>
-              </section>
+                <input
+                  type="text"
+                  placeholder="Last Name"
+                  value={formData.lastName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, lastName: e.target.value })
+                  }
+                  className="border-b py-3 outline-none focus:border-[#1D3A15] transition-all"
+                />
+              </div>
+              <input
+                type="email"
+                placeholder="Email"
+                value={formData.email}
+                className="w-full border-b py-3 outline-none opacity-60"
+                disabled
+              />
+              <input
+                type="text"
+                placeholder="House No, Road, Area"
+                onChange={(e) =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
+                className="w-full border-b py-3 outline-none focus:border-[#1D3A15]"
+              />
+              <div className="grid grid-cols-3 gap-6">
+                <input
+                  type="text"
+                  placeholder="City/Town"
+                  onChange={(e) =>
+                    setFormData({ ...formData, town: e.target.value })
+                  }
+                  className="border-b py-3 outline-none focus:border-[#1D3A15]"
+                />
+                <input
+                  type="text"
+                  placeholder="District"
+                  onChange={(e) =>
+                    setFormData({ ...formData, district: e.target.value })
+                  }
+                  className="border-b py-3 outline-none focus:border-[#1D3A15]"
+                />
+                <input
+                  type="text"
+                  placeholder="Phone Number"
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
+                  className="border-b py-3 outline-none font-bold text-[#1D3A15] focus:border-[#1D3A15]"
+                />
+              </div>
+            </section>
 
-              {/* Address Section */}
-              <section className="space-y-6">
-                <h3 className="text-xl font-bold">Address</h3>
-                <select className="w-full border-b border-gray-200 py-3 focus:outline-none bg-transparent">
-                  <option>Bangladesh</option>
-                </select>
-                <div className="grid grid-cols-2 gap-4">
-                  <input type="text" placeholder="First Name" className="border-b border-gray-200 py-3 focus:outline-none" />
-                  <input type="text" placeholder="Last Name" className="border-b border-gray-200 py-3 focus:outline-none" />
-                </div>
-                <input type="text" placeholder="House number and street name" className="w-full border-b border-gray-200 py-3 focus:outline-none" />
-                <input type="text" placeholder="Apartment, suite, unit, etc. (optional)" className="w-full border-b border-gray-200 py-3 focus:outline-none" />
-                <div className="grid grid-cols-3 gap-4">
-                  <input type="text" placeholder="Town / City" className="border-b border-gray-200 py-3 focus:outline-none" />
-                  <input type="text" placeholder="District" className="border-b border-gray-200 py-3 focus:outline-none" />
-                  <input type="text" placeholder="Postcode / ZIP" className="border-b border-gray-200 py-3 focus:outline-none" />
-                </div>
-                <input type="text" placeholder="Phone Number" className="w-full border-b border-gray-200 py-3 focus:outline-none" />
-              </section>
+            <section className="space-y-6">
+              <h3 className="text-xl font-bold">Payment Method</h3>
+              <div className="flex gap-8">
+                <label className="flex items-center gap-2 cursor-pointer font-medium">
+                  <input
+                    type="radio"
+                    checked={paymentMethod === "sslcommerz"}
+                    onChange={() => setPaymentMethod("sslcommerz")}
+                    className="accent-[#1D3A15] w-4 h-4"
+                  />
+                  SSLCommerz (Local)
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer font-medium">
+                  <input
+                    type="radio"
+                    checked={paymentMethod === "stripe"}
+                    onChange={() => setPaymentMethod("stripe")}
+                    className="accent-[#1D3A15] w-4 h-4"
+                  />
+                  Stripe (International)
+                </label>
+              </div>
+            </section>
 
-              {/* Delivery Section */}
-              <section className="space-y-4">
-                <h3 className="text-xl font-bold">Delivery</h3>
-                <div className="border border-gray-100 rounded-xl p-4 flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <input type="radio" name="delivery" id="free" className="accent-[#1D3A15]" defaultChecked />
-                    <label htmlFor="free" className="font-medium">Free Shipping <span className="block text-xs text-gray-400 font-normal">For orders over ৳500</span></label>
-                  </div>
-                  <span className="font-bold">FREE</span>
-                </div>
-                <div className="border border-gray-100 rounded-xl p-4 flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <input type="radio" name="delivery" id="standard" className="accent-[#1D3A15]" />
-                    <label htmlFor="standard" className="font-medium">Standard Delivery <span className="block text-xs text-gray-400 font-normal">30-40 minutes</span></label>
-                  </div>
-                  <span className="font-bold">৳80</span>
-                </div>
-              </section>
-
-              {/* Payment Method Section */}
-              <section className="space-y-6">
-                <h3 className="text-xl font-bold">Payment Method</h3>
-                <div className="flex flex-wrap gap-6">
-                  {["Credit Card", "Bkash", "Nagad", "Cash On Delivery"].map((method) => (
-                    <label key={method} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="payment"
-                        value={method.toLowerCase().replace(/ /g, "-")}
-                        checked={paymentMethod === method.toLowerCase().replace(/ /g, "-")}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="accent-[#1D3A15]"
-                      />
-                      <span className="text-sm font-medium">{method}</span>
-                    </label>
-                  ))}
-                </div>
-
-                {paymentMethod === "credit-card" && (
-                  <div className="space-y-4 mt-4 bg-gray-50/50 p-6 rounded-2xl">
-                    <input type="text" placeholder="Cardholder Name" className="w-full border-b border-gray-200 py-3 bg-transparent focus:outline-none" />
-                    <input type="text" placeholder="Card Number" className="w-full border-b border-gray-200 py-3 bg-transparent focus:outline-none" />
-                    <div className="grid grid-cols-2 gap-4">
-                      <input type="text" placeholder="Expiry Date (MM/YY)" className="border-b border-gray-200 py-3 bg-transparent focus:outline-none" />
-                      <input type="text" placeholder="CVV" className="border-b border-gray-200 py-3 bg-transparent focus:outline-none" />
-                    </div>
-                  </div>
-                )}
-              </section>
-
-              <button className="w-full bg-[#3D5334] text-white py-4 rounded-xl font-bold hover:bg-[#1D3A15] transition-colors shadow-lg">
-                Place Order
-              </button>
-              <p className="text-[10px] text-gray-400 text-center">
-                Your Info will be saved to a Shop account. By continuing, you agree to Shop&apos;s Terms of Service and acknowledge the Privacy Policy.
-              </p>
-            </div>
+            <button
+              onClick={handleOrderSubmit}
+              className="w-full bg-[#3D5334] text-white py-5 rounded-2xl font-bold text-lg hover:bg-[#1D3A15] transition-all shadow-xl active:scale-[0.98]"
+            >
+              PLACE ORDER & PAY (৳{grandTotal.toFixed(2)})
+            </button>
           </div>
 
-          {/* Right Side: Order Summary */}
+          {/* Sidebar Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white border border-gray-100 rounded-3xl p-8 sticky top-10 shadow-sm">
-              <div className="space-y-6">
-                <div className="flex justify-between items-center text-gray-600 font-medium">
+            <div className="bg-gray-50 border border-gray-100 rounded-[30px] p-8 sticky top-10 shadow-sm">
+              <h3 className="text-xl font-bold mb-6">Order Summary</h3>
+              <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2">
+                {checkoutItems.map((item) => (
+                  <div
+                    key={item._id}
+                    className="flex justify-between text-sm items-center"
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium text-gray-800">
+                        {item.name || item.title}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        Qty: {item.quantity}
+                      </span>
+                    </div>
+                    <span className="font-bold">
+                      ৳{(item.price * item.quantity).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-dashed border-gray-300 pt-6 mt-4 space-y-2">
+                <div className="flex justify-between text-gray-500 text-sm">
                   <span>Subtotal</span>
-                  <span className="text-gray-900 font-bold">৳{subtotal.toFixed(2)}</span>
+                  <span>৳{subtotal.toFixed(2)}</span>
                 </div>
-
-                <div className="space-y-2">
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Enter Discount Code</p>
-                  <div className="flex border border-gray-200 rounded-xl overflow-hidden h-12">
-                    <input
-                      type="text"
-                      placeholder="FLAT50"
-                      className="grow px-4 focus:outline-none text-sm"
-                      value={discountCode}
-                      onChange={(e) => setDiscountCode(e.target.value)}
-                    />
-                    <button className="bg-[#3D5334] text-white px-6 font-bold text-xs uppercase hover:bg-[#1D3A15]">Apply</button>
-                  </div>
+                <div className="flex justify-between text-gray-500 text-sm">
+                  <span>Delivery Charge</span>
+                  <span>৳{taxes.toFixed(2)}</span>
                 </div>
-
-                <div className="pt-4 space-y-4 border-t border-gray-50">
-                  <div className="flex justify-between text-gray-600">
-                    <span>Taxes</span>
-                    <span className="text-gray-900 font-bold">৳{taxes.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>Delivery Fee</span>
-                    <span className="text-gray-900 font-bold uppercase">Free</span>
-                  </div>
-                </div>
-
-                <hr className="border-gray-100" />
-
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600 font-medium">Grand Total</span>
-                  <span className="text-2xl font-black text-gray-900">৳{grandTotal.toFixed(2)}</span>
+                <div className="flex justify-between text-xl font-black text-[#1D3A15] pt-2">
+                  <span>Grand Total</span>
+                  <span>৳{grandTotal.toFixed(2)}</span>
                 </div>
               </div>
             </div>

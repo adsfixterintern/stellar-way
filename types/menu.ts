@@ -19,6 +19,7 @@ export interface IChef {
 export interface IMenu {
   _id: string;
   title: string;
+  description: string;
   price: number;
   stock: number;
   categoryId: ICategory;

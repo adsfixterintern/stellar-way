@@ -16,9 +16,7 @@ const ContactPage = () => {
         buttonTitle=""
         buttonLink=""
         isCenter={true}
-      />
-
-   
+      /> 
       <div className="py-6 md:py-20">
         <Contact />
       </div>

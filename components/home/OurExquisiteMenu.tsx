@@ -127,7 +127,7 @@ const OurExquisiteMenu = () => {
                         {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" className={i < Math.round(getAverageRating(item.reviews)) ? "text-yellow-400" : "text-gray-300"} />)}
                       </div>
 
-                      <p className="py-4 menuDescription text-primary">Delight in a crispy mixed pizza, topped with fresh veggies, savory meats, and melty cheese.</p>
+                      <p className="py-4 menuDescription text-primary">{item.description}</p>
 
                       <div className="flex items-center justify-between w-full mt-auto pt-4">
                         <span className="price font-bold pt-6">৳{item.price?.toFixed(2)}</span>

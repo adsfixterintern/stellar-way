@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -61,6 +61,14 @@ const MenuPage = () => {
     alert(`${item.title} added to cart!`);
   };
 
+  // স্ক্রলিং ফাংশন
+  const scrollToCategory = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-white min-h-screen pb-20">
@@ -115,11 +123,10 @@ const MenuPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.slice(0, 4).map((cat) => {
               const firstItemImage = menuItems.find((item) => {
-               
                 if (!item?.categoryId) return false;
                 const id =
                   typeof item.categoryId === "object"
-                    ? (item.categoryId as ICategory)?._id
+                    ? (item.categoryId as any)?._id
                     : String(item.categoryId);
                 return id === cat._id;
               })?.image?.url;
@@ -127,7 +134,8 @@ const MenuPage = () => {
               return (
                 <div
                   key={cat._id}
-                  className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex flex-col items-center"
+                  onClick={() => scrollToCategory(cat._id)}
+                  className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col items-center cursor-pointer hover:-translate-y-2"
                 >
                   <div className="relative w-32 h-32 mb-6">
                     <Image
@@ -138,7 +146,7 @@ const MenuPage = () => {
                     />
                   </div>
                   <h3 className="nameText text-xl">{cat.name}</h3>
-                  <p className="designationText mt-1">(Popular Items)</p>
+                  <p className="designationText mt-1">(See Items)</p>
                 </div>
               );
             })}
@@ -148,7 +156,7 @@ const MenuPage = () => {
       </div>
 
       {/* Main Menu Items */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20">
         <div className="text-center mb-16">
           <p className="superTitle">our menu</p>
           <h2 className="secTitle mt-2">Our Exquisite Menu</h2>
@@ -156,14 +164,12 @@ const MenuPage = () => {
 
         <div className="space-y-3">
           {categories.map((category) => {
-           
             const filteredItems = menuItems.filter((item) => {
-             
               if (!item || !item.categoryId) return false;
 
               const itemCatId =
                 typeof item.categoryId === "object"
-                  ? (item.categoryId as ICategory)?._id 
+                  ? (item.categoryId as any)?._id
                   : String(item.categoryId);
               
               return itemCatId === category._id;
@@ -172,7 +178,11 @@ const MenuPage = () => {
             if (filteredItems.length === 0) return null;
 
             return (
-              <div key={category._id} className="relative mb-20">
+              <div 
+                key={category._id} 
+                id={category._id} 
+                className="relative mb-3 scroll-mt-24" 
+              >
                 <div className="flex justify-between items-center mb-10">
                   <p className="subTitle text-primary">{category.name}</p>
                   <div className="flex gap-3">
@@ -201,12 +211,11 @@ const MenuPage = () => {
                     640: { slidesPerView: 2 },
                     1024: { slidesPerView: 3 },
                   }}
-                   
+              
                 >
                   {filteredItems.map((item) => (
                     <SwiperSlide key={item._id}>
                       <div className="group relative mb-20">
-                        {/* Image Container */}
                         <div className="relative h-85 w-full rounded-2xl overflow-hidden shadow-sm">
                           <Image
                             src={item.image?.url || ""}
@@ -224,7 +233,6 @@ const MenuPage = () => {
                           </div>
                         </div>
 
-                        {/* Floating Content Box */}
                         <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-[85%] bg-white rounded-2xl p-5 text-center shadow-[0_15px_35px_rgba(0,0,0,0.1)] border border-gray-50 z-10 transform group-hover:-translate-y-3 transition-all duration-500">
                           <h4 className="cardTitle mb-1! text-lg line-clamp-1">
                             {item.title}

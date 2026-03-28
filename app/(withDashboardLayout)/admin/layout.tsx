@@ -38,6 +38,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       icon: <IoPeopleOutline />,
       path: "/admin/chef",
     },
+    { name: "Events", icon: <IoCartOutline />, path: "/dashboard/events" },
     {
       name: "Settings",
       icon: <IoSettingsOutline />,

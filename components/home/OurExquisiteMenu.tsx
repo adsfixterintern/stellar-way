@@ -18,51 +18,18 @@ import { useCategories } from "@/app/hooks/useCategories";
 import { IMenu, IReview } from "@/types/menu";
 import { ICategory } from "@/types/category";
 import { SkeletonCard } from "../shared/SkeletonCard";
+import toast from "react-hot-toast";
+import { useCart } from "@/context/CartContext";
 
 const OurExquisiteMenu = () => {
-  const router = useRouter(); 
   const [activeCategoryId, setActiveCategoryId] = useState<string>("All");
   const { data: categories = [] } = useCategories();
   const { data: allMenus, isLoading } = useMenu();
+  const { addToCart } = useCart();
 
 
   const swiperRef = useRef<any>(null);
 
-  // --- Cart Logic Start ---
-  const addToCart = (item: IMenu) => {
-    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
-
-    const isExist = existingCart.find((cartItem: any) => cartItem._id === item._id);
-
-    let updatedCart;
-    if (isExist) {
-
-      updatedCart = existingCart.map((cartItem: any) =>
-        cartItem._id === item._id
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
-          : cartItem
-      );
-    } else {
-   
-      updatedCart = [
-        ...existingCart,
-        {
-          _id: item._id,
-          title: item.title,
-          price: item.price,
-          image: item.image,
-          quantity: 1,
-          size: "Medium",
-        },
-      ];
-    }
-
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
-
-
-    router.push("/cart");
-  };
-  // --- Cart Logic End ---
 
   const getAverageRating = (reviews: IReview[]) => {
     if (!reviews || reviews.length === 0) return 0;
@@ -133,7 +100,7 @@ const OurExquisiteMenu = () => {
                         <span className="price font-bold pt-6">৳{item.price?.toFixed(2)}</span>
                         
                     
-                        <button 
+                    <button 
                           onClick={() => addToCart(item)}
                           className="bg-primary p-2 rounded-lg text-white hover:opacity-90 transition-all"
                         >

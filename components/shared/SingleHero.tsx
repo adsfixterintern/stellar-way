@@ -7,10 +7,10 @@ import CustomBtn from "./CustomBtn";
 
 interface CommonHeroProps {
   subtitle?: string;
-  title: React.ReactNode;
-  description: string;
-  buttonTitle: string;
-  buttonLink: string;
+  title?: React.ReactNode;
+  description?: string;
+  buttonTitle?: string;
+  buttonLink?: string;
   mainImage?: string;
   isCenter?: boolean;
 }

@@ -211,7 +211,7 @@ const Navbar = () => {
                     <div className="bg-[#1e3316] border border-white/10 rounded-xl shadow-2xl py-2">
                       {(session.user as any)?.role === "admin" && (
                         <Link
-                          href="/dashboard"
+                          href="/admin"
                           className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10"
                         >
                           <LayoutDashboard size={16} /> Dashboard

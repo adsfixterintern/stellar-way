@@ -116,7 +116,7 @@ const CartPage = () => {
     }));
 
     localStorage.setItem("temp_checkout", JSON.stringify(itemsToCheckout));
-    localStorage.setItem("pending_order_id", order._id); 
+    localStorage.setItem("pending_order_id", order._id);
     setSelectedOrderDetails(null);
     router.push("/checkout");
   };
@@ -200,9 +200,7 @@ const CartPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-           
-            <div className="lg:col-span-2 space-y-6">
-            </div>
+            <div className="lg:col-span-2 space-y-6"></div>
             <div className="lg:col-span-1">{/* Summary logic */}</div>
           </div>
         )}

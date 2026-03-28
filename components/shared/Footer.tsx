@@ -15,19 +15,19 @@ const footerData = {
   explore: [
     { name: "Home", href: "/" },
     { name: "Menu", href: "/menu" },
-    { name: "Reservations", href: "/reservations" },
-    { name: "Events", href: "/events" },
+    { name: "Reservations", href: "/reservation" },
+    { name: "Events", href: "/event" },
     { name: "Contact", href: "/contact" },
   ],
   resources: [
     { name: "Blog", href: "/blog" },
-    { name: "FAQ", href: "/faq" },
-    { name: "About Us", href: "/about" },
+    { name: "FAQ", href: "/#faq-section" },
+    { name: "About Us", href: "/about-us" },
   ],
   legal: [
-    { name: "Privacy Policy", href: "/privacy" },
-    { name: "Terms of Service", href: "/terms" },
-    { name: "Cookie Policy", href: "/cookie" },
+    { name: "Privacy Policy", href: "/legal/privacyPolicy" },
+    { name: "Terms of Service", href: "/legal/termsOfService" },
+    { name: "Cookie Policy", href: "/legal/cookiePolicy" },
   ],
   socials: [
     { icon: <FaFacebookF size={16} />, href: "https://facebook.com" },

@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../app/globals.css";
 import AuthProvider from "@/context/AuthProvider";
 import Providers from "./providers";
 import { Toaster } from "react-hot-toast";
-<<<<<<< HEAD
-import { CartProvider } from "@/context/CartContext"; // ইমপোর্ট করা আছে
-=======
 import { CartProvider } from "@/context/CartContext";
 
 
->>>>>>> 08c6bba9fd6372e1c18054e708efe55bfe8833ff
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

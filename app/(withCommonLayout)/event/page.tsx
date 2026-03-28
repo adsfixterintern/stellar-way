@@ -24,7 +24,7 @@ const EventsPage = () => {
   const { data: eventResponse, isLoading } = useEvents("?status=active");
   const events = eventResponse?.data || [];
 
-  console.log(events)
+  console.log(events);
   const prevRef = useRef<HTMLButtonElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
 
@@ -40,7 +40,7 @@ const EventsPage = () => {
         description="Join us at Savory Nest for exciting culinary events, live music nights, and special dining experiences. Reserve your spot and enjoy unforgettable moments."
         mainImage={eventHero}
         buttonText="Book Event"
-        buttonPath="/booking"
+        buttonPath="/event-booking"
       />
 
       <section

@@ -4,9 +4,7 @@ import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
 import Providers from "./providers";
 import { Toaster } from "react-hot-toast";
-import { CartProvider } from "@/context/CartContext"; // CartProvider ইমপোর্ট করুন
-
-
+import { CartProvider } from "@/context/CartContext"; // ইমপোর্ট করা আছে
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,13 +32,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-        <Providers>
-          <Toaster/>
-          {children}
-          
-        </Providers>
-            </AuthProvider>
-            
+          {/* CartProvider-কে এখানে যুক্ত করা হয়েছে যেন পুরো অ্যাপ ডাটা পায় */}
+          <CartProvider>
+            <Providers>
+              <Toaster />
+              {children}
+            </Providers>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

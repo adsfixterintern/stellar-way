@@ -6,6 +6,8 @@ import Providers from "./providers";
 import { Toaster } from "react-hot-toast";
 import { CartProvider } from "@/context/CartContext"; // CartProvider ইমপোর্ট করুন
 
+
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -32,13 +34,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <CartProvider> 
-            <Providers>
-              <Toaster position="top-center" />
-              {children}
-            </Providers>
-          </CartProvider>
-        </AuthProvider>
+        <Providers>
+          <Toaster/>
+          {children}
+          
+        </Providers>
+            </AuthProvider>
+            
       </body>
     </html>
   );

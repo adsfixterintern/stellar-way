@@ -4,7 +4,7 @@ import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
 import Providers from "./providers";
 import { Toaster } from "react-hot-toast";
-import { CartProvider } from "@/context/CartContext"; // CartProvider ইমপোর্ট করুন
+import { CartProvider } from "@/context/CartContext";
 
 
 
@@ -34,11 +34,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-        <Providers>
+       <CartProvider>
+         <Providers>
           <Toaster/>
           {children}
           
         </Providers>
+       </CartProvider>
             </AuthProvider>
             
       </body>

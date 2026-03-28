@@ -18,7 +18,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'example.com', // আপনার এরর ফিক্স করার জন্য এটি যোগ করা হলো
+        hostname: 'example.com', 
+      },
+      {
+        protocol:'http',
+        hostname:'localhost'
       },
       {
         protocol: 'https',

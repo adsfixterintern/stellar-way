@@ -21,7 +21,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 const EventsPage = () => {
-  const { data: events } = useEvents();
+  const { data: eventResponse, isLoading } = useEvents("?status=active");
+  const events = eventResponse?.data || [];
+
+  console.log(events)
   const prevRef = useRef<HTMLButtonElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
 

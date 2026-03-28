@@ -29,19 +29,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   // Navigation menu items - You can add or remove items here easily
   const menuItems = [
-    { name: "Overview", icon: <IoStatsChartOutline />, path: "/dashboard" },
-    { name: "Category", icon: <IoCubeOutline />, path: "/dashboard/category" },
-    { name: "Menus", icon: <IoCubeOutline />, path: "/dashboard/menus" },
-    { name: "Orders", icon: <IoCartOutline />, path: "/dashboard/orders" },
+    { name: "Overview", icon: <IoStatsChartOutline />, path: "/admin" },
+    { name: "Category", icon: <IoCubeOutline />, path: "/admin/category" },
+    { name: "Menus", icon: <IoCubeOutline />, path: "/admin/menus" },
+    { name: "Orders", icon: <IoCartOutline />, path: "/admin/orders" },
     {
       name: "Chef",
       icon: <IoPeopleOutline />,
-      path: "/dashboard/chef",
+      path: "/admin/chef",
     },
     {
       name: "Settings",
       icon: <IoSettingsOutline />,
-      path: "/dashboard/settings",
+      path: "/admin/settings",
     },
   ];
 

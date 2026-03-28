@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useEffect } from "react";
 import SingleHero from "@/components/shared/SingleHero";
@@ -7,11 +8,12 @@ import {
   createSSLOrder,
   createStripeOrder,
 } from "@/app/modules/order/order.api";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Lock } from "lucide-react";
 
 const CheckoutPage = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [checkoutItems, setCheckoutItems] = useState<ICartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -27,7 +29,6 @@ const CheckoutPage = () => {
   });
 
   useEffect(() => {
-    // ১. চেকআউট আইটেম লোড করা
     const tempCart = localStorage.getItem("temp_checkout");
     if (tempCart) {
       setCheckoutItems(JSON.parse(tempCart));
@@ -35,7 +36,6 @@ const CheckoutPage = () => {
       router.push("/cart");
     }
 
-    // ২. ইউজার সেশন থেকে ডাটা প্রি-ফিল করা
     if (session?.user) {
       const names = session.user.name?.split(" ") || ["", ""];
       setFormData((prev) => ({
@@ -56,7 +56,11 @@ const CheckoutPage = () => {
   const grandTotal = subtotal + taxes;
 
   const handleOrderSubmit = async () => {
-    // ভ্যালিডেশন
+    if (status !== "authenticated") {
+      toast.error("Please login to place an order!");
+      return signIn();
+    }
+
     if (!formData.phone || !formData.address || !formData.town) {
       return toast.error("Please fill in Phone, Address and City!");
     }
@@ -66,7 +70,7 @@ const CheckoutPage = () => {
     const orderData = {
       orderId: pendingOrderId || null,
       customerInfo: {
-        user: session?.user?.id || "65f1a2b3c4d5e6f7a8b9c0d1", // সেশন আইডি না থাকলে একটি ডিফল্ট আইডি
+        user: session?.user?.id,
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
       },
@@ -94,11 +98,9 @@ const CheckoutPage = () => {
           : await createSSLOrder(orderData);
 
       if (response.success && response.data?.paymentUrl) {
-        // --- ৩. কার্ট ক্লিনিং লজিক (ব্যাকএন্ড পরিবর্তন ছাড়াই) ---
         const mainCartRaw = localStorage.getItem("cart");
         if (mainCartRaw) {
           const mainCart = JSON.parse(mainCartRaw);
-          // শুধুমাত্র সেই আইটেমগুলো রাখুন যেগুলো এখন অর্ডার করা হচ্ছে না
           const remainingCart = mainCart.filter(
             (mainItem: any) =>
               !checkoutItems.some(
@@ -108,13 +110,10 @@ const CheckoutPage = () => {
           localStorage.setItem("cart", JSON.stringify(remainingCart));
         }
 
-        // টেম্পোরারি স্টোরেজ ক্লিয়ার
         localStorage.removeItem("temp_checkout");
         localStorage.removeItem("pending_order_id");
 
         toast.success("Redirecting to payment...");
-
-        // ৪. পেমেন্ট গেটওয়েতে রিডাইরেক্ট (window.location.href ব্যবহার করা হয়েছে)
         window.location.href = response.data.paymentUrl;
       } else {
         toast.error(response.message || "Failed to initiate payment gateway.");
@@ -141,8 +140,23 @@ const CheckoutPage = () => {
       <div className="max-w-7xl mx-auto px-4 mt-16">
         <h2 className="text-5xl font-bold text-[#1D3A15] mb-12">Checkout</h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Shipping Form */}
-          <div className="lg:col-span-2 space-y-8 border border-gray-100 rounded-[40px] p-10 shadow-sm bg-white">
+          <div className="lg:col-span-2 space-y-8 border border-gray-100 rounded-[40px] p-10 shadow-sm bg-white relative">
+            {status !== "authenticated" && (
+              <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] rounded-[40px] flex flex-col items-center justify-center p-6 text-center">
+                <div className="bg-[#1D3A15] p-4 rounded-full mb-4 shadow-lg shadow-[#1D3A15]/20">
+                  <Lock className="text-white" size={32} />
+                </div>
+                <h3 className="text-2xl font-black text-[#1D3A15] mb-2 uppercase tracking-tight">Login Required</h3>
+                <p className="text-gray-500 max-w-xs mb-6 font-medium">Please login to your account to provide shipping details and complete payment.</p>
+                <button 
+                  onClick={() => signIn()}
+                  className="bg-[#1D3A15] text-white px-10 py-4 rounded-2xl font-black uppercase tracking-[2px] hover:bg-black transition-all shadow-xl"
+                >
+                  Sign In Now
+                </button>
+              </div>
+            )}
+
             <section className="space-y-6">
               <h3 className="text-xl font-bold">Contact & Shipping</h3>
               <div className="grid grid-cols-2 gap-6">
@@ -170,7 +184,7 @@ const CheckoutPage = () => {
                 placeholder="Email"
                 value={formData.email}
                 className="w-full border-b py-3 outline-none opacity-60"
-                disabled
+                readOnly
               />
               <input
                 type="text"
@@ -234,13 +248,17 @@ const CheckoutPage = () => {
 
             <button
               onClick={handleOrderSubmit}
-              className="w-full bg-[#3D5334] text-white py-5 rounded-2xl font-bold text-lg hover:bg-[#1D3A15] transition-all shadow-xl active:scale-[0.98]"
+              disabled={status !== "authenticated"}
+              className={`w-full py-5 rounded-2xl font-bold text-lg transition-all shadow-xl active:scale-[0.98] ${
+                status === "authenticated" 
+                ? "bg-[#3D5334] text-white hover:bg-[#1D3A15]" 
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              }`}
             >
               PLACE ORDER & PAY (৳{grandTotal.toFixed(2)})
             </button>
           </div>
 
-          {/* Sidebar Summary */}
           <div className="lg:col-span-1">
             <div className="bg-gray-50 border border-gray-100 rounded-[30px] p-8 sticky top-10 shadow-sm">
               <h3 className="text-xl font-bold mb-6">Order Summary</h3>
@@ -252,7 +270,7 @@ const CheckoutPage = () => {
                   >
                     <div className="flex flex-col">
                       <span className="font-medium text-gray-800">
-                        {item.name || item.title}
+                        {item.title}
                       </span>
                       <span className="text-xs text-gray-400">
                         Qty: {item.quantity}

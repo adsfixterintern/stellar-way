@@ -33,9 +33,7 @@ const BlogInitialPage = () => {
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  if (loading) {
-    return <div className="py-20 text-center font-bold text-[#3A4D39]">Loading Blogs...</div>;
-  }
+
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-16">

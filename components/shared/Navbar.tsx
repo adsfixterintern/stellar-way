@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react"; 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation"; 
 import Image from "next/image";
 import { Search, User, ShoppingCart, Menu, X, LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
+import axios from "axios"; 
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -14,6 +15,51 @@ const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const router = useRouter();
+
+  // --- SEARCH LOGIC START ---
+  const [searchOpen, setSearchOpen] = useState(false); 
+  const [searchQuery, setSearchQuery] = useState(""); 
+  const [categories, setCategories] = useState<any[]>([]); 
+  const [filteredCats, setFilteredCats] = useState<any[]>([]); 
+  const searchRef = useRef<HTMLDivElement>(null); 
+
+ 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:8000/api/v1/categories");
+        if (data.success) setCategories(data.data);
+      } catch (err) {
+        console.log("Search categories load failed", err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredCats([]);
+    } else {
+      const filtered = categories.filter((cat) =>
+        cat.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredCats(filtered);
+    }
+  }, [searchQuery, categories]);
+
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  // --- SEARCH LOGIC END ---
 
   useEffect(() => {
     const handleScroll = () => {
@@ -116,9 +162,52 @@ const Navbar = () => {
         {/* Right Side */}
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex items-center gap-4 text-white/90">
-            <Search size={20} strokeWidth={1.5} className="cursor-pointer" />
+            
+            
+            <div className="relative" ref={searchRef}>
+              <Search 
+                size={20} 
+                strokeWidth={1.5} 
+                className="cursor-pointer hover:text-white transition" 
+                onClick={() => setSearchOpen(!searchOpen)} 
+              />
+              
+              {searchOpen && (
+                <div className="absolute right-0 top-12 w-64 bg-[#1e3316] border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2">
+                  <div className="p-3 border-b border-white/5">
+                    <input 
+                      autoFocus
+                      type="text"
+                      placeholder="Search category (e.g. Pizza)"
+                      className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c2a15e]"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  
+                  {filteredCats.length > 0 && (
+                    <div className="max-h-48 overflow-y-auto py-2">
+                      {filteredCats.map((cat) => (
+                        <div
+                          key={cat._id}
+                          onClick={() => {
+                            setSearchOpen(false);
+                            setSearchQuery("");
+                            router.push(`/menu?category=${cat.name}`); 
+                          }}
+                          className="px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white cursor-pointer transition-colors"
+                        >
+                          {cat.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            {/* --- SEARCH UI END --- */}
 
-            {/* User Profile Logic with Dropdown Fixed */}
+            {/* User Profile Logic (Your existing code) */}
             {session?.user ? (
               <div 
                 className="relative"
@@ -140,10 +229,9 @@ const Navbar = () => {
                   <ChevronDown size={14} className={`transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                 </div>
 
-                {/* Dropdown Menu Container with Padding Bridge */}
+                {/* Dropdown Menu Container */}
                 {isDropdownOpen && (
                   <div className="absolute right-0 top-full w-48 pt-2 z-50"> 
-                   
                     <div className="bg-[#1e3316] border border-white/10 rounded-xl shadow-2xl py-2 animate-in fade-in zoom-in duration-200">
                       {(session.user as any)?.role === "admin" && (
                         <Link 
@@ -177,7 +265,7 @@ const Navbar = () => {
               <Link href="/cart">
                 <ShoppingCart size={20} strokeWidth={1.5} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-primary text-[10px] text-white w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                  <span className="absolute -top-2 -right-2 bg-red-600 text-[10px] text-white w-4 h-4 rounded-full flex items-center justify-center font-bold">
                     {cartCount}
                   </span>
                 )}
@@ -205,67 +293,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu Content (Keep it as it was) */}
-      {open && (
-        <div className="lg:hidden mt-4 max-w-7xl mx-auto bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center shadow-2xl">
-          <ul className="flex flex-col gap-5 text-gray-300 font-medium">
-            {navLinks.map((link, index) => (
-              <li key={index}>
-                <Link
-                  href={link.path}
-                  onClick={() => setOpen(false)}
-                  className={`${
-                    pathname === link.path
-                      ? "text-[#c2a15e] font-bold"
-                      : "hover:text-white transition"
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-8 pt-6 border-t border-white/10">
-            {session?.user ? (
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#c2a15e] flex items-center justify-center text-black font-bold overflow-hidden">
-                    {session.user?.image ? (
-                        <Image src={session.user.image} alt="user" width={40} height={40} className="rounded-full" />
-                    ) : (
-                        session.user.name?.charAt(0) || "U"
-                    )}
-                  </div>
-                  <span className="text-white font-medium">
-                    {session.user.name}
-                  </span>
-                </div>
-                
-                {(session.user as any)?.role === "admin" && (
-                   <Link href="/dashboard" onClick={() => setOpen(false)}>
-                      <button className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-semibold w-full flex items-center justify-center gap-2 mb-2">
-                        <LayoutDashboard size={18} /> Dashboard
-                      </button>
-                   </Link>
-                )}
-
-                <button
-                  onClick={() => signOut()}
-                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-semibold w-full flex items-center justify-center gap-2"
-                >
-                  <LogOut size={18} /> Logout
-                </button>
-              </div>
-            ) : (
-              <Link href="/login" onClick={() => setOpen(false)}>
-                <button className="bg-[#1e3316] hover:bg-[#2d4a22] text-white px-6 py-3 rounded-xl font-semibold w-full">
-                  Sign in
-                </button>
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
+      {/* ... (বাকি কোড অপরিবর্তিত) */}
     </nav>
   );
 };

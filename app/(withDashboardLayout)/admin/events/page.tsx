@@ -12,21 +12,25 @@ import {
   IoCreateOutline,
 } from "react-icons/io5";
 import Swal from "sweetalert2";
-import { IEvent } from "@/types/event";
 import Image from "next/image";
 import { TableSkeleton } from "@/components/shared/TableSkeleton";
 import PaginationDashboard from "@/components/shared/PaginationDashboard";
 import { useEvents } from "@/app/hooks/useEvent";
+import { IEvent } from "@/types/event";
 
 const EventPage: React.FC = () => {
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  // React Query Hook
+  // 1. React Query Hook - data কে 'eventResponse' হিসেবে ধরছি
   const {
-    data: events = [],
+    data: eventResponse,
     isLoading: eventLoading,
     refetch: refetchEvents,
   } = useEvents();
+
+  // 2. Data Extraction - API থেকে আসা অবজেক্টের ভেতর থেকে অ্যারে বের করা
+  // আপনার backend 'data.data' ফরম্যাটে ডাটা পাঠায়, তাই এটি নিশ্চিত করা জরুরি
+  const events: IEvent[] = (eventResponse as any)?.data || (Array.isArray(eventResponse) ? eventResponse : []);
 
   const [btnLoading, setBtnLoading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -44,34 +48,33 @@ const EventPage: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (file) {
-    // 10MB check (10 * 1024 * 1024 bytes)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("File is too large! Please upload under 10MB.");
-      return;
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("File is too large! Please upload under 10MB.");
+        return;
+      }
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(file);
     }
-    setImageFile(file);
-    const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result as string);
-    reader.readAsDataURL(file);
-  }
-};
+  };
 
+  // 3. Pagination Logic - 'events' অ্যারের ওপর ভিত্তি করে
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const currentItems = events.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const currentItems = Array.isArray(events)
+    ? events.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+    : [];
 
   const openEditModal = (event: IEvent) => {
     setEditId(event._id);
     setTitle(event.title);
     setSubTitle(event.subTitle || "");
-    setDate(event.date); 
+    setDate(event.date);
     setTime(event.time);
     setSeat(String(event.seat));
     setPrice(String(event.price));
@@ -81,61 +84,57 @@ const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     setIsModalOpen(true);
   };
 
-
   const handleSubmit = async (e: FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!editId && !imageFile) {
-    return toast.error("Please upload an image first!");
-  }
-
-  setBtnLoading(true);
-
-  try {
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("subTitle", subTitle);
-    formData.append("date", date);
-    formData.append("time", time);
-    formData.append("seat", seat); 
-    formData.append("price", price);
-    formData.append("status", status);
-    formData.append("featured", String(featured));
-
-    
-    if (imageFile) {
-      formData.append("image", imageFile); 
+    if (!editId && !imageFile) {
+      return toast.error("Please upload an image first!");
     }
 
-    const url = editId
-      ? `${BASE_URL}/events/event/${editId}`
-      : `${BASE_URL}/events/create-event`;
-    
-    const method = editId ? "put" : "post";
+    setBtnLoading(true);
 
-   
-    const response = await axios({
-      method,
-      url,
-      data: formData, 
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("subTitle", subTitle);
+      formData.append("date", date);
+      formData.append("time", time);
+      formData.append("seat", seat);
+      formData.append("price", price);
+      formData.append("status", status);
+      formData.append("featured", String(featured));
 
-    if (response.data.success) {
-      toast.success(editId ? "Updated!" : "Created!");
-      closeModal();
-      refetchEvents();
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
+      const url = editId
+        ? `${BASE_URL}/events/event/${editId}`
+        : `${BASE_URL}/events/create-event`;
+
+      const method = editId ? "put" : "post";
+
+      const response = await axios({
+        method,
+        url,
+        data: formData,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.data.success) {
+        toast.success(editId ? "Updated!" : "Created!");
+        closeModal();
+        refetchEvents();
+      }
+    } catch (err: any) {
+      console.error("Submit Error:", err.response?.data);
+      toast.error(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setBtnLoading(false);
     }
-  } catch (err: any) {
-    console.error("Submit Error:", err.response?.data);
-    toast.error(err.response?.data?.message || "Something went wrong");
-  } finally {
-    setBtnLoading(false);
-  }
-};
+  };
 
-
-const closeModal = () => {
+  const closeModal = () => {
     setIsModalOpen(false);
     setEditId(null);
     setTitle("");
@@ -168,7 +167,7 @@ const closeModal = () => {
           refetchEvents();
         }
       } catch (err) {
-        console.log(err)
+        console.log(err);
         toast.error("Delete failed");
       }
     }

@@ -15,6 +15,7 @@ import { IMenu, ICartItem } from "@/types/menu";
 import { getCategories } from "@/app/api/categoryApi";
 import { getMenus } from "@/app/api/menuApi";
 import { SkeletonCard } from "@/components/shared/SkeletonCard";
+import toast from "react-hot-toast";
 
 const MenuPage = () => {
   const [categories, setCategories] = useState<ICategory[]>([]);
@@ -58,7 +59,8 @@ const MenuPage = () => {
 
     localStorage.setItem("cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("cartUpdated"));
-    alert(`${item.title} added to cart!`);
+    toast.success(`${item.title} added to cart!`);
+    
   };
 
   // স্ক্রলিং ফাংশন
@@ -117,41 +119,73 @@ const MenuPage = () => {
         }}
       >
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="superTitle">customer favorites</p>
-          <h2 className="secTitle mt-2 mb-12">Popular Categories</h2>
+          <div className="flex flex-col md:flex-row justify-between items-center mb-12">
+            <div className="text-left">
+              <p className="superTitle">customer favorites</p>
+              <h2 className="secTitle mt-2">Popular Categories</h2>
+            </div>
+            
+            {/* Category Swiper Navigation */}
+            <div className="flex gap-3 mt-4 md:mt-0">
+              <button className="popular-prev p-2 rounded-lg border border-gray-400 text-primary hover:bg-primary hover:text-white transition">
+                <ArrowLeft size={20} />
+              </button>
+              <button className="popular-next p-2 rounded-lg bg-primary text-white hover:bg-opacity-90 transition">
+                <ArrowRight size={20} />
+              </button>
+            </div>
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {categories.slice(0, 4).map((cat) => {
-              const firstItemImage = menuItems.find((item) => {
-                if (!item?.categoryId) return false;
+          <Swiper
+            modules={[Navigation]}
+            spaceBetween={24}
+            slidesPerView={1}
+            navigation={{
+              prevEl: ".popular-prev",
+              nextEl: ".popular-next",
+            }}
+            breakpoints={{
+              640: { slidesPerView: 2 },
+              1024: { slidesPerView: 4 },
+            }}
+          >
+            {categories.map((cat) => {
+              // ঐ ক্যাটাগরির আইটেম ফিল্টার করা
+              const categoryItems = menuItems.filter((item) => {
                 const id =
                   typeof item.categoryId === "object"
                     ? (item.categoryId as any)?._id
                     : String(item.categoryId);
                 return id === cat._id;
-              })?.image?.url;
+              });
+
+              const firstItemImage = categoryItems[0]?.image?.url;
+              const itemCount = categoryItems.length;
 
               return (
-                <div
-                  key={cat._id}
-                  onClick={() => scrollToCategory(cat._id)}
-                  className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col items-center cursor-pointer hover:-translate-y-2"
-                >
-                  <div className="relative w-32 h-32 mb-6">
-                    <Image
-                      src={firstItemImage || "/placeholder.png"}
-                      alt={cat.name}
-                      fill
-                      className="object-contain rounded-full"
-                    />
+                <SwiperSlide key={cat._id}>
+                  <div
+                    onClick={() => scrollToCategory(cat._id)}
+                    className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col items-center cursor-pointer hover:-translate-y-2 mb-5"
+                  >
+                    <div className="relative w-32 h-32 mb-6">
+                      <Image
+                        src={firstItemImage || "/placeholder.png"}
+                        alt={cat.name}
+                        fill
+                        className="object-contain rounded-full"
+                      />
+                    </div>
+                    <h3 className="nameText text-xl">{cat.name}</h3>
+                    {/* Item Count দেখানো হচ্ছে */}
+                    <p className="designationText mt-1">
+                      ({itemCount} {itemCount > 1 ? "Items" : "Item"})
+                    </p>
                   </div>
-                  <h3 className="nameText text-xl">{cat.name}</h3>
-                  <p className="designationText mt-1">(See Items)</p>
-                </div>
+                </SwiperSlide>
               );
             })}
-          </div>
-          <button className="blockBtn mt-12">See More</button>
+          </Swiper>
         </div>
       </div>
 
@@ -211,7 +245,6 @@ const MenuPage = () => {
                     640: { slidesPerView: 2 },
                     1024: { slidesPerView: 3 },
                   }}
-              
                 >
                   {filteredItems.map((item) => (
                     <SwiperSlide key={item._id}>

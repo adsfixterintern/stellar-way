@@ -14,6 +14,9 @@ export interface IEvent {
   __v?: number;
 }
 
+// API Response
+
+
 export interface IEventResponse {
   success: boolean;
   message: string;

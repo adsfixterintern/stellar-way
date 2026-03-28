@@ -18,11 +18,16 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'i.ibb.co',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'example.com', 
       },
       {
-        protocol:'http',
-        hostname:'localhost'
+        protocol: 'http',
+        hostname: 'localhost'
       },
       {
         protocol: 'https',

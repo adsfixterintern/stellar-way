@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -6,14 +7,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Trash2, Plus, Minus, X, ShoppingBag, Clock, Eye } from "lucide-react";
-import { useCart } from "@/context/CartContext"; // ১. Context Import
+import { useCart } from "@/context/CartContext";
 import SingleHero from "@/components/shared/SingleHero";
 import { toast, Toaster } from "react-hot-toast";
 import { getMyOrdersFromDB } from "@/app/modules/order/order.api";
 import { useSession } from "next-auth/react";
 
 const CartPage = () => {
-  // ২. Context থেকে প্রয়োজনীয় ফাংশন ও ডাটা নেওয়া
+
   const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
   
   const [unpaidOrders, setUnpaidOrders] = useState<any[]>([]);
@@ -25,7 +26,6 @@ const CartPage = () => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
 
-  // ৩. ইনিশিয়াল লোড এবং আনপেইড অর্ডার ফেচ
   useEffect(() => {
     if (cartItems.length > 0) {
       setSelectedItems(cartItems.map((item) => item._id));
@@ -48,7 +48,6 @@ const CartPage = () => {
     );
   };
 
-  // ৪. ক্যালকুলেশন
   const filteredItems = cartItems.filter((item) => selectedItems.includes(item._id));
   const subtotal = filteredItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const taxes = filteredItems.length > 0 ? 10 : 0;
@@ -83,7 +82,8 @@ const CartPage = () => {
       <Toaster position="top-center" />
       <SingleHero 
         subtitle="CART" 
-        title="Your Cart Bag" 
+        title="Your Cart" 
+        description="Review your selected items and proceed to checkout when you're ready."
         isCenter={true} 
       />
 

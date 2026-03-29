@@ -21,27 +21,23 @@ const EventDetailsPage = () => {
   const [event, setEvent] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
 
-  const handleBooking = () => {
-    if (!selectedDate || !selectedTime) {
-      return toast.error("Please select both date and time to proceed");
-    }
-
-    // চেকআউট পেজে ডাটা পাঠিয়ে দেওয়া
-    const checkoutUrl = `/event-pay?type=event&id=${id}&date=${selectedDate}&time=${selectedTime}&price=${event.price}`;
-
-    toast.success("Redirecting to checkout...");
-    router.push(checkoutUrl);
-  };
   useEffect(() => {
     const fetchEvent = async () => {
       try {
         const data = await getSingleEventFromDB(id as string);
-        if (data.success) setEvent(data.data);
+        if (data.success) {
+          setEvent(data.data);
+          // ডাটাবেজ থেকে আসা ডিফল্ট ডেট এবং টাইম সেট করা
+          setSelectedDate(data.data.date);
+          setSelectedTime(data.data.time);
+        }
       } catch (error) {
         console.error("Error loading event");
+        toast.error("Failed to load event details");
       } finally {
         setIsLoading(false);
       }
@@ -75,7 +71,7 @@ const EventDetailsPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
           {/* বাম পাশে ইমেজ এবং ডিটেইলস */}
           <div className="lg:col-span-7 space-y-10">
-            <div className="relative h-[400px] md:h-[600px] rounded-[32px] overflow-hidden shadow-sm">
+            <div className="relative h-[400px] md:h-[600px] rounded-[32px] overflow-hidden shadow-sm border border-gray-100">
               <Image
                 src={event.image}
                 alt={event.title}
@@ -83,21 +79,29 @@ const EventDetailsPage = () => {
                 className="object-cover"
                 priority
               />
+              <div className="absolute bottom-8 left-8 bg-white/90 backdrop-blur px-6 py-3 rounded-2xl flex items-center gap-3 shadow-lg">
+                <Users size={20} className="text-[#3D5334]" />
+                <span className="font-black text-[#1D3A15]">
+                  {event.seat} Seats Available
+                </span>
+              </div>
             </div>
 
             <div className="px-2">
               <h2 className="text-3xl font-black text-[#1D3A15] mb-6 tracking-tight">
-                Experience Details
+                About the Experience
               </h2>
               <p className="text-gray-500 text-lg leading-relaxed font-medium">
-                Our {event.title} is more than just an event; it's a celebration
-                of culinary excellence.
+                Our {event.title} is a premium culinary event designed for
+                enthusiasts. Experience the finest flavors and expert techniques
+                in a cozy setting.
               </p>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
                 {[
                   "Professional Guidance",
                   "Premium Ingredients",
-                  "Tasting Session",
+                  "Live Cooking",
                   "Networking",
                 ].map((item, i) => (
                   <div
@@ -114,81 +118,95 @@ const EventDetailsPage = () => {
 
           {/* ডান পাশে বুকিং কার্ড */}
           <div className="lg:col-span-5 lg:sticky lg:top-32">
-            <div className="bg-[#F8F9F8] rounded-[40px] p-10 border border-gray-100">
-              <div className="mb-10 pb-6 border-b border-gray-200/50 text-center lg:text-left">
-                <p className="text-4xl font-black text-[#1D3A15]">
-                  ৳{event.price}
-                </p>
+            <div className="bg-[#F8F9F8] rounded-[40px] p-10 border border-gray-100 shadow-sm">
+              <div className="mb-10 pb-6 border-b border-gray-200/50 flex justify-between items-end">
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
+                    Ticket Price
+                  </p>
+                  <p className="text-4xl font-black text-[#1D3A15]">
+                    ৳{event.price}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
+                    Status
+                  </p>
+                  <span className="bg-[#1D3A15] text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase">
+                    {event.status}
+                  </span>
+                </div>
               </div>
 
-              {/* ২. ইনপুট ফিল্ডস - এখান থেকে ডাটা সিলেক্ট হবে */}
+              {/* ইনপুট ফিল্ডস - ডাইনামিক ডেট ও টাইম */}
               <div className="space-y-6 mb-10">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                    Choose Date
+                    Change Date (Optional)
                   </label>
                   <input
                     type="date"
-                    className="w-full p-4 rounded-2xl border border-gray-200 outline-none focus:ring-2 focus:ring-[#1D3A15]/5 transition-all"
+                    value={selectedDate}
+                    className="w-full p-4 rounded-2xl border border-gray-200 outline-none focus:ring-2 focus:ring-[#1D3A15]/5 transition-all bg-white font-bold text-[#1D3A15]"
                     onChange={(e) => setSelectedDate(e.target.value)}
                   />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                    Choose Time Slot
+                    Choose Your Slot
                   </label>
                   <select
-                    className="w-full p-4 rounded-2xl border border-gray-200 outline-none focus:ring-2 focus:ring-[#1D3A15]/5 transition-all cursor-pointer"
+                    value={selectedTime}
+                    className="w-full p-4 rounded-2xl border border-gray-200 outline-none focus:ring-2 focus:ring-[#1D3A15]/5 transition-all cursor-pointer bg-white font-bold text-[#1D3A15]"
                     onChange={(e) => setSelectedTime(e.target.value)}
                   >
-                    <option value="">Select a slot</option>
-                    <option value="12:00 PM">12:00 PM (Lunch)</option>
-                    <option value="04:00 PM">04:00 PM (Snacks)</option>
-                    <option value="08:00 PM">08:00 PM (Dinner)</option>
+                    <option value={event.time}>Default ({event.time})</option>
+                    <option value="12:00 PM">12:00 PM (Lunch Slot)</option>
+                    <option value="04:00 PM">04:00 PM (Afternoon Slot)</option>
+                    <option value="08:00 PM">08:00 PM (Dinner Slot)</option>
                   </select>
                 </div>
 
-                <hr className="border-gray-100 my-6" />
+                <hr className="border-gray-200/50 my-6" />
 
-                {/* ৩. স্ট্যাটিক প্রিভিউ সেকশন */}
-                <div className="flex items-center gap-5">
-                  <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center shadow-sm ring-1 ring-black/5">
-                    <CalendarIcon size={20} className="text-[#3D5334]" />
+                <div className="space-y-4">
+                  <div className="flex items-center gap-5">
+                    <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center shadow-sm border border-gray-100">
+                      <CalendarIcon size={20} className="text-[#3D5334]" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
+                        Scheduled Date
+                      </p>
+                      <p className="font-bold text-[#1D3A15]">{selectedDate}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
-                      Your Selected Date
-                    </p>
-                    <p className="font-bold text-[#1D3A15]">
-                      {selectedDate ? selectedDate : "Pick a date above"}
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-5">
-                  <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center shadow-sm ring-1 ring-black/5">
-                    <Clock size={20} className="text-[#3D5334]" />
+                  <div className="flex items-center gap-5">
+                    <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center shadow-sm border border-gray-100">
+                      <Clock size={20} className="text-[#3D5334]" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
+                        Scheduled Time
+                      </p>
+                      <p className="font-bold text-[#1D3A15]">{selectedTime}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
-                      Preferred Slot
-                    </p>
-                    <p className="font-bold text-[#1D3A15]">
-                      {selectedTime ? selectedTime : "Select your time"}
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-5">
-                  <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center shadow-sm ring-1 ring-black/5">
-                    <MapPin size={20} className="text-[#3D5334]" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
-                      Location
-                    </p>
-                    <p className="font-bold text-[#1D3A15]">Savory Nest Hall</p>
+                  <div className="flex items-center gap-5">
+                    <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center shadow-sm border border-gray-100">
+                      <MapPin size={20} className="text-[#3D5334]" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
+                        Location
+                      </p>
+                      <p className="font-bold text-[#1D3A15]">
+                        Savory Nest Main Hall
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -198,8 +216,6 @@ const EventDetailsPage = () => {
                   if (!selectedDate || !selectedTime) {
                     return toast.error("Please select date and time");
                   }
-
-                  toast.success("Proceeding to reservation");
 
                   const queryParams = new URLSearchParams({
                     eventId: id as string,
@@ -213,7 +229,7 @@ const EventDetailsPage = () => {
                 }}
                 className="w-full bg-[#1D3A15] text-white py-6 rounded-2xl font-black uppercase tracking-[0.1em] hover:bg-black transition-all flex items-center justify-center gap-3 shadow-xl shadow-[#1D3A15]/10 active:scale-95"
               >
-                CONFIRM RESERVATION <ArrowRight size={20} />
+                PROCEED TO BOOKING <ArrowRight size={20} />
               </button>
             </div>
           </div>

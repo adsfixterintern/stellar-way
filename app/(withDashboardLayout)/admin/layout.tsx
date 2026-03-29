@@ -95,6 +95,7 @@ const menuItems = [
   { name: "Chef", icon: <IoPeopleOutline />, path: "/admin/chef" },
 
   { name: "Events", icon: <IoCalendarOutline />, path: "/admin/events" },
+  { name: "booking", icon: <IoCalendarOutline />, path: "/admin/booking" },
 
   { name: "Settings", icon: <IoSettingsOutline />, path: "/admin/settings" },
 ];

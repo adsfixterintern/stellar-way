@@ -111,7 +111,7 @@ const Navbar = () => {
       setFilteredCats([]);
     } else {
       const filtered = categories.filter((cat) =>
-        cat.name.toLowerCase().includes(searchQuery.toLowerCase())
+        cat.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setFilteredCats(filtered);
     }
@@ -282,12 +282,21 @@ const Navbar = () => {
                 {isDropdownOpen && (
                   <div className="absolute right-0 top-full w-48 pt-2 z-50">
                     <div className="bg-[#1e3316] border border-white/10 rounded-xl shadow-2xl py-2">
-                      {(session.user as any)?.role === "admin" && (
-                        <Link href="/admin" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10">
-                          <LayoutDashboard size={16} /> Dashboard
-                        </Link>
-                      )}
-                      <button onClick={() => signOut()} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-white/10">
+                      <Link
+                        href={
+                          (session.user as any)?.role === "admin"
+                            ? "/admin"
+                            : "/dashboard"
+                        }
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10"
+                      >
+                        <LayoutDashboard size={16} /> Dashboard
+                      </Link>
+
+                      <button
+                        onClick={() => signOut({ callbackUrl: "/" })}
+                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-white/10"
+                      >
                         <LogOut size={16} /> Sign out
                       </button>
                     </div>
@@ -303,7 +312,10 @@ const Navbar = () => {
 
           {/* Cart Icon */}
           <Link href="/cart" className="relative">
-            <ShoppingCart size={22} className="text-white/90 hover:text-white" />
+            <ShoppingCart
+              size={22}
+              className="text-white/90 hover:text-white"
+            />
             {totalCartItems > 0 && (
               <span className="absolute -top-2 -right-2 bg-[#c2a15e] text-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#1e3316]">
                 {totalCartItems}
@@ -318,7 +330,11 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu Content */}
-      <div className={`lg:hidden overflow-hidden transition-all duration-500 ease-in-out ${open ? "max-h-[600px] opacity-100 mt-4" : "max-h-0 opacity-0"}`}>
+      <div
+        className={`lg:hidden overflow-hidden transition-all duration-500 ease-in-out ${
+          open ? "max-h-150 opacity-100 mt-4" : "max-h-0 opacity-0"
+        }`}
+      >
         <div className="bg-[#1e3316] border border-white/10 rounded-2xl p-6 shadow-2xl">
           <ul className="flex flex-col gap-5">
             {navLinks.map((link, index) => (
@@ -329,14 +345,24 @@ const Navbar = () => {
               </li>
             ))}
           </ul>
+
           <hr className="my-6 border-white/10" />
+
           <div className="flex flex-col gap-4">
+            {/* Mobile User/Login */}
             {session ? (
-              <button onClick={() => signOut()} className="flex items-center justify-center gap-2 bg-red-500/10 text-red-400 p-3 rounded-xl border border-red-500/20">
+              <button
+                onClick={() => signOut()}
+                className="flex items-center justify-center gap-2 bg-red-500/10 text-red-400 p-3 rounded-xl border border-red-500/20"
+              >
                 <LogOut size={18} /> Sign Out
               </button>
             ) : (
-              <Link href="/login" onClick={() => setOpen(false)} className="bg-[#c2a15e] text-black text-center font-bold p-3 rounded-xl">
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="bg-[#c2a15e] text-black text-center font-bold p-3 rounded-xl"
+              >
                 Sign In
               </Link>
             )}

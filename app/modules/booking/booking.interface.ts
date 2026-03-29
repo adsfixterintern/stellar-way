@@ -21,4 +21,5 @@ export interface ICreateBookingRequest {
   time: string;
   date: string;     
   specialRequest?: string;
+  address:string
 }

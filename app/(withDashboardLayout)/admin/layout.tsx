@@ -15,6 +15,7 @@ import {
   IoNotificationsOutline,
   IoStatsChartOutline,
 } from "react-icons/io5";
+import { Toaster } from "react-hot-toast";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -91,6 +92,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   return (
     <div className="flex min-h-screen bg-[#FDFCFD] font-sans antialiased">
+      <Toaster position="top-center" reverseOrder={false} />
       {/* 1. DESKTOP SIDEBAR */}
       <aside className="hidden lg:block w-64 fixed inset-y-0 left-0 z-50">
         <SidebarContent 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
@@ -12,41 +13,41 @@ const TableBooking = () => {
   const { data: session } = useSession();
 
   const handleBooking = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!session?.user) {
-      toast.error("Please login first to reserve a table!");
-      return;
-    }
+  if (!session || !session.user) {
+    toast.error("Please login first to reserve a table!");
+    return;
+  }
 
-    setLoading(true);
-    const formData = new FormData(e.currentTarget);
+  setLoading(true);
+  const formData = new FormData(e.currentTarget);
 
-    const bookingData: ICreateBookingRequest = {
-      userId: (session.user as any)._id as string,
-      email: session.user.email as string,
-      name: formData.get("name") as string,
-      phone: formData.get("phone") as string,
-      address: (formData.get("address") as string) || "Not Specified",
-      guest: Number(formData.get("guest")),
-      time: formData.get("time") as string, // e.g., "08:00 PM"
-      date: formData.get("date") as string, // e.g., "2026-04-15"
-      specialRequest: (formData.get("specialRequest") as string) || "",
-    };
-
-    try {
-      const res = await createBooking(bookingData);
-      if (res.success) {
-        toast.success("Table Reserved Successfully!");
-        (e.target as HTMLFormElement).reset();
-      }
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Failed to reserve table");
-    } finally {
-      setLoading(false);
-    }
+  const bookingData: ICreateBookingRequest = {
+    userId: (session.user as any).id, 
+    email: session.user.email as string,
+    name: formData.get("name") as string,
+    phone: formData.get("phone") as string,
+    address: (formData.get("address") as string) || "Not Specified",
+    guest: Number(formData.get("guest")),
+    time: formData.get("time") as string,
+    date: formData.get("date") as string,
+    specialRequest: (formData.get("specialRequest") as string) || "",
   };
 
+  try {
+    const res = await createBooking(bookingData);
+    if (res.success) {
+      toast.success("Table Reserved Successfully!");
+      (e.target as HTMLFormElement).reset();
+    }
+  } catch (error: any) {
+    console.error("Booking Error:", error.response?.data);
+    toast.error(error?.response?.data?.message || "Failed to reserve table");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
 <section className="py-24 bg-[#EDEBD7]">
   <div className="max-w-7xl mx-auto px-6">

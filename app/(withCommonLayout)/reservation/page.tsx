@@ -9,6 +9,7 @@ import CommonHero from "@/components/shared/CommonHero";
 import Contact from "@/components/shared/Contact";
 import reservationImg from "@/assets/img/reservationHero.jpg";
 import bookingtableHero from "@/assets/img/bookingtableHero.png";
+import { createBooking } from "@/app/modules/booking/booking.api"; 
 
 const ReservationPage = () => {
   const router = useRouter();
@@ -19,7 +20,7 @@ const ReservationPage = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (status === "unauthenticated" || !user) {
+      if (status === "unauthenticated" || !user) {
       toast.error("Please login to book a table");
       router.push("/login");
       return;
@@ -28,24 +29,29 @@ const ReservationPage = () => {
     setLoading(true);
     const formData = new FormData(e.currentTarget);
 
-    const payload = {
-      userId: user._id || user.id,
-      guest: Number(formData.get("guest")),
-      time: formData.get("time"),
-      date: formData.get("date"),
-      address: formData.get("address") || "Not Specified",
-      name: user.name,
+
+    const payload: any = {
+      userId: user.id || user._id, 
+      name: `${formData.get("firstName")} ${formData.get("lastName")}`,
       email: user.email,
-      phone: formData.get("phone"),
+      phone: formData.get("phone") as string,
+      address: (formData.get("address") as string) || "Not Specified",
+      guest: Number(formData.get("guest")),
+      time: formData.get("time") as string,
+      date: formData.get("date") as string,
+      specialRequest: "", 
     };
 
     try {
-      //   console.log("Sending Data:", payload);
-      toast.success("Table reserved successfully!");
-      (e.target as HTMLFormElement).reset();
-    } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong. Please try again.");
+      const res = await createBooking(payload);
+      
+      if (res.success) {
+        toast.success("Table reserved successfully!");
+        (e.target as HTMLFormElement).reset();
+      }
+    } catch (error: any) {
+      console.error("Booking error:", error);
+      toast.error(error?.response?.data?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -54,7 +60,7 @@ const ReservationPage = () => {
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center font-bold">
-        Loading...
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1D3A15]"></div>
       </div>
     );
   }
@@ -74,12 +80,10 @@ const ReservationPage = () => {
         buttonPath=""
       />
 
-      {/* ২. Online Booking Form Section */}
       <section className="py-20 bg-cover bg-center bg-no-repeat"
       style={{
           backgroundImage: `linear-gradient(rgba(228, 245, 220, 0.9), rgba(228, 245, 220, 0.9)), url(${bookingtableHero.src})`,
         }}
-      
       >
         <div className="max-w-4xl mx-auto px-4 relative z-10">
           <div className="text-center mb-10">
@@ -94,13 +98,12 @@ const ReservationPage = () => {
             >
               {/* First Name */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-800 ml-1">
-                  First Name
-                </label>
+                <label className="text-sm font-bold text-gray-800 ml-1">First Name</label>
                 <input
                   required
                   name="firstName"
                   type="text"
+                  defaultValue={user?.name?.split(" ")[0] || ""}
                   placeholder="Input your first name"
                   className="w-full px-5 py-3.5 rounded-xl border border-gray-100 bg-[#F9FBF9] focus:outline-none focus:ring-1 focus:ring-[#1D3A15] transition-all"
                 />
@@ -108,13 +111,12 @@ const ReservationPage = () => {
 
               {/* Last Name */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-800 ml-1">
-                  Last Name
-                </label>
+                <label className="text-sm font-bold text-gray-800 ml-1">Last Name</label>
                 <input
                   required
                   name="lastName"
                   type="text"
+                  defaultValue={user?.name?.split(" ")[1] || ""}
                   placeholder="Input your last name"
                   className="w-full px-5 py-3.5 rounded-xl border border-gray-100 bg-[#F9FBF9] focus:outline-none focus:ring-1 focus:ring-[#1D3A15] transition-all"
                 />
@@ -122,9 +124,7 @@ const ReservationPage = () => {
 
               {/* Phone Number */}
               <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-bold text-gray-800 ml-1">
-                  Phone Number
-                </label>
+                <label className="text-sm font-bold text-gray-800 ml-1">Phone Number</label>
                 <input
                   required
                   name="phone"
@@ -134,25 +134,21 @@ const ReservationPage = () => {
                 />
               </div>
 
-              {/* Email (Pre-filled if logged in) */}
+              {/* Email (Read Only as it's from session) */}
               <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-bold text-gray-800 ml-1">
-                  Email
-                </label>
+                <label className="text-sm font-bold text-gray-800 ml-1">Email</label>
                 <input
-                  defaultValue={user?.email || ""}
+                  readOnly
+                  value={user?.email || ""}
                   name="email"
                   type="email"
-                  placeholder="Input your email"
-                  className="w-full px-5 py-3.5 rounded-xl border border-gray-100 bg-[#F9FBF9] focus:outline-none focus:ring-1 focus:ring-[#1D3A15] transition-all"
+                  className="w-full px-5 py-3.5 rounded-xl border border-gray-100 bg-[#f0f0f0] cursor-not-allowed focus:outline-none"
                 />
               </div>
 
               {/* Address */}
               <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-bold text-gray-800 ml-1">
-                  Address
-                </label>
+                <label className="text-sm font-bold text-gray-800 ml-1">Address</label>
                 <input
                   name="address"
                   type="text"
@@ -163,24 +159,21 @@ const ReservationPage = () => {
 
               {/* Guests */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-800 ml-1">
-                  Guests
-                </label>
+                <label className="text-sm font-bold text-gray-800 ml-1">Guests</label>
                 <input
                   required
                   name="guest"
                   type="number"
+                  min="1"
                   placeholder="Number of guests"
                   className="w-full px-5 py-3.5 rounded-xl border border-gray-100 bg-[#F9FBF9] focus:outline-none focus:ring-1 focus:ring-[#1D3A15] transition-all"
                 />
               </div>
 
-              {/* Date & Time Container */}
+              {/* Date & Time */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-800 ml-1">
-                    Time
-                  </label>
+                  <label className="text-sm font-bold text-gray-800 ml-1">Time</label>
                   <input
                     required
                     name="time"
@@ -189,13 +182,12 @@ const ReservationPage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-800 ml-1">
-                    Date
-                  </label>
+                  <label className="text-sm font-bold text-gray-800 ml-1">Date</label>
                   <input
                     required
                     name="date"
                     type="date"
+                    min={new Date().toISOString().split("T")[0]} 
                     className="w-full px-5 py-3.5 rounded-xl border border-gray-100 bg-[#F9FBF9] focus:outline-none focus:ring-1 focus:ring-[#1D3A15] transition-all"
                   />
                 </div>
@@ -206,9 +198,9 @@ const ReservationPage = () => {
                 <button
                   disabled={loading}
                   type="submit"
-                  className="w-full blockBtn"
+                  className="w-full blockBtn disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                  {loading ? "Processing..." : "Reserve"}
+                  {loading ? "Processing..." : "Reserve Now"}
                 </button>
               </div>
             </form>

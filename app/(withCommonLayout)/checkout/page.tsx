@@ -55,18 +55,26 @@ const CheckoutPage = () => {
   const taxes = checkoutItems.length > 0 ? 10 : 0;
   const grandTotal = subtotal + taxes;
 
-  const handleOrderSubmit = async () => {
+const handleOrderSubmit = async () => {
+  
     if (status !== "authenticated") {
       toast.error("Please login to place an order!");
       return signIn();
     }
 
+    // ২. ফিল্ড ভ্যালিডেশন
     if (!formData.phone || !formData.address || !formData.town) {
       return toast.error("Please fill in Phone, Address and City!");
     }
 
+    // ৩. কার্টে আইটেম আছে কি না চেক
+    if (checkoutItems.length === 0) {
+      return toast.error("Your cart is empty!");
+    }
+
     const pendingOrderId = localStorage.getItem("pending_order_id");
 
+    // ৪. অর্ডার অবজেক্ট তৈরি
     const orderData = {
       orderId: pendingOrderId || null,
       customerInfo: {
@@ -87,17 +95,24 @@ const CheckoutPage = () => {
       paymentMethod: paymentMethod === "sslcommerz" ? "SSLCommerz" : "Stripe",
     };
 
+    // ডিবাগিংয়ের জন্য ডাটা কনসোলে প্রিন্ট করা
+    console.log("--- Sending Order Data to Backend ---", orderData);
+
     const loadingToast = toast.loading(
       "Order placing, redirecting to payment gateway...",
     );
 
     try {
+      // ৫. এপিআই কল (SSLCommerz বা Stripe)
       const response =
         paymentMethod === "stripe"
           ? await createStripeOrder(orderData)
           : await createSSLOrder(orderData);
 
+      console.log("--- Backend Response Received ---", response);
+
       if (response.success && response.data?.paymentUrl) {
+        // ৬. মেইন কার্ট থেকে কেনা আইটেমগুলো রিমুভ করা
         const mainCartRaw = localStorage.getItem("cart");
         if (mainCartRaw) {
           const mainCart = JSON.parse(mainCartRaw);
@@ -110,17 +125,23 @@ const CheckoutPage = () => {
           localStorage.setItem("cart", JSON.stringify(remainingCart));
         }
 
+        // ৭. লোকাল স্টোরেজ ক্লিন করা
         localStorage.removeItem("temp_checkout");
         localStorage.removeItem("pending_order_id");
 
         toast.success("Redirecting to payment...");
+        
+ 
         window.location.href = response.data.paymentUrl;
       } else {
+ 
+        console.warn("Payment Initiation Failed:", response.message);
         toast.error(response.message || "Failed to initiate payment gateway.");
       }
-    } catch (error) {
-      console.error("Payment Error:", error);
-      toast.error("Something went wrong! Please try again.");
+    } catch (error: any) {
+
+      console.error("Critical Payment Error:", error);
+      toast.error(error?.response?.data?.message || "Something went wrong! Please try again.");
     } finally {
       toast.dismiss(loadingToast);
     }

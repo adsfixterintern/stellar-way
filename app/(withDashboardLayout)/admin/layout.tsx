@@ -18,6 +18,7 @@ import {
   IoRestaurantOutline,
   IoCalendarOutline,
 } from "react-icons/io5";
+import { Toaster } from "react-hot-toast";
 import logo from "@/assets/img/flogo.png"
 import Image from "next/image";
 
@@ -102,6 +103,7 @@ const menuItems = [
 
   return (
     <div className="flex min-h-screen bg-[#FDFCFD] font-sans antialiased">
+      <Toaster position="top-center" reverseOrder={false} />
       {/* 1. DESKTOP SIDEBAR */}
       <aside className="hidden lg:block w-64 fixed inset-y-0 left-0 z-50">
         <SidebarContent 

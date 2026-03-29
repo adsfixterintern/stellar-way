@@ -11,3 +11,23 @@ export const getOverView = async (): Promise<IOverView | null> => {
     return null;
   }
 };
+
+export const getLowStockItems = async () => {
+  try {
+    const response = await api.get('/menu/low-stock');
+    return response.data?.data || [];
+  } catch (error) {
+    console.error("Error fetching low stock items:", error);
+    return [];
+  }
+};
+
+export const getTrafficStats = async () => {
+  try {
+    const response = await api.get('/analytics/stats');
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching traffic stats:", error);
+    return { direct: 0, social: 0, organic: 0 };
+  }
+};

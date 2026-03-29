@@ -8,7 +8,7 @@ export default function page() {
   return (
     <div>
       <CommonHero
-      buttonPath="/"
+      buttonPath="/reservation"
       buttonText="Reserve Your Table"
         isAboutPage={true}
         title="About Savory Nest"

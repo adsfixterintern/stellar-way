@@ -15,39 +15,89 @@ import {
   LogOut,
   LayoutDashboard,
   ChevronDown,
+  Bell,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import axios from "axios";
 import { useCart } from "@/context/CartContext";
+import { useSocket } from "@/app/hooks/useSocket";
+import { toast } from "react-hot-toast";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
+  const socket = useSocket();
+  const searchRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
 
-  // Cart Context
   const { cartItems } = useCart();
-  const totalCartItems = cartItems.reduce(
-    (acc, item) => acc + (item.quantity || 0),
-    0
-  );
+  const totalCartItems = cartItems.reduce((acc, item) => acc + (item.quantity || 0), 0);
 
-  // Search Logic
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
   const [filteredCats, setFilteredCats] = useState<any[]>([]);
-  const searchRef = useRef<HTMLDivElement>(null);
+
+  // ১. নোটিফিকেশন ফেচ করা
+  useEffect(() => {
+    if (session?.user?.email) {
+      const fetchNotifications = async () => {
+        try {
+          const { data } = await axios.get(`http://localhost:8000/api/v1/notifications/${session.user.email}`);
+          if (data.success) {
+            setNotifications(data.data);
+            setUnreadCount(data.data.filter((n: any) => n.status === "unread").length);
+          }
+        } catch (err) {
+          console.log("Notification fetch failed", err);
+        }
+      };
+      fetchNotifications();
+    }
+  }, [session]);
+
+  // ২. রিয়েল-টাইম সকেট লিসেনার
+  useEffect(() => {
+    if (socket && session?.user) {
+      const userId = (session.user as any).id || (session.user as any)._id;
+      socket.emit("join-notification", userId);
+
+      socket.on("new-notification", (data: any) => {
+        setNotifications((prev) => [data, ...prev]);
+        setUnreadCount((prev) => prev + 1);
+        toast.success(data.title, { icon: "🔔" });
+      });
+    }
+    return () => {
+      socket?.off("new-notification");
+    };
+  }, [socket, session]);
+
+  // ৩. নোটিফিকেশন রিড হিসেবে মার্ক করা
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await axios.patch(`http://localhost:8000/api/v1/notifications/mark-as-read/${id}`);
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === id ? { ...n, status: "read" } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (err) {
+      console.log("Failed to mark as read", err);
+    }
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data } = await axios.get(
-          "http://localhost:8000/api/v1/categories"
-        );
+        const { data } = await axios.get("http://localhost:8000/api/v1/categories");
         if (data.success) setCategories(data.data);
       } catch (err) {
         console.log("Search categories load failed", err);
@@ -61,7 +111,7 @@ const Navbar = () => {
       setFilteredCats([]);
     } else {
       const filtered = categories.filter((cat) =>
-        cat.name.toLowerCase().includes(searchQuery.toLowerCase())
+        cat.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setFilteredCats(filtered);
     }
@@ -69,22 +119,15 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target as Node)
-      ) {
-        setSearchOpen(false);
-      }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) setSearchOpen(false);
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) setNotifOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Scroll Effect
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -108,7 +151,6 @@ const Navbar = () => {
             : "bg-white/10 backdrop-blur-md border-white/20"
         }`}
       >
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-1">
           <Image
             width={140}
@@ -119,16 +161,13 @@ const Navbar = () => {
           />
         </Link>
 
-        {/* Desktop Menu */}
         <ul className="hidden lg:flex items-center gap-6 xl:gap-8 text-gray-300 font-medium">
           {navLinks.map((link, index) => (
             <li key={index}>
               <Link
                 href={link.path}
                 className={`text-sm xl:text-base transition-all ${
-                  pathname === link.path
-                    ? "text-white border-b-2 border-white pb-1"
-                    : "hover:text-white opacity-80 hover:opacity-100"
+                  pathname === link.path ? "text-white border-b-2 border-white pb-1" : "hover:text-white opacity-80 hover:opacity-100"
                 }`}
               >
                 {link.name}
@@ -137,9 +176,8 @@ const Navbar = () => {
           ))}
         </ul>
 
-        {/* Right Side Tools */}
         <div className="flex items-center gap-3 md:gap-5">
-          {/* Search (Desktop) */}
+          {/* Search */}
           <div className="hidden sm:block relative" ref={searchRef}>
             <Search
               size={20}
@@ -179,6 +217,52 @@ const Navbar = () => {
             )}
           </div>
 
+          {/* Notifications */}
+          <div className="relative" ref={notifRef}>
+            <Bell
+              size={22}
+              className="text-white/90 cursor-pointer hover:text-white transition"
+              onClick={() => setNotifOpen(!notifOpen)}
+            />
+            {unreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#1e3316]">
+                {unreadCount}
+              </span>
+            )}
+            {notifOpen && (
+              <div className="absolute right-0 top-12 w-80 bg-[#1e3316] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 z-[60]">
+                <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+                  <h3 className="text-sm font-bold text-white">Notifications</h3>
+                  <span className="text-[10px] text-[#c2a15e] font-bold uppercase tracking-wider">Recent</span>
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notifications.length > 0 ? (
+                    notifications.map((n) => (
+                      <div
+                        key={n._id}
+                        onClick={() => handleMarkAsRead(n._id)}
+                        className={`p-4 border-b border-white/5 cursor-pointer hover:bg-white/5 transition-all ${
+                          n.status === "unread" ? "bg-white/[0.07]" : "opacity-60"
+                        }`}
+                      >
+                        <div className="flex justify-between items-start gap-2">
+                          <p className={`text-xs font-bold ${n.status === "unread" ? "text-white" : "text-gray-400"}`}>{n.title}</p>
+                          {n.status === "unread" && <div className="w-2 h-2 bg-[#c2a15e] rounded-full mt-1"></div>}
+                        </div>
+                        <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">{n.message}</p>
+                        <p className="text-[9px] text-gray-500 mt-2">{new Date(n.createdAt).toLocaleTimeString()}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center">
+                      <p className="text-xs text-gray-500">No notifications yet</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* User Profile */}
           <div className="hidden sm:block">
             {session?.user ? (
@@ -189,36 +273,28 @@ const Navbar = () => {
               >
                 <div className="flex items-center gap-2 cursor-pointer bg-white/10 px-3 py-1.5 rounded-full border border-white/10 hover:bg-white/20 transition-all">
                   <div className="w-6 h-6 rounded-full bg-[#c2a15e] flex items-center justify-center text-[10px] font-bold text-black uppercase overflow-hidden">
-                    {session.user.image ? (
-                      <Image
-                        src={session.user.image}
-                        alt="user"
-                        width={24}
-                        height={24}
-                      />
-                    ) : (
-                      session.user.name?.charAt(0)
-                    )}
+                    {session.user.image ? <Image src={session.user.image} alt="user" width={24} height={24} /> : session.user.name?.charAt(0)}
                   </div>
-                  <span className="text-xs font-medium text-white">
-                    {session.user.name?.split(" ")[0]}
-                  </span>
+                  <span className="text-xs font-medium text-white">{session.user.name?.split(" ")[0]}</span>
                   <ChevronDown size={14} className="text-white/70" />
                 </div>
 
                 {isDropdownOpen && (
                   <div className="absolute right-0 top-full w-48 pt-2 z-50">
                     <div className="bg-[#1e3316] border border-white/10 rounded-xl shadow-2xl py-2">
-                      {(session.user as any)?.role === "admin" && (
-                        <Link
-                          href="/admin"
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10"
-                        >
-                          <LayoutDashboard size={16} /> Dashboard
-                        </Link>
-                      )}
+                      <Link
+                        href={
+                          (session.user as any)?.role === "admin"
+                            ? "/admin"
+                            : "/dashboard"
+                        }
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10"
+                      >
+                        <LayoutDashboard size={16} /> Dashboard
+                      </Link>
+
                       <button
-                        onClick={() => signOut()}
+                        onClick={() => signOut({ callbackUrl: "/" })}
                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-white/10"
                       >
                         <LogOut size={16} /> Sign out
@@ -236,7 +312,10 @@ const Navbar = () => {
 
           {/* Cart Icon */}
           <Link href="/cart" className="relative">
-            <ShoppingCart size={22} className="text-white/90 hover:text-white" />
+            <ShoppingCart
+              size={22}
+              className="text-white/90 hover:text-white"
+            />
             {totalCartItems > 0 && (
               <span className="absolute -top-2 -right-2 bg-[#c2a15e] text-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#1e3316]">
                 {totalCartItems}
@@ -244,11 +323,7 @@ const Navbar = () => {
             )}
           </Link>
 
-          {/* Mobile Menu Toggle */}
-          <button
-            onClick={() => setOpen(!open)}
-            className="lg:hidden text-white p-1"
-          >
+          <button onClick={() => setOpen(!open)} className="lg:hidden text-white p-1">
             {open ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
@@ -257,46 +332,40 @@ const Navbar = () => {
       {/* Mobile Menu Content */}
       <div
         className={`lg:hidden overflow-hidden transition-all duration-500 ease-in-out ${
-          open ? "max-h-[600px] opacity-100 mt-4" : "max-h-0 opacity-0"
+          open ? "max-h-150 opacity-100 mt-4" : "max-h-0 opacity-0"
         }`}
       >
         <div className="bg-[#1e3316] border border-white/10 rounded-2xl p-6 shadow-2xl">
           <ul className="flex flex-col gap-5">
             {navLinks.map((link, index) => (
               <li key={index}>
-                <Link
-                  href={link.path}
-                  onClick={() => setOpen(false)}
-                  className={`text-lg font-medium block ${
-                    pathname === link.path ? "text-[#c2a15e]" : "text-gray-300"
-                  }`}
-                >
+                <Link href={link.path} onClick={() => setOpen(false)} className={`text-lg font-medium block ${pathname === link.path ? "text-[#c2a15e]" : "text-gray-300"}`}>
                   {link.name}
                 </Link>
               </li>
             ))}
           </ul>
-          
+
           <hr className="my-6 border-white/10" />
-          
+
           <div className="flex flex-col gap-4">
-             {/* Mobile User/Login */}
-             {session ? (
-                <button 
-                  onClick={() => signOut()}
-                  className="flex items-center justify-center gap-2 bg-red-500/10 text-red-400 p-3 rounded-xl border border-red-500/20"
-                >
-                  <LogOut size={18} /> Sign Out
-                </button>
-             ) : (
-                <Link 
-                  href="/login" 
-                  onClick={() => setOpen(false)}
-                  className="bg-[#c2a15e] text-black text-center font-bold p-3 rounded-xl"
-                >
-                  Sign In
-                </Link>
-             )}
+            {/* Mobile User/Login */}
+            {session ? (
+              <button
+                onClick={() => signOut()}
+                className="flex items-center justify-center gap-2 bg-red-500/10 text-red-400 p-3 rounded-xl border border-red-500/20"
+              >
+                <LogOut size={18} /> Sign Out
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="bg-[#c2a15e] text-black text-center font-bold p-3 rounded-xl"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
         </div>
       </div>

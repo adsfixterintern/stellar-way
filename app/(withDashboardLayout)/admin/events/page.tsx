@@ -114,6 +114,13 @@ const EventPage: React.FC = () => {
     }
   };
 
+  const truncateWords = (text: string, limit: number) => {
+  if (!text) return "";
+  const words = text.split(" ");
+  if (words.length <= limit) return text;
+  return words.slice(0, limit).join(" ") + "...";
+};
+
   const handleDelete = async (id: string) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -182,7 +189,7 @@ const EventPage: React.FC = () => {
                         <div className="flex flex-col">
                           <span className="font-bold text-gray-800 text-sm line-clamp-1">{event.title}</span>
                           <span className="text-[11px] font-semibold ">
-                            {event.subTitle}
+                            {truncateWords(event.subTitle, 3)}
                           </span>
                         </div>
                       </div>

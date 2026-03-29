@@ -15,19 +15,24 @@ import { getOverView } from '@/app/modules/overview/overview.api';
 
 
 export default function DashboardPage() {
-  const [items, setItems] = useState<IOverView[]>([]);
-      const [loading, setLoading] = useState(true);
-  
-      useEffect(() => {
-          const fetchData = async () => {
-              const data = await getOverView();
-              setItems(data);
-              setLoading(false);
-          };
-          fetchData();
-      }, []);
-  
-      if (loading) return <div className="text-center py-20 font-medium">Loading Gallery...</div>;
+const [stats, setStats] = useState<IOverView | null>(null);
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const data = await getOverView(); 
+      setStats(data); 
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchData();
+}, []);
+
+if (loading) return <div className="text-center py-20">Loading Statistics...</div>;
   return (
     <div className="bg-[#F8F9FA] min-h-screen p-6 font-sans">
       {/* Top Header */}

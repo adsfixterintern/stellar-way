@@ -14,7 +14,12 @@ import {
   IoCloseOutline,
   IoNotificationsOutline,
   IoStatsChartOutline,
+  IoGridOutline,
+  IoRestaurantOutline,
+  IoCalendarOutline,
 } from "react-icons/io5";
+import logo from "@/assets/img/flogo.png"
+import Image from "next/image";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -34,8 +39,8 @@ const SidebarContent = ({
     <div className="mb-10 flex justify-center">
       <Link href="/">
         <div className=" w-32 h-10 rounded flex items-center justify-center text-xs font-bold uppercase tracking-widest">
-          <img
-            src="/assets/img/flogo.png"
+          <Image
+            src={logo}
             alt="Seoul Mirage"
             className=" h-auto"
           />
@@ -78,16 +83,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const pathname = usePathname();
 
-  const menuItems = [
-    { name: "Overview", icon: <IoStatsChartOutline />, path: "/admin" },
-    { name: "Category", icon: <IoCubeOutline />, path: "/admin/category" },
-    { name: "Menus", icon: <IoCubeOutline />, path: "/admin/menus" },
-    { name: "Orders", icon: <IoCartOutline />, path: "/admin/orders" },
-    { name: "Chef", icon: <IoPeopleOutline />, path: "/admin/chef" },
-    { name: "Events", icon: <IoCartOutline />, path: "/admin/events" },
-    { name: "Event", icon: <IoCartOutline />, path: "/admin/event" },
-    { name: "Settings", icon: <IoSettingsOutline />, path: "/admin/settings" },
-  ];
+const menuItems = [
+  { name: "Overview", icon: <IoStatsChartOutline />, path: "/admin" },
+
+  { name: "Category", icon: <IoGridOutline />, path: "/admin/category" },
+
+  { name: "Menus", icon: <IoRestaurantOutline />, path: "/admin/menus" },
+
+  { name: "Orders", icon: <IoCartOutline />, path: "/admin/orders" },
+
+  { name: "Chef", icon: <IoPeopleOutline />, path: "/admin/chef" },
+
+  { name: "Events", icon: <IoCalendarOutline />, path: "/admin/events" },
+
+  { name: "Settings", icon: <IoSettingsOutline />, path: "/admin/settings" },
+];
 
   return (
     <div className="flex min-h-screen bg-[#FDFCFD] font-sans antialiased">

@@ -28,7 +28,6 @@ const EventPayContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { data: session } = useSession();
-
   const [isProcessing, setIsProcessing] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
 

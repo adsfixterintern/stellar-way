@@ -43,15 +43,15 @@ const AdminBookingDashboard = () => {
     fetchBookings();
   }, []);
 
-  // ২. ডিলিট করার ফাংশন (SweetAlert2 এবং Toast সহ)
+  
   const handleDelete = async (id) => {
-    // কনফার্মেশন পপআপ
+   
     const result = await Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this booking!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#1A4E11", // আপনার ব্র্যান্ড গ্রিন কালার
+      confirmButtonColor: "#1A4E11", 
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, delete it!",
       cancelButtonText: "Cancel",
@@ -70,7 +70,7 @@ const AdminBookingDashboard = () => {
         const { data } = await axios.delete(`${BASE_URL}/bookings/${id}`);
         if (data.success) {
           toast.success("Booking deleted successfully");
-          // যদি কারেন্ট পেজে একটাই ডাটা থাকে এবং সেটি ডিলিট হয়, তবে আগের পেজে যাবে
+        
           const nextPage = bookings.length === 1 && meta.page > 1 ? meta.page - 1 : meta.page;
           fetchBookings(nextPage); 
         }

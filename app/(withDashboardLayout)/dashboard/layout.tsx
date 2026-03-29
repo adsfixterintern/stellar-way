@@ -12,6 +12,8 @@ import {
   IoCloseOutline,
   IoNotificationsOutline,
   IoStatsChartOutline,
+  IoPersonOutline,
+  IoCalendarClearOutline,
 } from "react-icons/io5";
 import Image from "next/image";
 import logo from '@/assets/img/flogo.png'
@@ -95,7 +97,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const menuItems = [
     { name: "Overview", icon: <IoStatsChartOutline />, path: "/dashboard" },
     { name: "My Orders", icon: <IoCartOutline />, path: "/dashboard/my-orders" },
-    { name: "Profile", icon: <IoCartOutline />, path: "/dashboard/profile" },
+    { name: "Profile", icon: <IoPersonOutline />, path: "/dashboard/profile" },
+  { name: "My Booking", icon: <IoCalendarClearOutline />, path: "/dashboard/my-booking" }
   ];
 
   return (

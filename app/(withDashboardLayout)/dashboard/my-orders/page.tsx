@@ -120,18 +120,18 @@ const handleSubmitReviews = async () => {
                     </div>
                   </td>
                   <td className="p-5 font-black text-gray-800 text-sm">৳{order.totalPrice}</td>
-                  <td className="p-5 text-right space-x-2">
+                  <td className="p-5 text-right space-x-2 space-y-2 sm:space-y-0">
                     <button 
         onClick={() => handleTrackClick(order)}
-        className="p-2 text-gray-400 hover:text-[#1A4E11] transition-all hover:scale-110"
+        className="inline-flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase bg-[#1A4E11] text-white rounded-lg hover:shadow-lg"
       >
-        <IoLocationOutline size={20}/>
+        <IoLocationOutline size={20}/> Track
       </button>
                     <button 
                       onClick={() => openReviewModal(order)}
                       className="inline-flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase bg-[#1A4E11] text-white rounded-lg hover:shadow-lg"
                     >
-                      <IoChatbubbleEllipsesOutline size={14} /> Review
+                      <IoChatbubbleEllipsesOutline size={20} /> Review
                     </button>
                   </td>
                 </tr>

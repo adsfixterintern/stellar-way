@@ -124,6 +124,7 @@ const MenuPage: React.FC = () => {
     }
   };
 
+
   const closeModal = () => {
     setIsModalOpen(false);
     setEditId(null);

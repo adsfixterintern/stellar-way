@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
@@ -36,8 +36,18 @@ const FAQ = () => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
+
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      const el = document.querySelector(hash);
+      el?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
+
   return (
-    <section className="relative w-full py-24 bg-white overflow-hidden">
+    <section id="faq-section" className="relative w-full py-24 bg-white overflow-hidden">
       {/* Container with Max Width and Auto Margin */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative">
         

@@ -11,9 +11,14 @@ export const getEvents = async (query: string = ""): Promise<{
   const response = await api.get(`/events/event${query}`);
   return response.data;
 };
-
-
-
+export const getAllEventsFromDB = async (page = 1, limit = 3) => {
+  const response = await api.get(`/events/event?page=${page}&limit=${limit}`);
+  return response.data;
+};
+export const getSingleEventFromDB = async (id: string) => {
+  const response = await api.get(`/events/event/${id}`);
+  return response.data;
+};
 export const createEventApi = async (formData: FormData) => {
   const response = await api.post("/events/create-event", formData, {
     headers: { "Content-Type": "multipart/form-data" },

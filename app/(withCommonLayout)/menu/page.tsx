@@ -16,11 +16,13 @@ import { getCategories } from "@/app/api/categoryApi";
 import { getMenus } from "@/app/api/menuApi";
 import { SkeletonCard } from "@/components/shared/SkeletonCard";
 import toast from "react-hot-toast";
+import { useCart } from "@/context/CartContext";
 
 const MenuPage = () => {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [menuItems, setMenuItems] = useState<IMenu[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,28 +42,6 @@ const MenuPage = () => {
     fetchData();
   }, []);
 
-  const addToCart = (item: IMenu) => {
-    const savedCart = localStorage.getItem("cart");
-    const cart: ICartItem[] = savedCart ? JSON.parse(savedCart) : [];
-    const existingItem = cart.find((i) => i._id === item._id);
-
-    if (existingItem) {
-      existingItem.quantity += 1;
-    } else {
-      cart.push({
-        _id: item._id,
-        title: item.title,
-        price: item.price,
-        image: { url: item.image?.url || "" },
-        quantity: 1,
-      });
-    }
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-    window.dispatchEvent(new Event("cartUpdated"));
-    toast.success(`${item.title} added to cart!`);
-    
-  };
 
   // স্ক্রলিং ফাংশন
   const scrollToCategory = (id: string) => {
@@ -150,7 +130,6 @@ const MenuPage = () => {
             }}
           >
             {categories.map((cat) => {
-              // ঐ ক্যাটাগরির আইটেম ফিল্টার করা
               const categoryItems = menuItems.filter((item) => {
                 const id =
                   typeof item.categoryId === "object"
@@ -177,7 +156,6 @@ const MenuPage = () => {
                       />
                     </div>
                     <h3 className="nameText text-xl">{cat.name}</h3>
-                    {/* Item Count দেখানো হচ্ছে */}
                     <p className="designationText mt-1">
                       ({itemCount} {itemCount > 1 ? "Items" : "Item"})
                     </p>
@@ -258,8 +236,8 @@ const MenuPage = () => {
                           />
                           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button
-                              onClick={() => addToCart(item)}
-                              className="bg-white text-primary p-3 rounded-full hover:scale-110 transition-transform shadow-xl"
+                              onClick={() => addToCart(item)} 
+                              className="bg-white text-primary p-4 rounded-full hover:scale-110 transition-transform shadow-2xl"
                             >
                               <ShoppingCart size={24} />
                             </button>

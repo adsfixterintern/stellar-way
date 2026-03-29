@@ -11,6 +11,7 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useMenu } from "@/app/hooks/useMenu";
+import OrderTrackingModal from "@/components/shared/OrderTrackingModal";
 
 const MyOrdersPage = () => {
   const { data: session } = useAuthSession();
@@ -26,6 +27,8 @@ const MyOrdersPage = () => {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewData, setReviewData] = useState<{ [menuId: string]: { rating: number, comment: string } }>({});
   const [btnLoading, setBtnLoading] = useState(false);
+  const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
+  const [selectedTrackOrder, setSelectedTrackOrder] = useState<any>(null);
 
   const openReviewModal = (order: any) => {
     setSelectedOrder(order);
@@ -33,6 +36,11 @@ const MyOrdersPage = () => {
     setReviewData({});
   };
 
+
+  const handleTrackClick = (order: any) => {
+    setSelectedTrackOrder(order);
+    setIsTrackModalOpen(true);
+  };
  
   const getMenuInfo = (id: string) => {
     return allMenus?.find((m: any) => m._id === id);
@@ -113,7 +121,12 @@ const handleSubmitReviews = async () => {
                   </td>
                   <td className="p-5 font-black text-gray-800 text-sm">৳{order.totalPrice}</td>
                   <td className="p-5 text-right space-x-2">
-                    <button className="p-2 text-gray-300 hover:text-blue-600 transition-all"><IoLocationOutline size={20}/></button>
+                    <button 
+        onClick={() => handleTrackClick(order)}
+        className="p-2 text-gray-400 hover:text-[#1A4E11] transition-all hover:scale-110"
+      >
+        <IoLocationOutline size={20}/>
+      </button>
                     <button 
                       onClick={() => openReviewModal(order)}
                       className="inline-flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase bg-[#1A4E11] text-white rounded-lg hover:shadow-lg"
@@ -127,6 +140,11 @@ const handleSubmitReviews = async () => {
           </table>
         </div>
       </div>
+      <OrderTrackingModal 
+        isOpen={isTrackModalOpen} 
+        onClose={() => setIsTrackModalOpen(false)} 
+        order={selectedTrackOrder} 
+      />
 
       {/* --- Review Modal --- */}
       {isReviewModalOpen && selectedOrder && (

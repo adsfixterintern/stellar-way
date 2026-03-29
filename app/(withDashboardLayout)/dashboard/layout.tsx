@@ -14,6 +14,7 @@ import {
   IoStatsChartOutline,
 } from "react-icons/io5";
 import Image from "next/image";
+import logo from '@/assets/img/flogo.png'
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -29,19 +30,25 @@ const SidebarContent = ({
   menuItems: any[];
 }) => (
   <div className="flex flex-col h-full bg-[#E4F5DC] p-6 shadow-sm border-r border-gray-100">
-    <div className="mb-10 flex justify-center">
-      <Link href="/">
-        <div className="w-32 h-10 rounded flex items-center justify-center text-xs font-bold uppercase tracking-widest">
-          <Image 
-            src="/assets/img/pizza.png"
-            alt="Logo"
-            width={30}
-            height={30}
-            className="h-auto"
-          /> 
-        </div>
-      </Link>
+   <div className="mb-10 flex justify-center">
+  <Link href="/">
+    <div className="flex flex-col items-center justify-center gap-2 group transition-all duration-300">
+      
+      <div className="p-3 bg-gray-50 rounded-2xl group-hover:bg-[#E4F5DC] transition-colors">
+        <Image 
+          src={logo}
+          alt="Savory Nest Logo"
+          width={80} 
+          height={80}
+          className="h-auto w-auto object-contain"
+          priority 
+        />
+      </div>
+
+      <div className="h-0.5 w-5 bg-[#1A4E11] rounded-full scale-x-0 group-hover:scale-x-150 transition-transform duration-300"></div>
     </div>
+  </Link>
+</div>
 
     <nav className="flex-1 space-y-2">
       {menuItems.map((item) => {

@@ -60,3 +60,15 @@ export const updateDeliveryStatusApi = async (orderId: string, payload: {
   const response = await api.patch(`/orders/update-delivery-status/${orderId}`, payload);
   return response.data;
 };
+
+
+
+export const updateRiderRatingApi = async (payload: {
+  riderId: string;
+  userId: string;
+  rating: number;
+  comment?: string;
+}) => {
+  const response = await api.patch("/riders/update-rating", payload);
+  return response.data;
+};

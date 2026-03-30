@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -6,12 +7,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { 
-  LayoutDashboard, ShoppingBag, History, User, LogOut, Bell, Menu, X 
+  LayoutDashboard, ShoppingBag, History, User, LogOut, Bell, Menu, X, Trash2 
 } from "lucide-react";
 import { useSocket } from "@/app/hooks/useSocket";
 import { toast } from "react-hot-toast";
 import { useSession, signOut } from "next-auth/react";
 import api from "@/utils/apiInstance";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface RiderLayoutProps {
   children: ReactNode;
@@ -41,47 +43,57 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
     }
   }, [session]);
 
-  // ২. রিয়েল-টাইম সকেট লিসেনার
   useEffect(() => {
     if (socket) {
-      // রাইডার রুমে জয়েন করা
       socket.emit("join-rider-room");
-      console.log("Joined Rider Room");
 
       const handleNewOrder = (data: any) => {
-        console.log("New Order Alert Received!", data);
-        
-        // নতুন নোটিফিকেশন লিস্টের শুরুতে যোগ করা
-        setNotifications((prev) => [
-          {
-            title: data.title || "New Order Available!",
-            message: data.message || "A new delivery request just arrived.",
-            createdAt: new Date(),
-          },
-          ...prev
-        ]);
+        const newNotif = {
+          _id: data._id || Math.random().toString(), 
+          title: data.title || "New Order Available!",
+          message: data.message || "A new delivery request just arrived.",
+          createdAt: new Date(),
+        };
 
-        // টোস্ট মেসেজ
+        setNotifications((prev) => [newNotif, ...prev]);
+
         toast.success(data.message || "New Order Available!", {
-          duration: 10000,
+          duration: 6000,
           icon: '🛵',
-          position: "top-right"
         });
 
-        // সাউন্ড প্লে করা
         const audio = new Audio("/notification.mp3");
-        audio.play().catch((err) => console.log("Audio play blocked", err));
+        audio.play().catch(() => {});
       };
 
       socket.on("new-order-available", handleNewOrder);
-
-      return () => {
-        socket.off("new-order-available", handleNewOrder);
-      };
+      return () => { socket.off("new-order-available", handleNewOrder); };
     }
   }, [socket]);
 
-  // ড্রপডাউন বন্ধ করার লজিক
+  const removeNotification = async (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n._id !== id));
+    
+
+    try {
+      await api.delete(`/notifications/${id}`);
+    } catch (err) {
+      console.log("Delete error", err);
+    }
+  };
+
+  const clearAllNotifications = async () => {
+    const email = session?.user?.email;
+    setNotifications([]);
+    if (email) {
+      try {
+        await api.delete(`/notifications/clear/${email}`);
+      } catch (err) {
+        console.log("Clear all error", err);
+      }
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
@@ -139,42 +151,91 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
                 >
                    <Bell size={20} />
                    {notifications.length > 0 && (
-                      <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[9px] flex items-center justify-center font-bold rounded-full border-2 border-white">
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-[10px] flex items-center justify-center font-black rounded-full border-2 border-white animate-bounce">
                         {notifications.length}
                       </span>
                    )}
                 </div>
 
+                {/* Notification Dropdown */}
+                <AnimatePresence>
                 {notifOpen && (
-                  <div className="absolute right-0 mt-3 w-72 bg-white border rounded-2xl shadow-xl z-50 overflow-hidden">
-                    <div className="p-3 border-b bg-gray-50 font-bold text-xs uppercase tracking-widest text-gray-500">Notifications</div>
-                    <div className="max-h-64 overflow-y-auto">
-                      {notifications.length > 0 ? (
-                        notifications.map((n, i) => (
-                          <div key={i} className="p-4 border-b hover:bg-gray-50 transition-colors">
-                            <p className="text-xs font-bold text-gray-900">{n.title}</p>
-                            <p className="text-[11px] text-gray-500 mt-0.5">{n.message}</p>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="p-6 text-center text-gray-400 text-xs">No new alerts</div>
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-3 w-80 bg-white border rounded-2xl shadow-2xl z-50 overflow-hidden"
+                  >
+                    <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+                      <span className="font-bold text-xs uppercase tracking-widest text-gray-500">Alerts</span>
+                      {notifications.length > 0 && (
+                        <button 
+                          onClick={clearAllNotifications}
+                          className="text-[10px] text-red-500 hover:text-red-700 font-bold flex items-center gap-1"
+                        >
+                          <Trash2 size={12} /> Clear All
+                        </button>
                       )}
                     </div>
-                  </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length > 0 ? (
+                        <AnimatePresence initial={false}>
+                          {notifications.map((n) => (
+                            <motion.div 
+                              key={n._id}
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ x: 50, opacity: 0 }}
+                              className="p-4 border-b hover:bg-gray-50 transition-colors relative group"
+                            >
+                              <button 
+                                onClick={() => removeNotification(n._id)}
+                                className="absolute top-4 right-4 p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all rounded-md opacity-0 group-hover:opacity-100"
+                              >
+                                <X size={14} />
+                              </button>
+                              <p className="text-xs font-bold text-gray-900 pr-6">{n.title}</p>
+                              <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">{n.message}</p>
+                              <p className="text-[9px] text-gray-400 mt-2 font-medium">
+                                {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      ) : (
+                        <div className="p-12 text-center flex flex-col items-center">
+                          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                             <Bell size={20} className="text-gray-300" />
+                          </div>
+                          <p className="text-gray-400 text-xs font-medium">No active notifications</p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
                 )}
+                </AnimatePresence>
              </div>
 
              <div className="flex items-center gap-3">
                 <div className="text-right hidden sm:block">
-                   <p className="text-sm font-bold">{session?.user?.name || "Rider"}</p>
-                   <p className="text-[10px] text-green-500 font-black uppercase">● Online</p>
+                   <p className="text-sm font-bold leading-tight">{session?.user?.name || "Rider"}</p>
+                   <p className="text-[9px] text-green-500 font-black uppercase tracking-tighter flex items-center gap-1 justify-end">
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Online
+                   </p>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-[#1e3316] border-2 border-[#c2a15e] overflow-hidden">
-                   {session?.user?.image && <Image src={session.user.image} alt="profile" width={40} height={40} />}
+                <div className="w-10 h-10 rounded-full bg-[#1e3316] border-2 border-[#c2a15e] overflow-hidden relative">
+                   {session?.user?.image ? (
+                      <Image src={session.user.image} alt="profile" fill className="object-cover" />
+                   ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white text-xs font-bold">
+                        {session?.user?.name?.charAt(0)}
+                      </div>
+                   )}
                 </div>
              </div>
           </div>
         </header>
+
         <main className="flex-1 overflow-y-auto p-6 bg-[#f8fafc]">
           {children}
         </main>

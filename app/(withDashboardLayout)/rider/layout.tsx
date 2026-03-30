@@ -7,7 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { 
-  LayoutDashboard, ShoppingBag, History, User, LogOut, Bell, Menu, X, Trash2 
+  LayoutDashboard, History, User, LogOut, Bell, Menu, X, Trash2 
 } from "lucide-react";
 import { useSocket } from "@/app/hooks/useSocket";
 import { toast } from "react-hot-toast";
@@ -28,14 +28,11 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
   const socket = useSocket();
   const notifRef = useRef<HTMLDivElement>(null);
 
-  // ১. পুরাতন নোটিফিকেশন লোড করা
   useEffect(() => {
     if (session?.user?.email) {
       const fetchNotifs = async () => {
         try {
-          const { data } = await api.get(
-            `/notifications/${session.user.email}`,
-          );
+          const { data } = await api.get(`/notifications/${session.user.email}`);
           if (data.success) setNotifications(data.data);
         } catch (err) {
           console.log("Notif fetch error", err);
@@ -48,7 +45,6 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
   useEffect(() => {
     if (socket) {
       socket.emit("join-rider-room");
-
       const handleNewOrder = (data: any) => {
         const newNotif = {
           _id: data._id || Math.random().toString(), 
@@ -56,16 +52,12 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
           message: data.message || "A new delivery request just arrived.",
           createdAt: new Date(),
         };
-
         setNotifications((prev) => [newNotif, ...prev]);
-
         toast.success(data.message || "New Order Available!", {
           duration: 6000,
           icon: '🛵',
         });
-
-        const audio = new Audio("/notification.mp3");
-        audio.play().catch(() => {});
+        new Audio("/notification.mp3").play().catch(() => {});
       };
       socket.on("new-order-available", handleNewOrder);
       return () => { socket.off("new-order-available", handleNewOrder); };
@@ -74,8 +66,6 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
 
   const removeNotification = async (id: string) => {
     setNotifications((prev) => prev.filter((n) => n._id !== id));
-    
-
     try {
       await api.delete(`/notifications/${id}`);
     } catch (err) {
@@ -97,10 +87,7 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        notifRef.current &&
-        !notifRef.current.contains(event.target as Node)
-      ) {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
         setNotifOpen(false);
       }
     };
@@ -110,30 +97,21 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
 
   const menuItems = [
     { name: "Overview", icon: LayoutDashboard, path: "/rider" },
-    // { name: "New Orders", icon: ShoppingBag, path: "/rider/new-orders" },
     { name: "My Deliveries", icon: History, path: "/rider/my-deliveries" },
     { name: "Profile", icon: User, path: "/rider/profile" },
   ];
 
   return (
-    <div className="flex h-screen bg-[#FDFCFD] font-sans antialiased text-gray-900">
-      {/* Sidebar - ড্যাশবোর্ড থিম অনুযায়ী কালার আপডেট */}
+    <div className="flex h-screen bg-[#FDFCFD] font-sans antialiased text-gray-900 overflow-hidden">
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#E4F5DC] border-r border-gray-100 transition-transform lg:static lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
-        {/* ১. কন্টেইনারকে flex-col এবং h-full দেওয়া হয়েছে */}
         <div className="flex flex-col h-full">
-          {/* লোগো সেকশন */}
           <div className="flex flex-col items-center justify-center h-28 px-6 border-b border-white/20">
-            <span className="text-[10px] font-black tracking-[3px] text-[#1A4E11] uppercase">
-              Rider Panel
-            </span>
-            <h2 className="text-xl font-black text-gray-800 tracking-tighter mt-1">
-              Stellar Way
-            </h2>
+            <span className="text-[10px] font-black tracking-[3px] text-[#1A4E11] uppercase">Rider Panel</span>
+            <h2 className="text-xl font-black text-gray-800 tracking-tighter mt-1">Stellar Way</h2>
           </div>
 
-          {/* ২. nav-এ flex-1 দেওয়া হয়েছে যাতে এটি বাকি জায়গা দখল করে বাটনকে নিচে পাঠিয়ে দেয় */}
           <nav className="mt-8 px-4 space-y-2 flex-1 overflow-y-auto">
             {menuItems.map((item) => {
               const isActive = pathname === item.path;
@@ -143,9 +121,7 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
                   href={item.path}
                   onClick={() => setIsSidebarOpen(false)}
                   className={`flex items-center gap-3 px-5 py-3.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-                    isActive
-                      ? "bg-[#1A4E11] text-white shadow-lg translate-x-1"
-                      : "text-gray-500 hover:bg-white/70 hover:text-black"
+                    isActive ? "bg-[#1A4E11] text-white shadow-lg translate-x-1" : "text-gray-500 hover:bg-white/70 hover:text-black"
                   }`}
                 >
                   <item.icon size={18} />
@@ -155,11 +131,10 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
             })}
           </nav>
 
-          {/* ৩. লগআউট বাটন সেকশন - এখন এটি সবসময় নিচে থাকবে */}
           <div className="p-4 border-t border-white/10">
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
-              className="flex items-center gap-3 px-5 py-3.5 w-full text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all font-bold border border-transparent hover:border-red-100"
+              className="flex items-center gap-3 px-5 py-3.5 w-full text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all font-bold"
             >
               <LogOut size={18} />
               <span>Logout</span>
@@ -168,13 +143,11 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-20 bg-white border-b flex items-center justify-between px-6">
-          <button className="lg:hidden" onClick={() => setIsSidebarOpen(true)}><Menu /></button>
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="h-20 bg-white border-b flex items-center justify-between px-6 shrink-0">
+          <button className="lg:hidden p-2" onClick={() => setIsSidebarOpen(true)}><Menu size={24} /></button>
           
           <div className="flex items-center gap-5 ml-auto">
-             {/* Notification Icon */}
              <div className="relative" ref={notifRef}>
                 <div 
                   onClick={() => setNotifOpen(!notifOpen)}
@@ -188,7 +161,6 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
                    )}
                 </div>
 
-                {/* Notification Dropdown */}
                 <AnimatePresence>
                 {notifOpen && (
                   <motion.div 
@@ -200,10 +172,7 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
                     <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
                       <span className="font-bold text-xs uppercase tracking-widest text-gray-500">Alerts</span>
                       {notifications.length > 0 && (
-                        <button 
-                          onClick={clearAllNotifications}
-                          className="text-[10px] text-red-500 hover:text-red-700 font-bold flex items-center gap-1"
-                        >
+                        <button onClick={clearAllNotifications} className="text-[10px] text-red-500 hover:text-red-700 font-bold flex items-center gap-1">
                           <Trash2 size={12} /> Clear All
                         </button>
                       )}
@@ -221,25 +190,17 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
                             >
                               <button 
                                 onClick={() => removeNotification(n._id)}
-                                className="absolute top-4 right-4 p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all rounded-md opacity-0 group-hover:opacity-100"
+                                className="absolute top-4 right-4 p-1 text-gray-300 hover:text-red-500 transition-all rounded-md opacity-0 group-hover:opacity-100"
                               >
                                 <X size={14} />
                               </button>
                               <p className="text-xs font-bold text-gray-900 pr-6">{n.title}</p>
                               <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">{n.message}</p>
-                              <p className="text-[9px] text-gray-400 mt-2 font-medium">
-                                {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </p>
                             </motion.div>
                           ))}
                         </AnimatePresence>
                       ) : (
-                        <div className="p-12 text-center flex flex-col items-center">
-                          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                             <Bell size={20} className="text-gray-300" />
-                          </div>
-                          <p className="text-gray-400 text-xs font-medium">No active notifications</p>
-                        </div>
+                        <div className="p-10 text-center text-gray-400 text-xs font-medium">No notifications</div>
                       )}
                     </div>
                   </motion.div>
@@ -250,35 +211,20 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
              <div className="flex items-center gap-3">
                 <div className="text-right hidden sm:block">
                    <p className="text-sm font-bold leading-tight">{session?.user?.name || "Rider"}</p>
-                   <p className="text-[9px] text-green-500 font-black uppercase tracking-tighter flex items-center gap-1 justify-end">
+                   <p className="text-[9px] text-green-500 font-black uppercase flex items-center gap-1 justify-end">
                       <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Online
                    </p>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-[#1e3316] border-2 border-[#c2a15e] overflow-hidden relative">
+                <div className="w-10 h-10 rounded-full bg-[#1A4E11] border-2 border-[#c2a15e] overflow-hidden relative shadow-sm">
                    {session?.user?.image ? (
                       <Image src={session.user.image} alt="profile" fill className="object-cover" />
                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white text-xs font-bold">
-                        {session?.user?.name?.charAt(0)}
+                      <div className="w-full h-full flex items-center justify-center text-white text-xs font-bold uppercase">
+                        {session?.user?.name?.charAt(0) || "R"}
                       </div>
                    )}
                 </div>
               </div>
-              <div className="w-11 h-11 rounded-full border-2 border-green-50 overflow-hidden bg-gray-100 shadow-sm relative">
-                {session?.user?.image ? (
-                  <Image
-                    src={session.user.image}
-                    alt="profile"
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center font-black text-[#1A4E11] text-xs">
-                    R
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </header>
 
@@ -287,13 +233,17 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
         </main>
       </div>
 
-      {/* Mobile Overlay */}
-      {isSidebarOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity"
-          onClick={() => setIsSidebarOpen(false)}
-        ></div>
-      )}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

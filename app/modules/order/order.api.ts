@@ -14,3 +14,4 @@ export const getMyOrdersFromDB = async (email: string) => {
   const response = await api.get(`/orders/${email}`);
   return response.data;
 };
+

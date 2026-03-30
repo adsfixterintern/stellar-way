@@ -4,33 +4,40 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
-import { 
-  IoCalendarOutline, 
-  IoTimeOutline, 
-  IoPeopleOutline, 
-  IoMailOutline, 
-  IoCallOutline, 
+import {
+  IoCalendarOutline,
+  IoTimeOutline,
+  IoPeopleOutline,
+  IoMailOutline,
+  IoCallOutline,
   IoTrashOutline,
   IoLocationOutline,
   IoChevronBackOutline,
-  IoChevronForwardOutline
+  IoChevronForwardOutline,
 } from "react-icons/io5";
 
 const AdminBookingDashboard = () => {
-  const BASE_URL = "http://localhost:8000/api/v1"; 
+  const BASE_URL = "http://localhost:8000/api/v1";
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPage: 1 });
+  const [meta, setMeta] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPage: 1,
+  });
 
   // ১. ডাটা ফেচ করার ফাংশন
   const fetchBookings = async (page = 1) => {
     try {
       setLoading(true);
-      const { data } = await axios.get(`${BASE_URL}/bookings?page=${page}&limit=10`); 
-      
+      const { data } = await axios.get(
+        `${BASE_URL}/bookings?page=${page}&limit=10`,
+      );
+
       if (data.success) {
-        setBookings(data.data); 
-        setMeta(data.meta);    
+        setBookings(data.data);
+        setMeta(data.meta);
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to fetch bookings");
@@ -43,15 +50,13 @@ const AdminBookingDashboard = () => {
     fetchBookings();
   }, []);
 
-  
   const handleDelete = async (id) => {
-   
     const result = await Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this booking!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#1A4E11", 
+      confirmButtonColor: "#1A4E11",
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, delete it!",
       cancelButtonText: "Cancel",
@@ -60,9 +65,11 @@ const AdminBookingDashboard = () => {
       customClass: {
         title: "font-sans font-black uppercase text-sm tracking-widest",
         htmlContainer: "text-xs font-bold text-gray-500",
-        confirmButton: "px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest",
-        cancelButton: "px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest"
-      }
+        confirmButton:
+          "px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest",
+        cancelButton:
+          "px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest",
+      },
     });
 
     if (result.isConfirmed) {
@@ -70,9 +77,10 @@ const AdminBookingDashboard = () => {
         const { data } = await axios.delete(`${BASE_URL}/bookings/${id}`);
         if (data.success) {
           toast.success("Booking deleted successfully");
-        
-          const nextPage = bookings.length === 1 && meta.page > 1 ? meta.page - 1 : meta.page;
-          fetchBookings(nextPage); 
+
+          const nextPage =
+            bookings.length === 1 && meta.page > 1 ? meta.page - 1 : meta.page;
+          fetchBookings(nextPage);
         }
       } catch (err) {
         toast.error(err.response?.data?.message || "Failed to delete booking");
@@ -86,7 +94,9 @@ const AdminBookingDashboard = () => {
         {/* Header */}
         <div className="mb-8 flex justify-between items-end">
           <div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight uppercase italic">Table Reservations</h1>
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight uppercase italic">
+              Table Reservations
+            </h1>
             <p className="text-[10px] text-gray-400 font-bold mt-1 uppercase tracking-[3px]">
               Total Records: {meta.total}
             </p>
@@ -99,33 +109,57 @@ const AdminBookingDashboard = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50/80 border-b border-gray-100 text-[#1A4E11]">
-                  <th className="p-6 text-[10px] font-black uppercase tracking-widest">Customer info</th>
-                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-center">Date & Time</th>
-                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-center">Guest Details</th>
-                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-right">Manage</th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-widest">
+                    Customer info
+                  </th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-center">
+                    Date & Time
+                  </th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-center">
+                    Guest Details
+                  </th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-right">
+                    Manage
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 text-sm">
                 {loading ? (
                   <tr>
                     <td colSpan="4" className="p-32 text-center">
-                       <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1A4E11]"></div>
-                       <p className="mt-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Syncing with server...</p>
+                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1A4E11]"></div>
+                      <p className="mt-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        Syncing with server...
+                      </p>
                     </td>
                   </tr>
                 ) : bookings.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="p-20 text-center text-gray-400 font-bold uppercase text-[10px] tracking-widest italic">No active bookings found</td>
+                    <td
+                      colSpan="4"
+                      className="p-20 text-center text-gray-400 font-bold uppercase text-[10px] tracking-widest italic"
+                    >
+                      No active bookings found
+                    </td>
                   </tr>
                 ) : (
                   bookings.map((booking) => (
-                    <tr key={booking._id} className="hover:bg-gray-50/40 transition-colors group">
+                    <tr
+                      key={booking._id}
+                      className="hover:bg-gray-50/40 transition-colors group"
+                    >
                       <td className="p-6">
                         <div className="flex flex-col gap-1">
-                          <p className="font-black text-gray-800 text-sm uppercase tracking-tighter">{booking.name}</p>
+                          <p className="font-black text-gray-800 text-sm uppercase tracking-tighter">
+                            {booking.name}
+                          </p>
                           <div className="flex flex-col gap-0.5 opacity-60 font-bold text-[11px]">
-                            <span className="flex items-center gap-1"><IoMailOutline /> {booking.email}</span>
-                            <span className="flex items-center gap-1"><IoCallOutline /> {booking.phone}</span>
+                            <span className="flex items-center gap-1">
+                              <IoMailOutline /> {booking.email}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <IoCallOutline /> {booking.phone}
+                            </span>
                           </div>
                         </div>
                       </td>
@@ -144,7 +178,8 @@ const AdminBookingDashboard = () => {
                       <td className="p-6 text-center">
                         <div className="flex flex-col items-center gap-1.5">
                           <div className="flex items-center gap-1.5 font-black text-gray-700 text-xs bg-gray-100 px-3 py-1 rounded-full">
-                            <IoPeopleOutline className="text-[#1A4E11]" /> {booking.guest} Guests
+                            <IoPeopleOutline className="text-[#1A4E11]" />{" "}
+                            {booking.guest} Guests
                           </div>
                           {booking.address && (
                             <span className="text-[10px] text-gray-400 font-bold flex items-center gap-1 max-w-[150px] truncate">
@@ -155,7 +190,7 @@ const AdminBookingDashboard = () => {
                       </td>
 
                       <td className="p-6 text-right">
-                        <button 
+                        <button
                           onClick={() => handleDelete(booking._id)}
                           className="p-3 text-red-400 hover:text-white hover:bg-red-500 rounded-xl transition-all shadow-sm hover:shadow-md"
                           title="Delete Booking"
@@ -176,14 +211,14 @@ const AdminBookingDashboard = () => {
               Page {meta.page} of {meta.totalPage}
             </p>
             <div className="flex gap-3">
-              <button 
+              <button
                 disabled={meta.page === 1}
                 onClick={() => fetchBookings(meta.page - 1)}
                 className="flex items-center gap-1 px-4 py-2 text-[10px] font-black uppercase bg-white border border-gray-200 rounded-xl disabled:opacity-30 hover:border-[#1A4E11] hover:text-[#1A4E11] transition-all shadow-sm"
               >
                 <IoChevronBackOutline /> Prev
               </button>
-              <button 
+              <button
                 disabled={meta.page >= meta.totalPage}
                 onClick={() => fetchBookings(meta.page + 1)}
                 className="flex items-center gap-1 px-4 py-2 text-[10px] font-black uppercase bg-white border border-gray-200 rounded-xl disabled:opacity-30 hover:border-[#1A4E11] hover:text-[#1A4E11] transition-all shadow-sm"

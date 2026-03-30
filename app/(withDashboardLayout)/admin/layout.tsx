@@ -18,6 +18,7 @@ import {
   IoRestaurantOutline,
   IoCalendarOutline,
   IoImageOutline,
+  IoBriefcaseOutline
 } from "react-icons/io5";
 import { Toaster } from "react-hot-toast";
 import logo from "@/assets/img/flogo.png"

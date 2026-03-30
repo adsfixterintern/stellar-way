@@ -102,12 +102,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const menuItems = [
     { name: "Overview", icon: <IoStatsChartOutline />, path: "/dashboard" },
+    { name: "Profile", icon: <IoPersonOutline />, path: "/dashboard/profile" },
     {
       name: "My Orders",
       icon: <IoCartOutline />,
       path: "/dashboard/my-orders",
     },
-    { name: "Profile", icon: <IoPersonOutline />, path: "/dashboard/profile" },
     {
       name: "My Booking",
       icon: <IoCalendarClearOutline />,

@@ -98,7 +98,11 @@ const handleSubmitReviews = async () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {ordersLoading ? <TableSkeleton /> : orders.map((order: any) => (
+              {ordersLoading ? <TableSkeleton /> : orders.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-20 text-center text-gray-400 font-bold uppercase text-[10px] tracking-widest">No orders yet</td>
+                </tr>
+              ) :  orders.map((order: any) => (
                 <tr key={order._id} className="hover:bg-gray-50/30 transition-colors">
                   <td className="p-5">
                     <p className="text-sm font-bold text-gray-800 uppercase tracking-tighter">{order.transactionId?.slice(-10)}</p>

@@ -94,6 +94,7 @@ const menuItems = [
   { name: "Orders", icon: <IoCartOutline />, path: "/admin/orders" },
 
   { name: "Chef", icon: <IoPeopleOutline />, path: "/admin/chef" },
+   { name: "Blog", icon: <IoPeopleOutline />, path: "/admin/blog" },
 
   { name: "Events", icon: <IoCalendarOutline />, path: "/admin/events" },
   { name: "booking", icon: <IoCalendarOutline />, path: "/admin/booking" },

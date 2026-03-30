@@ -201,7 +201,7 @@ const Navbar = () => {
                         onClick={() => { setSearchOpen(false); router.push(`/menu`); }} 
                         className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 cursor-pointer transition border-b border-white/5 last:border-0"
                       >
-                        {/* Displaying Image from item.image.url */}
+                      
                         <div className="w-12 h-12 relative shrink-0">
                           <Image 
                             src={item.image?.url || "/placeholder.png"} 

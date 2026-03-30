@@ -90,8 +90,8 @@ const GalleryManagementPage = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
         <div>
-          <h1 className="text-2xl font-black text-gray-900 uppercase italic flex items-center gap-2">
-            <IoImagesOutline className="text-[#1A4E11]" /> Gallery Management
+          <h1 className="text-2xl font-black text-gray-900 uppercase  flex items-center gap-2">
+            Gallery Management
           </h1>
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
             Total Assets: {items.length}

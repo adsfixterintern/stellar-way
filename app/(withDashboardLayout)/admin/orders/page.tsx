@@ -70,7 +70,7 @@ const OrderPage: React.FC = () => {
         {/* Header */}
         <div className="flex justify-between items-end mb-8">
           <div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight uppercase italic">
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">
               Order Management
             </h1>
             <p className="text-[10px] text-gray-400 font-bold mt-1 uppercase tracking-[3px]">

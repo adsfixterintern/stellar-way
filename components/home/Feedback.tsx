@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { getAllFeedbacks } from "@/app/modules/feedback/feedback.api";
 import { IFeedback } from "@/app/modules/feedback/feedback.interface";
+import { TableSkeleton } from "../shared/TableSkeleton";
 
 
 
@@ -34,7 +35,7 @@ const Testimonials = () => {
     fetchFeedbacks();
   }, []);
 
-  if (loading) return <div className="py-20 text-center font-bold">Loading...</div>;
+  if (loading) return <TableSkeleton />;
 
   return (
     <section className="py-20 px-4 bg-[#E4F5DC]">
@@ -46,7 +47,7 @@ const Testimonials = () => {
           Our guests rave about the warm ambiance, attentive service, and unforgettable experiences they enjoy here.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-stretch">
           {feedbacks.map((item) => (
             <div key={item._id} className="flex flex-col items-center">
               

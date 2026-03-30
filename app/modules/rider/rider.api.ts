@@ -1,32 +1,45 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import api from "@/utils/apiInstance";
+import { IRider } from "./rider.interface";
 
-export interface IUpdateStatusPayload {
-  status: 'on-the-way' | 'delivered';
-  riderId: string;
-  riderName?: string;
-  currentLocation?: { lat: number; lng: number } | null; 
-  otp?:string
-}
 
-export const getRiderDashboardData = async (email: string) => {
-  const response = await api.get(`/orders/rider-stats/${email}`);
+
+export const applyForRiderApi = async (riderData: Partial<IRider>) => {
+  const response = await api.post("/riders/apply-rider", riderData);
   return response.data;
 };
 
-export const updateDeliveryStatusApi = async (orderId: string, payload: {
-  status: 'on-the-way' | 'delivered';
-  riderId: string;
-  riderName?: string;
-  otp?: string;
-  currentLocation?: { lat: number; lng: number } | null;
-}) => {
-  const response = await api.patch(`/orders/update-delivery-status/${orderId}`, payload);
+
+export const getAllRidersApi = async (query: string = "") => {
+  const response = await api.get(`/riders${query}`);
   return response.data;
 };
 
-export const getRiderOrderHistory = async (email: string) => {
-  const response = await api.get(`/orders/rider-history/${email}`);
+
+export const getSingleRiderApi = async (id: string) => {
+  const response = await api.get(`/riders/${id}`);
+  return response.data;
+};
+
+
+export const approveRiderApi = async (id: string) => {
+  const response = await api.patch(`/riders/approve-rider/${id}`);
+  return response.data;
+};
+
+
+export const updateRiderApi = async (id: string, updateData: Partial<IRider>) => {
+  const response = await api.patch(`/riders/${id}`, updateData);
+  return response.data;
+};
+
+
+export const deleteRiderApi = async (id: string) => {
+  const response = await api.delete(`/riders/${id}`);
+  return response.data;
+};
+
+export const rejectRiderApi = async (id: string) => {
+  const response = await api.patch(`/riders/reject-rider/${id}`);
   return response.data;
 };

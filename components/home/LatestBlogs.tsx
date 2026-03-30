@@ -38,12 +38,14 @@ const LatestBlogs: React.FC = () => {
     <section className="py-20 px-4 md:px-12 bg-[#E4F5DC]">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-end mb-12">
-          <div>
-            <span className="superTitle flex items-center gap-3">Blog
+          <div className="!mb-5">
+            <span className="superTitle flex items-center gap-3 ">Blog
               <div className="w-10 h-[2px] bg-[#1A4E11]"></div> 
             </span>
-            <h2 className="secTitle">Latest Blog Post</h2>
+            <h2 className="secTitle mt-4">Latest Blog Post</h2>
           </div>
+
+       
 
           <div className="flex gap-3">
             <button className="blog-prev w-12 h-12 rounded-full border border-gray-300 flex items-center justify-center hover:bg-[#1A4E11] hover:text-white transition-all duration-300">

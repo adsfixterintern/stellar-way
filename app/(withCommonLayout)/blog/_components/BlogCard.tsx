@@ -68,3 +68,5 @@ const BlogCard = ({ blog }: { blog: any }) => {
 };
 
 export default BlogCard;
+
+

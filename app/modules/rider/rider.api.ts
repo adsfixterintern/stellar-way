@@ -43,3 +43,20 @@ export const rejectRiderApi = async (id: string) => {
   const response = await api.patch(`/riders/reject-rider/${id}`);
   return response.data;
 };
+
+export const getRiderDashboardData = async (email: string) => {
+  const response = await api.get(`/orders/rider-stats/${email}`);
+  return response.data;
+};
+
+
+export const updateDeliveryStatusApi = async (orderId: string, payload: {
+  status: 'on-the-way' | 'delivered';
+  riderId: string;
+  riderName?: string;
+  otp?: string;
+  currentLocation?: { lat: number; lng: number } | null;
+}) => {
+  const response = await api.patch(`/orders/update-delivery-status/${orderId}`, payload);
+  return response.data;
+};

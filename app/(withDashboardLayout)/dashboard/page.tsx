@@ -5,6 +5,9 @@ import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useMyOrders } from "@/app/hooks/useMyOrders";
 import { useMenu } from "@/app/hooks/useMenu";
+import { useMyBookings } from "@/app/hooks/useMyBookings";
+import { useEvents } from "@/app/hooks/useEvent";
+
 import {
   ShoppingBag,
   Star,
@@ -13,6 +16,8 @@ import {
   ArrowRight,
   Copy,
   Check,
+  Calendar,
+  Sparkles,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,13 +26,47 @@ import toast from "react-hot-toast";
 export default function CustomerDashboardOverview() {
   const { data: session } = useSession();
   const customerEmail = session?.user?.email as string;
+  const userId = (session?.user as any)?.id;
   const [copied, setCopied] = useState(false);
 
+  // --- Data Fetching ---
   const { data: ordersData, isLoading: ordersLoading } =
     useMyOrders(customerEmail);
-  const orders = ordersData?.data || [];
-  const { data: allMenus, isLoading: menuLoading } = useMenu();
+  const { data: menusData, isLoading: menuLoading } = useMenu();
+  const { data: bookingsData, isLoading: bookingsLoading } =
+    useMyBookings(userId);
+  const { data: eventsData, isLoading: eventsLoading } = useEvents();
 
+  // --- Safe order Data Extraction  ---
+
+  const orders = Array.isArray(ordersData?.data)
+    ? ordersData.data
+    : Array.isArray(ordersData)
+      ? ordersData
+      : [];
+
+  // ২. Menu data(Special for You)
+  const menusList = Array.isArray(menusData?.data)
+    ? menusData.data
+    : Array.isArray(menusData)
+      ? menusData
+      : [];
+
+  // ৩. booking data 
+  const myBookingsList = Array.isArray(bookingsData?.data)
+    ? bookingsData.data
+    : Array.isArray(bookingsData)
+      ? bookingsData
+      : [];
+
+  // ৪. Event Data 
+  const globalEventsList = Array.isArray(eventsData?.data)
+    ? eventsData.data
+    : Array.isArray(eventsData)
+      ? eventsData
+      : [];
+
+  // --- Orders Logic ---
   const activeOrders = orders.filter(
     (order: any) =>
       order.deliveryStatus !== "delivered" &&
@@ -40,26 +79,31 @@ export default function CustomerDashboardOverview() {
     (sum: number, order: any) => sum + (order.totalPrice || 0),
     0,
   );
-
-  console.log(totalSpent)
-
   const recentOrder = orders.length > 0 ? orders[0] : null;
 
   const firstItemId =
     recentOrder?.items?.[0]?.menuId?.$oid || recentOrder?.items?.[0]?.menuId;
-
-  const recentMenuDetails = allMenus?.find(
+  const recentMenuDetails = menusList.find(
     (menu: any) => (menu._id?.$oid || menu._id) === firstItemId,
   );
 
-  const recommendedItems = allMenus?.slice(0, 4) || [];
+  // Recommended items logic
+  const recommendedItems = menusList.slice(0, 2);
 
+  // --- Events Logic ---
+  const myNextEvent = [...myBookingsList].sort(
+    (a: any, b: any) =>
+      new Date(a.selectedDate).getTime() - new Date(b.selectedDate).getTime(),
+  )[0];
+
+  const upcomingGlobalEvents = globalEventsList.slice(0, 2);
+
+  // --- Savings & Goals ---
   const totalSavings = deliveredOrders.reduce(
     (sum: number, order: any) =>
       sum + (order.discount || order.totalPrice * 0.1),
     0,
   );
-
   const monthlyGoal = 5000;
   const spendingPercentage = Math.min((totalSpent / monthlyGoal) * 100, 100);
 
@@ -72,10 +116,10 @@ export default function CustomerDashboardOverview() {
     }
   };
 
-  if (ordersLoading || menuLoading) {
+  if (ordersLoading || menuLoading || bookingsLoading || eventsLoading) {
     return (
-      <div className="p-20 text-center font-black text-gray-400 animate-pulse">
-        Loading Your Nest...
+      <div className="p-20 text-center font-black text-gray-400 animate-pulse uppercase tracking-widest">
+        Loading Your Universe...
       </div>
     );
   }
@@ -101,7 +145,6 @@ export default function CustomerDashboardOverview() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-        {/* Left Column */}
         <div className="xl:col-span-8 space-y-8">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -118,7 +161,6 @@ export default function CustomerDashboardOverview() {
                 </h3>
               </div>
             </div>
-
             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-5">
               <div className="bg-green-50 p-4 rounded-2xl text-[#1A4E11]">
                 <ShoppingBag size={26} />
@@ -132,7 +174,6 @@ export default function CustomerDashboardOverview() {
                 </h3>
               </div>
             </div>
-
             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-5">
               <div className="bg-blue-50 p-4 rounded-2xl text-blue-600">
                 <Tag size={26} />
@@ -156,12 +197,11 @@ export default function CustomerDashboardOverview() {
               </h3>
               <Link
                 href="/dashboard/my-orders"
-                className="text-[#1A4E11] text-xs font-bold flex items-center gap-1 hover:underline transition-all"
+                className="text-[#1A4E11] text-xs font-bold flex items-center gap-1 hover:underline"
               >
                 View All <ArrowRight size={14} />
               </Link>
             </div>
-
             {recentOrder ? (
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border border-gray-50 p-6 rounded-2xl bg-gray-50/30 group">
                 <div className="flex items-center gap-5 flex-1">
@@ -180,146 +220,184 @@ export default function CustomerDashboardOverview() {
                     <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
                       ID: #{recentOrder.transactionId?.slice(-6).toUpperCase()}
                     </p>
-
                     <h4 className="font-black text-lg text-gray-900">
-                      {recentMenuDetails?.title || "Delicious Feast"}
+                      {recentMenuDetails?.title || "Delicious Feast"}{" "}
                       {recentOrder.items?.length > 1 &&
                         ` +${recentOrder.items.length - 1} more`}
                     </h4>
-                    <p className="text-[11px] text-gray-500 font-medium italic">
-                      Placed on{" "}
-                      {new Date(
-                        recentOrder.createdAt?.$date || recentOrder.createdAt,
-                      ).toLocaleDateString("en-GB", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </p>
                     <span
-                      className={`inline-block px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
-                        recentOrder.deliveryStatus === "delivered"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-orange-100 text-orange-700"
-                      }`}
+                      className={`inline-block px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${recentOrder.deliveryStatus === "delivered" ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-700"}`}
                     >
                       {recentOrder.deliveryStatus || "Pending"}
                     </span>
                   </div>
                 </div>
-
-                <div className="flex flex-col items-center md:items-end gap-3 w-full md:w-auto">
-                  {recentOrder.deliveryStatus === "delivered" ? (
-                    <Link
-                      href="/dashboard/my-orders"
-                      className="w-full md:w-auto bg-[#1A4E11] text-white px-8 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-[2px] shadow-lg flex items-center justify-center gap-2 hover:bg-black transition-colors"
-                    >
-                      Rate Now
-                    </Link>
-                  ) : (
-                    <div className="text-center md:text-right border-l-2 border-[#1A4E11] pl-4">
-                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
-                        OTP for delivery
-                      </p>
-                      <p className="text-lg font-black text-[#1A4E11] tracking-[3px]">
-                        {recentOrder.deliveryOTP || "N/A"}
-                      </p>
-                    </div>
-                  )}
+                <div className="border-l-2 border-[#1A4E11] pl-4">
+                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
+                    OTP for delivery
+                  </p>
+                  <p className="text-lg font-black text-[#1A4E11] tracking-[3px]">
+                    {recentOrder.deliveryOTP || "N/A"}
+                  </p>
                 </div>
               </div>
             ) : (
-              <div className="text-center py-10 bg-gray-50 rounded-2xl border border-gray-100">
-                <ShoppingBag size={40} className="mx-auto text-gray-200" />
-                <p className="text-gray-500 mt-4 font-medium italic">
-                  No orders found.
-                </p>
-              </div>
+              <p className="text-center py-10 text-gray-400 italic">
+                No orders found.
+              </p>
             )}
           </div>
-          {/* --- বাম পাশের নিচের নতুন সেকশন --- */}
+
+          {/* Event Horizon & Spending Analysis */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* ১. Spending Analysis Card */}
             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm relative overflow-hidden group">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-black text-lg text-gray-900 uppercase tracking-tight flex items-center gap-2">
+                  <Calendar size={18} className="text-[#1A4E11]" /> Event
+                  Horizon
+                </h3>
+                <Link
+                  href="/dashboard/my-events"
+                  className="text-[10px] font-black text-[#1A4E11] uppercase hover:underline"
+                >
+                  My Bookings
+                </Link>
+              </div>
+              {myNextEvent ? (
+                <div className="space-y-4 relative z-10">
+                  <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100 group-hover:border-green-100 transition-colors">
+                    <div className="bg-white p-3 rounded-xl shadow-sm text-center min-w-15">
+                      <p className="text-[10px] font-black text-[#1A4E11] uppercase">
+                        {new Date(myNextEvent.selectedDate).toLocaleDateString(
+                          "en-US",
+                          { month: "short" },
+                        )}
+                      </p>
+                      <p className="text-xl font-black text-gray-900">
+                        {new Date(myNextEvent.selectedDate).getDate()}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-black text-gray-900 text-sm line-clamp-1">
+                        {myNextEvent.eventId?.title || "Reserved Event"}
+                      </h4>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase mt-0.5">
+                        {myNextEvent.selectedTime}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-6 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase">
+                    No upcoming reservations
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
               <h3 className="font-black text-lg text-gray-900 uppercase tracking-tight mb-6 flex items-center gap-2">
                 <Tag size={18} className="text-[#1A4E11]" /> Spending Analysis
               </h3>
-
-              <div className="space-y-5 relative z-10">
+              <div className="space-y-5">
                 <div>
-                  <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
-                    <span>Monthly Target (৳{monthlyGoal})</span>
+                  <div className="flex justify-between text-[10px] font-black uppercase text-gray-400 mb-2">
+                    <span>Monthly Target</span>
                     <span className="text-[#1A4E11]">
                       {Math.round(spendingPercentage)}%
                     </span>
                   </div>
-                  {/* ডাইনামিক প্রগ্রেস বার */}
                   <div className="w-full h-2 bg-gray-50 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-[#1A4E11] rounded-full transition-all duration-1000 ease-out"
+                      className="h-full bg-[#1A4E11] rounded-full transition-all duration-1000"
                       style={{ width: `${spendingPercentage}%` }}
                     ></div>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4 pt-2">
-                  <div className="bg-gray-50 p-4 rounded-2xl">
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                      Avg. Order
-                    </p>
-                    <p className="text-lg font-black text-gray-900 mt-1">
-                      ৳
-                      {orders.length > 0
-                        ? Math.round(totalSpent / orders.length)
-                        : 0}
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-2xl border border-green-100">
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                      Total Savings
-                    </p>
-                    {/* ডাইনামিক সেভিংস */}
-                    <p className="text-lg font-black text-green-600 mt-1">
-                      ৳{Math.round(totalSavings)}
-                    </p>
-                  </div>
+                <div className="flex justify-between items-center">
+                  <p className="text-[11px] font-bold text-gray-400 uppercase">
+                    Total Savings
+                  </p>
+                  <p className="text-lg font-black text-green-600">
+                    ৳{Math.round(totalSavings)}
+                  </p>
                 </div>
               </div>
-
-              {/* Background Decoration */}
-              <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-green-50 rounded-full blur-3xl opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
             </div>
+          </div>
+ 
+          {/* Recommended Items (Special for You) */}
+          <div className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm">
+            <h3 className="font-black text-lg text-gray-900 uppercase tracking-tight mb-6">
+              Special for You
+            </h3>
+            <div className="space-y-5">
+              {recommendedItems.length > 0 ? (
+                recommendedItems.map((item: any) => {
+            
+                  let displayRating = "0.0"; 
 
-            {/* ২. Need Help / Support Card */}
-            <div className="bg-linear-to-br from-gray-900 to-black p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-xl">
-              <div className="relative z-10">
-                <h3 className="font-black text-xl leading-tight">
-                  Need help with
-                  <br />
-                  your order?
-                </h3>
-                <p className="text-gray-400 text-xs mt-3 font-medium">
-                  Our support team is available 24/7 to assist you.
+                  if (
+                    item?.reviews &&
+                    Array.isArray(item.reviews) &&
+                    item.reviews.length > 0
+                  ) {
+                    const totalRating = item.reviews.reduce(
+                      (acc: number, rev: any) =>
+                        acc + (Number(rev.rating) || 0),
+                      0,
+                    );
+                    displayRating = (totalRating / item.reviews.length).toFixed(
+                      1,
+                    );
+                  }
+                  return (
+                    <Link
+                      key={item._id?.$oid || item._id}
+                      href="/menu"
+                      className="flex items-center gap-4 group pb-5 border-b border-gray-100 last:border-0 last:pb-0"
+                    >
+                      <div className="w-16 h-16 bg-gray-50 rounded-xl relative overflow-hidden shrink-0 border border-gray-200">
+                        <Image
+                          src={item.image?.url || "/placeholder-food.jpg"}
+                          alt={item.title}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-sm text-gray-900 truncate group-hover:text-[#1A4E11] transition-colors">
+                          {item.title}
+                        </p>
+                        <div className="flex items-center gap-3 mt-1.5">
+                          <span className="font-black text-xs text-[#1A4E11]">
+                            ৳{item.price}
+                          </span>
+                          <div className="flex items-center gap-1 text-[10px] font-bold text-yellow-500">
+                            <Star size={12} className="fill-yellow-500" />
+                            <span>{displayRating}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <ArrowRight
+                        size={14}
+                        className="text-gray-300 group-hover:text-[#1A4E11] group-hover:translate-x-1 transition-all"
+                      />
+                    </Link>
+                  );
+                })
+              ) : (
+                <p className="text-center text-[10px] font-black text-gray-400 uppercase py-4">
+                  No recommendations found
                 </p>
-
-                <div className="mt-8 space-y-3">
-                  <button className="w-full bg-white/10 hover:bg-white/20 border border-white/10 py-3 rounded-xl text-xs font-bold transition-all">
-                    Live Chat Support
-                  </button>
-                  <button className="w-full bg-[#1A4E11] hover:bg-green-700 py-3 rounded-xl text-xs font-bold transition-all">
-                    Call Hotline
-                  </button>
-                </div>
-              </div>
-              {/* Background Decorative Element */}
-              <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#1A4E11] blur-[50px] opacity-30"></div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Right Column */}
         <div className="xl:col-span-4 space-y-8">
-          {/* Coupon Card */}
           <div className="bg-[#1A4E11] p-8 rounded-3xl text-white relative overflow-hidden shadow-2xl">
             <div className="relative z-10">
               <div className="bg-white/10 w-12 h-12 rounded-full flex items-center justify-center mb-6 border border-white/10">
@@ -328,70 +406,59 @@ export default function CustomerDashboardOverview() {
               <p className="text-[10px] font-black uppercase tracking-[3px] text-green-200">
                 Exclusive Offer
               </p>
-              <h3 className="text-4xl font-extrabold mt-2 leading-tight tracking-tighter uppercase">
+              <h3 className="text-4xl font-extrabold mt-2 leading-tight uppercase">
                 30% OFF
               </h3>
-              <p className="text-green-100 mt-2 text-sm font-medium">
-                On order over ৳1,000
-              </p>
-
               <div className="mt-8 flex items-center gap-3 bg-white/10 border border-white/10 p-2 rounded-xl backdrop-blur-sm">
-                <span className="flex-1 text-center font-black text-xl tracking-[4px] text-yellow-300">
+                <span className="flex-1 text-center font-black text-xl tracking-[4px] text-yellow-300 uppercase">
                   NEST30
                 </span>
                 <button
                   onClick={() => handleCopy("NEST30")}
-                  className="bg-white text-[#1A4E11] px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase hover:bg-yellow-100 transition-colors flex items-center gap-2 active:scale-95"
+                  className="bg-white text-[#1A4E11] px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase flex items-center gap-2 active:scale-95"
                 >
-                  {copied ? <Check size={14} /> : <Copy size={14} />}
+                  {copied ? <Check size={14} /> : <Copy size={14} />}{" "}
                   {copied ? "Copied" : "Copy"}
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Recommended Items */}
+          {/* Stellar Spotlights (Events) */}
           <div className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-black text-lg text-gray-900 uppercase tracking-tight">
-                Special for You
-              </h3>
-            </div>
-            <div className="space-y-5">
-              {recommendedItems.map((item: any) => (
+            <h3 className="font-black text-lg text-gray-900 uppercase tracking-tight mb-6 flex items-center gap-2">
+              <Sparkles size={18} className="text-yellow-500" /> Stellar
+              Spotlights
+            </h3>
+            <div className="space-y-4">
+              {upcomingGlobalEvents.map((event: any) => (
                 <Link
-                  key={item._id?.$oid || item._id}
-                  href="/menu"
-                  className="flex items-center gap-4 group cursor-pointer pb-5 border-b border-gray-50 last:border-0 last:pb-0"
+                  key={event._id}
+                  href="/dashboard/my-events"
+                  className="block relative group rounded-2xl overflow-hidden aspect-video border border-gray-100"
                 >
-                  <div className="w-16 h-16 bg-gray-50 rounded-xl relative overflow-hidden shrink-0 border border-gray-100">
-                    <Image
-                      src={item.image?.url || ""}
-                      alt={item.title}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm text-gray-900 truncate group-hover:text-[#1A4E11] transition-colors">
-                      {item.title}
-                    </p>
-                    <div className="flex items-center gap-3 mt-1.5">
-                      <span className="font-black text-xs text-[#1A4E11]">
-                        ৳{item.price}
-                      </span>
-                      <div className="flex items-center gap-1 text-[10px] font-bold text-yellow-500">
-                        <Star size={12} className="fill-yellow-500" />{" "}
-                        {item.averageRating || "4.5"}
-                      </div>
-                    </div>
-                  </div>
-                  <ArrowRight
-                    size={14}
-                    className="text-gray-300 group-hover:text-[#1A4E11] group-hover:translate-x-1 transition-all"
+                  <Image
+                    src={event.image?.url || event.image || ""}
+                    alt={event.title}
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-700"
                   />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
+                    <p className="text-[8px] font-black text-yellow-400 uppercase tracking-widest mb-1">
+                      Upcoming Rally
+                    </p>
+                    <h4 className="text-white font-black text-xs leading-tight line-clamp-1">
+                      {event.title}
+                    </h4>
+                  </div>
                 </Link>
               ))}
+              <Link
+                href="/dashboard/my-events"
+                className="w-full py-3 border border-gray-100 rounded-xl text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-50 transition-all"
+              >
+                Discover All Events <ArrowRight size={12} />
+              </Link>
             </div>
           </div>
         </div>

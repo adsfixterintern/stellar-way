@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import {
@@ -15,31 +14,47 @@ import {
   IoChevronBackOutline,
   IoChevronForwardOutline,
 } from "react-icons/io5";
+import api from "@/utils/apiInstance"; 
 
-const AdminBookingDashboard = () => {
-  const BASE_URL = "http://localhost:8000/api/v1";
-  const [bookings, setBookings] = useState([]);
+// ✅ Booking type
+interface IBooking {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  date: string;
+  time: string;
+  guest: number;
+  address?: string;
+}
+
+interface IMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPage: number;
+}
+
+const AdminBookingDashboard: React.FC = () => {
+  const [bookings, setBookings] = useState<IBooking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState({
+  const [meta, setMeta] = useState<IMeta>({
     page: 1,
     limit: 10,
     total: 0,
     totalPage: 1,
   });
 
-  // ১. ডাটা ফেচ করার ফাংশন
+  // 📌 Fetch bookings
   const fetchBookings = async (page = 1) => {
     try {
       setLoading(true);
-      const { data } = await axios.get(
-        `${BASE_URL}/bookings?page=${page}&limit=10`,
-      );
-
+      const { data } = await api.get(`/bookings?page=${page}&limit=${meta.limit}`);
       if (data.success) {
         setBookings(data.data);
         setMeta(data.meta);
       }
-    } catch (err) {
+    } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to fetch bookings");
     } finally {
       setLoading(false);
@@ -47,23 +62,24 @@ const AdminBookingDashboard = () => {
   };
 
   useEffect(() => {
-    fetchBookings();
+    fetchBookings(meta.page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleDelete = async (id) => {
+  // 📌 Delete booking
+  const handleDelete = async (id: string) => {
     const result = await Swal.fire({
       title: "Are you sure?",
-      text: "You won't be able to revert this booking!",
+      text: "This booking will be permanently deleted!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#1A4E11",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonText: "Yes, delete",
       cancelButtonText: "Cancel",
       background: "#fff",
-      borderRadius: "15px",
       customClass: {
-        title: "font-sans font-black uppercase text-sm tracking-widest",
+        title: "font-black uppercase text-sm tracking-widest",
         htmlContainer: "text-xs font-bold text-gray-500",
         confirmButton:
           "px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest",
@@ -74,130 +90,121 @@ const AdminBookingDashboard = () => {
 
     if (result.isConfirmed) {
       try {
-        const { data } = await axios.delete(`${BASE_URL}/bookings/${id}`);
+        const { data } = await api.delete(`/bookings/${id}`);
         if (data.success) {
           toast.success("Booking deleted successfully");
 
-          const nextPage =
-            bookings.length === 1 && meta.page > 1 ? meta.page - 1 : meta.page;
+          const nextPage = bookings.length === 1 && meta.page > 1 ? meta.page - 1 : meta.page;
           fetchBookings(nextPage);
         }
-      } catch (err) {
+      } catch (err: any) {
         toast.error(err.response?.data?.message || "Failed to delete booking");
       }
     }
   };
 
   return (
-    <div className="bg-gray-50/50 min-h-screen p-4 md:p-8 font-sans">
-      <div className="mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="mb-8 flex justify-between items-end">
+    <div className="">
+      <div className="w-full p-2 md:p-4">
+
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight uppercase italic">
+            <h1 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight uppercase">
               Table Reservations
             </h1>
-            <p className="text-[10px] text-gray-400 font-bold mt-1 uppercase tracking-[3px]">
-              Total Records: {meta.total}
+            <p className="text-[10px] text-gray-400 font-black mt-1 uppercase tracking-widest">
+              Total Bookings: {meta.total}
             </p>
           </div>
         </div>
 
-        {/* Table Container */}
-        <div className="bg-white rounded-[20px] border border-gray-100 shadow-sm overflow-hidden">
+        {/* TABLE */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-200">
               <thead>
-                <tr className="bg-gray-50/80 border-b border-gray-100 text-[#1A4E11]">
-                  <th className="p-6 text-[10px] font-black uppercase tracking-widest">
-                    Customer info
+                <tr className="bg-gray-50/50 border-b border-gray-100">
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                    Customer
                   </th>
-                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-center">
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">
                     Date & Time
                   </th>
-                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-center">
-                    Guest Details
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">
+                    Guests
                   </th>
-                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-right">
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-widest text-right">
                     Manage
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50 text-sm">
+              <tbody className="divide-y divide-gray-50">
                 {loading ? (
                   <tr>
-                    <td colSpan="4" className="p-32 text-center">
-                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1A4E11]"></div>
-                      <p className="mt-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                        Syncing with server...
-                      </p>
+                    <td colSpan={4} className="p-10 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">
+                      Loading bookings...
                     </td>
                   </tr>
                 ) : bookings.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan="4"
-                      className="p-20 text-center text-gray-400 font-bold uppercase text-[10px] tracking-widest italic"
-                    >
-                      No active bookings found
+                    <td colSpan={4} className="p-10 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">
+                      No bookings found
                     </td>
                   </tr>
                 ) : (
                   bookings.map((booking) => (
-                    <tr
-                      key={booking._id}
-                      className="hover:bg-gray-50/40 transition-colors group"
-                    >
-                      <td className="p-6">
+                    <tr key={booking._id} className="hover:bg-gray-50/30 transition-colors group">
+
+                      {/* CUSTOMER */}
+                      <td className="p-4">
                         <div className="flex flex-col gap-1">
-                          <p className="font-black text-gray-800 text-sm uppercase tracking-tighter">
-                            {booking.name}
-                          </p>
-                          <div className="flex flex-col gap-0.5 opacity-60 font-bold text-[11px]">
-                            <span className="flex items-center gap-1">
-                              <IoMailOutline /> {booking.email}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <IoCallOutline /> {booking.phone}
-                            </span>
-                          </div>
+                          <span className="font-bold text-gray-800 text-sm">{booking.name}</span>
+                          <span className="text-[11px] text-gray-400 font-semibold flex items-center gap-1">
+                            <IoMailOutline /> {booking.email}
+                          </span>
+                          <span className="text-[11px] text-gray-400 font-semibold flex items-center gap-1">
+                            <IoCallOutline /> {booking.phone}
+                          </span>
                         </div>
                       </td>
 
-                      <td className="p-6 text-center">
-                        <div className="inline-flex flex-col items-center bg-[#1A4E11]/5 px-5 py-2.5 rounded-2xl border border-[#1A4E11]/10">
-                          <span className="text-[13px] font-black text-[#1A4E11] flex items-center gap-1.5">
+                      {/* DATE & TIME */}
+                      <td className="p-4 text-center">
+                        <div className="inline-flex flex-col items-center bg-[#1A4E11]/5 px-3 py-2 rounded-xl border border-[#1A4E11]/10">
+                          <span className="text-[12px] font-black text-[#1A4E11] flex items-center gap-1">
                             <IoCalendarOutline size={14} /> {booking.date}
                           </span>
-                          <span className="text-[10px] font-black text-gray-400 flex items-center gap-1 uppercase tracking-widest mt-1">
+                          <span className="text-[10px] font-black text-gray-400 flex items-center gap-1 mt-1 uppercase tracking-widest">
                             <IoTimeOutline size={12} /> {booking.time}
                           </span>
                         </div>
                       </td>
 
-                      <td className="p-6 text-center">
-                        <div className="flex flex-col items-center gap-1.5">
-                          <div className="flex items-center gap-1.5 font-black text-gray-700 text-xs bg-gray-100 px-3 py-1 rounded-full">
-                            <IoPeopleOutline className="text-[#1A4E11]" />{" "}
-                            {booking.guest} Guests
-                          </div>
+                      {/* GUESTS */}
+                      <td className="p-4 text-center">
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-[10px] font-black text-gray-700 bg-gray-100 px-3 py-1 rounded-full flex items-center gap-1">
+                            <IoPeopleOutline className="text-[#1A4E11]" /> {booking.guest} Guests
+                          </span>
                           {booking.address && (
-                            <span className="text-[10px] text-gray-400 font-bold flex items-center gap-1 max-w-[150px] truncate">
+                            <span className="text-[10px] text-gray-400 font-bold flex items-center gap-1 truncate max-w-[150px]">
                               <IoLocationOutline /> {booking.address}
                             </span>
                           )}
                         </div>
                       </td>
 
-                      <td className="p-6 text-right">
+                      {/* ACTION */}
+                      <td className="p-4 text-right">
                         <button
                           onClick={() => handleDelete(booking._id)}
-                          className="p-3 text-red-400 hover:text-white hover:bg-red-500 rounded-xl transition-all shadow-sm hover:shadow-md"
-                          title="Delete Booking"
+                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                         >
                           <IoTrashOutline size={18} />
                         </button>
                       </td>
+
                     </tr>
                   ))
                 )}
@@ -205,29 +212,30 @@ const AdminBookingDashboard = () => {
             </table>
           </div>
 
-          {/* Pagination */}
-          <div className="p-6 bg-gray-50/50 border-t border-gray-100 flex justify-between items-center">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[2px]">
+          {/* PAGINATION */}
+          <div className="p-4 bg-gray-50/50 border-t border-gray-100 flex justify-between items-center">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
               Page {meta.page} of {meta.totalPage}
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 disabled={meta.page === 1}
                 onClick={() => fetchBookings(meta.page - 1)}
-                className="flex items-center gap-1 px-4 py-2 text-[10px] font-black uppercase bg-white border border-gray-200 rounded-xl disabled:opacity-30 hover:border-[#1A4E11] hover:text-[#1A4E11] transition-all shadow-sm"
+                className="flex items-center gap-1 px-3 py-1 text-[10px] font-black uppercase bg-white border border-gray-200 rounded-xl disabled:opacity-30 hover:border-[#1A4E11] hover:text-[#1A4E11] transition-all"
               >
                 <IoChevronBackOutline /> Prev
               </button>
               <button
                 disabled={meta.page >= meta.totalPage}
                 onClick={() => fetchBookings(meta.page + 1)}
-                className="flex items-center gap-1 px-4 py-2 text-[10px] font-black uppercase bg-white border border-gray-200 rounded-xl disabled:opacity-30 hover:border-[#1A4E11] hover:text-[#1A4E11] transition-all shadow-sm"
+                className="flex items-center gap-1 px-3 py-1 text-[10px] font-black uppercase bg-white border border-gray-200 rounded-xl disabled:opacity-30 hover:border-[#1A4E11] hover:text-[#1A4E11] transition-all"
               >
                 Next <IoChevronForwardOutline />
               </button>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

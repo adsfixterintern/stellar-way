@@ -15,7 +15,6 @@ const PaymentSuccessPage = () => {
   useEffect(() => {
     const verifyAndUpdatePayment = async () => {
       try {
-        // ব্যাকএন্ডে ট্রানজেকশন আইডি পাঠিয়ে স্ট্যাটাস 'paid' করা
         const response = await axios.patch(
           `http://localhost:8000/api/v1/orders/status-by-transaction/${transactionId}`,
           { status: "paid" }
@@ -85,7 +84,7 @@ const PaymentSuccessPage = () => {
           <div className="bg-red-50 border border-red-100 rounded-[40px] p-12">
             <h2 className="text-3xl font-bold text-red-600 mb-4">Update Failed</h2>
             <p className="text-gray-600 mb-8">
-              Payment was received but we couldn't update your order status automatically. 
+              Payment was received but we could not update your order status automatically. 
               Please keep your Transaction ID: <strong>{transactionId}</strong>
             </p>
             <Link

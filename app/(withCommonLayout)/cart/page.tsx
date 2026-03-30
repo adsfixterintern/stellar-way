@@ -75,7 +75,6 @@ const CartPage = () => {
     router.push("/checkout");
   };
 
-  if (!isLoaded) return null;
 
   return (
     <div className="bg-white min-h-screen pb-20 relative font-sans">

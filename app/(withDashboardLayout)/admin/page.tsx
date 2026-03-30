@@ -1,17 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import { domToPng } from 'modern-screenshot';
 import {
   ShoppingBag,
   DollarSign,
   ArrowUpRight,
   ArrowDownRight,
-  ExternalLink,
-  Copy,
-  Trash2,
+  Users,
+  Zap,
+  LayoutGrid,
+  Settings,
+  PlusCircle,
+  TrendingUp,
 } from "lucide-react";
 import {
   LineChart,
@@ -21,41 +23,34 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  ReferenceArea,
 } from "recharts";
-import { IOverView } from "@/app/modules/overview/overview.interface";
 import {
   getLowStockItems,
   getOverView,
   getTrafficStats,
 } from "@/app/modules/overview/overview.api";
-import { useCategories } from "@/app/hooks/useCategories"; // হুক ইমপোর্ট করুন
-import { useChefs } from "@/app/hooks/useChefs"; // হুক ইমপোর্ট করুন
+import { useCategories } from "@/app/hooks/useCategories";
+import { useChefs } from "@/app/hooks/useChefs";
+import { useUsers } from "@/app/hooks/useUsers"; // ডাইনামিক ইউজার হুক
 import { MiniChart } from "@/components/admin-dashboard/MiniChart";
 import toast from "react-hot-toast";
 import Image from "next/image";
 import { MenuModal } from "@/components/admin-dashboard/MenuModal";
+import Link from "next/link";
 
-// --- Custom Components ---
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
-    const revenueItem = payload.find((p: any) => p.dataKey === "revenue");
-    const ordersItem = payload.find((p: any) => p.dataKey === "orders");
     return (
-      <div className="bg-white shadow-2xl p-4 rounded-xl border border-gray-100 font-sans text-xs min-w-[160px]">
-        <p className="text-gray-400 font-bold uppercase mb-2">{label} 2026</p>
+      <div className="bg-white shadow-2xl p-4 rounded-2xl border border-gray-100 text-[11px]">
+        <p className="text-gray-400 font-black uppercase mb-2 border-b pb-1">{label} 2026</p>
         <div className="space-y-2">
-          <div className="flex justify-between items-center gap-4">
-            <span className="text-gray-500">Total Revenue:</span>
-            <span className="font-bold text-[#4F46E5] text-sm">
-              ৳{revenueItem?.value.toLocaleString()}
-            </span>
+          <div className="flex justify-between gap-6">
+            <span className="text-gray-500 font-bold">REVENUE:</span>
+            <span className="font-black text-[#4F46E5]">৳{payload[0].value.toLocaleString()}</span>
           </div>
-          <div className="flex justify-between items-center gap-4">
-            <span className="text-gray-500">Total Orders:</span>
-            <span className="font-bold text-[#F59E0B] text-sm">
-              {ordersItem?.value}
-            </span>
+          <div className="flex justify-between gap-6">
+            <span className="text-gray-500 font-bold">ORDERS:</span>
+            <span className="font-black text-[#F59E0B]">{payload[1].value}</span>
           </div>
         </div>
       </div>
@@ -64,404 +59,261 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const CustomLegend = () => (
-  <div className="flex justify-end items-center gap-6 text-gray-500 font-semibold text-[11px] mb-4">
-    <div className="flex items-center gap-2">
-      <div className="w-2.5 h-2.5 rounded-sm bg-[#4F46E5]"></div>
-      <span>Total Revenue (৳)</span>
-    </div>
-    <div className="flex items-center gap-2">
-      <div className="w-2.5 h-2.5 rounded-sm bg-[#F59E0B]"></div>
-      <span>Total Orders</span>
-    </div>
-  </div>
-);
-
 export default function DashboardPage() {
-  const [stats, setStats] = useState<IOverView | null>(null);
+  const [stats, setStats] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [lowStockItems, setLowStockItems] = useState<any[]>([]);
-  const [trafficStats, setTrafficStats] = useState({
-    direct: 0,
-    social: 0,
-    organic: 0,
-  });
-
-  // Modal States
+  const [trafficStats, setTrafficStats] = useState({ direct: 0, social: 0, organic: 0 });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
 
-  // External Data Hooks
+  // TanStack Query Hooks
   const { data: categories = [] } = useCategories();
   const { data: chefs = [] } = useChefs();
+  const { data: users = [], isLoading: usersLoading } = useUsers();
 
-  // Fetch Logic
-  const fetchOverviewData = useCallback(async () => {
+  const fetchAllData = useCallback(async () => {
+    setLoading(true);
     try {
-      const data = await getOverView();
-      setStats(data);
+      const [overview, lowStock, traffic] = await Promise.all([
+        getOverView(),
+        getLowStockItems(),
+        getTrafficStats()
+      ]);
+      setStats(overview);
+      setLowStockItems(lowStock);
+      setTrafficStats(traffic);
     } catch (error) {
-      console.error("Error fetching overview:", error);
-    }
-  }, []);
-
-  const fetchLowStockData = useCallback(async () => {
-    try {
-      const data = await getLowStockItems();
-      setLowStockItems(data);
-    } catch (error) {
-      console.error("Error fetching low stock:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    const loadAllData = async () => {
-      setLoading(true);
-      await Promise.all([fetchOverviewData(), fetchLowStockData()]);
+      console.error("Dashboard sync error:", error);
+      toast.error("Failed to sync dashboard data");
+    } finally {
       setLoading(false);
-    };
-    loadAllData();
-  }, [fetchOverviewData, fetchLowStockData]);
-
-  const handleLowStockClick = (item: any) => {
-    setSelectedItem(item);
-    setIsModalOpen(true);
-  };
-  useEffect(() => {
-    const fetchTraffic = async () => {
-      const data = await getTrafficStats();
-      setTrafficStats(data);
-    };
-    fetchTraffic();
+    }
   }, []);
 
-  const totalVisits =
-    trafficStats.direct + trafficStats.social + trafficStats.organic || 1;
-  const getPercent = (count: number) => Math.round((count / totalVisits) * 100);
+  useEffect(() => {
+    fetchAllData();
+  }, [fetchAllData]);
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.origin);
-    toast.success("Link copied!");
+  // --- dynamicStatsCards ---
+  const dynamicStatsCards = useMemo(() => [
+    {
+      label: "Total Revenue",
+      value: `৳${stats?.totalRevenue?.toLocaleString() || 0}`,
+      trend: stats?.revenueTrend || 0,
+      icon: <DollarSign size={20} />,
+      color: "#4F46E5",
+      bg: "#EEF0FF",
+      chartData: stats?.salesChartData?.map((d: any) => ({ uv: d.revenue })) || []
+    },
+    {
+      label: "Total Orders",
+      value: stats?.totalPaidOrders || 0,
+      trend: stats?.orderTrend || 0,
+      icon: <ShoppingBag size={20} />,
+      color: "#F59E0B",
+      bg: "#FFF4E5",
+      chartData: stats?.salesChartData?.map((d: any) => ({ uv: d.orders })) || []
+    },
+    {
+      label: "Growth Rate",
+      value: `${stats?.growthRate || '14.2'}%`,
+      trend: stats?.growthTrend || "+2.5",
+      icon: <TrendingUp size={20} />,
+      color: "#10B981",
+      bg: "#ECFDF5",
+      chartData: [{uv: 20}, {uv: 40}, {uv: 35}, {uv: 50}, {uv: 45}]
+    },
+    {
+      label: "System Users",
+      value: users.length || 0, 
+      trend: stats?.userTrend || "+0",
+      icon: <Users size={20} />,
+      color: "#8B5CF6",
+      bg: "#F5F3FF",
+      chartData: [{uv: 10}, {uv: 25}, {uv: 20}, {uv: 30}, {uv: 40}]
+    }
+  ], [stats, users]);
+
+  const handleExportReport = async () => {
+    const dashboardElement = document.getElementById("dashboard-content");
+    if (!dashboardElement) return;
+    const toastId = toast.loading("Generating PDF Report...");
+    try {
+      const dataUrl = await domToPng(dashboardElement, { scale: 2, backgroundColor: '#F8F9FA' });
+      const pdf = new jsPDF({ orientation: "landscape", unit: "px", format: [dashboardElement.offsetWidth * 2, dashboardElement.offsetHeight * 2] });
+      pdf.addImage(dataUrl, "PNG", 0, 0, dashboardElement.offsetWidth * 2, dashboardElement.offsetHeight * 2);
+      pdf.save(`Analytics-Report-${new Date().toLocaleDateString()}.pdf`);
+      toast.success("Report Saved!", { id: toastId });
+    } catch (err) { toast.error("Export Failed", { id: toastId }); }
   };
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center min-h-screen text-gray-400">
-        Loading...
-      </div>
-    );
-const handleExportReport = async () => {
-  const dashboardElement = document.getElementById("dashboard-content");
-  if (!dashboardElement) return;
+  const getTrafficPercent = (count: number) => {
+    const total = trafficStats.direct + trafficStats.social + trafficStats.organic || 1;
+    return Math.round((count / total) * 100);
+  };
 
-  const toastId = toast.loading("Preparing your high-quality report...");
-
-  try {
-    // এটি আধুনিক CSS সাপোর্ট করে, তাই lab() কালারে এরর দেবে না
-    const dataUrl = await domToPng(dashboardElement, {
-      scale: 2,
-      backgroundColor: '#F8F9FA', // ড্যাশবোর্ডের ব্যাকগ্রাউন্ড কালার
-    });
-
-    const pdf = new jsPDF({
-      orientation: "landscape",
-      unit: "px",
-      format: [dashboardElement.offsetWidth * 2, dashboardElement.offsetHeight * 2],
-    });
-
-    pdf.addImage(dataUrl, "PNG", 0, 0, dashboardElement.offsetWidth * 2, dashboardElement.offsetHeight * 2);
-    pdf.save(`Dashboard-Report-${new Date().toLocaleDateString()}.pdf`);
-
-    toast.success("Report downloaded successfully!", { id: toastId });
-  } catch (error) {
-    console.error("Export error:", error);
-    toast.error("Failed to generate report.", { id: toastId });
-  }
-};
+  if (loading || usersLoading) return (
+    <div className="flex flex-col justify-center items-center min-h-screen bg-[#F8F9FA] gap-4">
+        <div className="w-12 h-12 border-4 border-[#4F46E5] border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[4px]">Syncing Realtime Data...</p>
+    </div>
+  );
 
   return (
-    <div className="bg-[#F8F9FA] min-h-screen p-6 font-sans">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-          Dashboard
-        </h1>
-        {/* Export Button Update */}
-        <button 
-          onClick={handleExportReport}
-          className="w-full md:w-auto bg-[#4F46E5] text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-lg shadow-indigo-100 hover:bg-[#3f38b5] transition-all flex items-center justify-center gap-2"
-        >
-          Export Report 📥
-        </button>
+    <div className="bg-[#F8F9FA] min-h-screen p-4 md:p-8 font-sans">
+      
+      {/* --- HEADER --- */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+            Dashboard <Zap className="text-yellow-400 fill-current" size={24} />
+          </h1>
+          <p className="text-[10px] text-gray-400 font-black mt-1 uppercase tracking-[3px]">Real-time Analytics Feed</p>
+        </div>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+           <button onClick={handleExportReport} className="flex-1 md:flex-none bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-gray-50 transition-all">
+             Export Data
+           </button>
+           <Link href="/admin/menus" className="flex-1 md:flex-none bg-[#1A4E11] text-white px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:shadow-xl transition-all flex items-center justify-center gap-2">
+             <PlusCircle size={16} /> Add Item
+           </Link>
+        </div>
       </div>
 
-<div id="dashboard-content" className="space-y-8 bg-[#F8F9FA] p-4 rounded-3xl">
-         {/* আপনার গ্রিড এবং চার্টগুলো এখানে থাকবে (আগে যা ছিল তাই) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column */}
-        <div className="lg:col-span-8 space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Total Order */}
-            <div className="bg-white p-6 rounded-[32px] border border-gray-50 shadow-sm relative overflow-hidden h-48">
-              <div className="flex justify-between items-start relative z-10">
-                <h3 className="text-lg font-bold text-gray-800">Total Order</h3>
-                <div className="bg-[#FFF4E5] p-3 rounded-full text-[#FFA043]">
-                  <ShoppingBag size={22} />
+      <div id="dashboard-content" className="space-y-8">
+        
+        {/* --- STATS GRID --- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {dynamicStatsCards.map((stat, i) => (
+            <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group overflow-hidden relative h-44">
+              <div className="flex justify-between items-center mb-4 relative z-10">
+                <div className="p-3 rounded-2xl" style={{ backgroundColor: stat.bg, color: stat.color }}>{stat.icon}</div>
+                <div className={`flex items-center text-[10px] font-black ${parseFloat(stat.trend.toString()) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {stat.trend}% {parseFloat(stat.trend.toString()) >= 0 ? <ArrowUpRight size={14}/> : <ArrowDownRight size={14}/>}
                 </div>
               </div>
-              <div className="mt-4 flex items-baseline gap-3 relative z-10">
-                <h2 className="text-4xl font-extrabold text-gray-900">
-                  {stats?.totalPaidOrders || 0}
-                </h2>
-                <span className="text-[#10B981] font-bold text-sm flex items-center">
-                  {stats?.orderTrend}% <ArrowUpRight size={16} />
-                </span>
+              <h4 className="text-gray-400 text-[10px] font-black uppercase tracking-widest relative z-10">{stat.label}</h4>
+              <h2 className="text-3xl font-black text-gray-900 mt-1 relative z-10">{stat.value}</h2>
+              <div className="absolute bottom-0 left-0 right-0 h-16 opacity-20 group-hover:opacity-40 transition-all">
+                <MiniChart data={stat.chartData.length > 0 ? stat.chartData : [{uv:10},{uv:20}]} color={stat.color} />
               </div>
-              <MiniChart
-                data={[
-                  { uv: 400 },
-                  { uv: 300 },
-                  { uv: 500 },
-                  { uv: 400 },
-                  { uv: 600 },
-                ]}
-                color="#10B981"
-              />
             </div>
+          ))}
+        </div>
 
-            {/* Total Revenue */}
-            <div className="bg-white p-6 rounded-[32px] border border-gray-50 shadow-sm relative overflow-hidden h-48">
-              <div className="flex justify-between items-start relative z-10">
-                <h3 className="text-lg font-bold text-gray-800">
-                  Total Revenue
-                </h3>
-                <div className="bg-[#EEF0FF] p-3 rounded-full text-[#6366F1]">
-                  <DollarSign size={22} />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* --- MAIN CHART --- */}
+          <div className="lg:col-span-8 bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
+              <div>
+                <h3 className="font-black text-xl text-gray-900 tracking-tight">Sales Trends</h3>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Performance mapping per period</p>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex items-center gap-2 text-[10px] font-black text-[#4F46E5] uppercase bg-[#EEF0FF] px-3 py-1 rounded-lg">
+                   Revenue
+                </div>
+                <div className="flex items-center gap-2 text-[10px] font-black text-[#F59E0B] uppercase bg-[#FFF4E5] px-3 py-1 rounded-lg">
+                   Orders
                 </div>
               </div>
-              <div className="mt-4 flex items-baseline gap-3 relative z-10">
-                <h2 className="text-4xl font-extrabold text-gray-900">
-                  ৳{stats?.totalRevenue?.toLocaleString()}
-                </h2>
-                <span className="text-[#10B981] font-bold text-sm flex items-center">
-                  {stats?.revenueTrend}% <ArrowUpRight size={16} />
-                </span>
-              </div>
-              <MiniChart
-                data={[
-                  { uv: 300 },
-                  { uv: 500 },
-                  { uv: 400 },
-                  { uv: 700 },
-                  { uv: 500 },
-                ]}
-                color="#6366F1"
-              />
             </div>
-
-            {/* Cancel Order */}
-            <div className="bg-white p-6 rounded-[32px] border border-gray-50 shadow-sm relative overflow-hidden h-48">
-              <div className="flex justify-between items-start relative z-10">
-                <h3 className="text-lg font-bold text-gray-800">
-                  Cancel Order
-                </h3>
-                <div className="bg-[#FFF1F2] p-3 rounded-full text-[#F43F5E]">
-                  <Trash2 size={22} />
-                </div>
-              </div>
-              <div className="mt-4 flex items-baseline gap-3 relative z-10">
-                <h2 className="text-4xl font-extrabold text-gray-900">120</h2>
-                <span className="text-[#F43F5E] font-bold text-sm flex items-center">
-                  5% <ArrowDownRight size={16} />
-                </span>
-              </div>
-              <MiniChart
-                data={[
-                  { uv: 600 },
-                  { uv: 400 },
-                  { uv: 500 },
-                  { uv: 300 },
-                  { uv: 400 },
-                ]}
-                color="#F43F5E"
-              />
-            </div>
-          </div>
-
-          {/* Big Chart */}
-          <div className="bg-white p-8 rounded-[40px] border border-gray-50 shadow-sm">
-            <h3 className="font-bold text-xl text-gray-800 mb-8">
-              Product Selling Overview
-            </h3>
-            <CustomLegend />
-            <div className="h-80 w-full mt-6">
+            <div className="h-80 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={stats?.salesChartData || []}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="#F3F4F6"
-                  />
-                  <XAxis
-                    dataKey="name"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#9CA3AF", fontSize: 12 }}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#9CA3AF", fontSize: 12 }}
-                    tickFormatter={(v) => `৳${v / 1000}k`}
-                  />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#9CA3AF", fontSize: 10, fontWeight: 900 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: "#9CA3AF", fontSize: 10, fontWeight: 900 }} tickFormatter={(v) => `৳${v/1000}k`} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Line
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="#4F46E5"
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="orders"
-                    stroke="#F59E0B"
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                  />
+                  <Line type="monotone" dataKey="revenue" stroke="#4F46E5" strokeWidth={4} dot={{ r: 4, fill: '#4F46E5' }} activeDot={{ r: 8 }} />
+                  <Line type="monotone" dataKey="orders" stroke="#F59E0B" strokeWidth={4} dot={{ r: 4, fill: '#F59E0B' }} activeDot={{ r: 8 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
-        </div>
 
-        {/* Right Column */}
-        <div className="lg:col-span-4 space-y-8">
-          <div className="bg-white p-8 rounded-[40px] border border-gray-50 shadow-sm text-center">
-            <div className="flex gap-3 mb-8">
-              <button
-                onClick={() => window.open("/", "_blank")}
-                className="flex-1 bg-[#4F46E5] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2"
-              >
-                Visit website <ExternalLink size={18} />
-              </button>
-              <button
-                onClick={handleCopyLink}
-                className="p-4 rounded-2xl border border-gray-100 text-gray-400 hover:bg-gray-50"
-              >
-                <Copy size={20} />
-              </button>
-            </div>
-            <p className="text-gray-400 text-sm font-bold uppercase tracking-widest mb-2">
-              Total Visitors
-            </p>
-            <div className="flex items-end justify-between h-40 gap-4 mb-6">
-              {/* Direct - Blue Bar */}
-              <div
-                style={{ height: `${getPercent(trafficStats.direct)}%` }}
-                className="bg-[#4F46E5] rounded-xl w-full transition-all duration-1000 ease-out"
-                title={`Direct: ${trafficStats.direct}`}
-              ></div>
-
-              {/* Social - Orange Bar */}
-              <div
-                style={{ height: `${getPercent(trafficStats.social)}%` }}
-                className="bg-[#F59E0B] rounded-xl w-full transition-all duration-1000 ease-out"
-                title={`Social: ${trafficStats.social}`}
-              ></div>
-
-              {/* Organic - Red Bar */}
-              <div
-                style={{ height: `${getPercent(trafficStats.organic)}%` }}
-                className="bg-[#EF4444] rounded-xl w-full transition-all duration-1000 ease-out"
-                title={`Organic: ${trafficStats.organic}`}
-              ></div>
+          {/* --- TRAFFIC & ACTIONS --- */}
+          <div className="lg:col-span-4 space-y-8">
+            <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+               <h3 className="font-black text-sm uppercase tracking-widest text-gray-400 mb-6 text-center underline decoration-[#1A4E11]/20">Command Center</h3>
+               <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { label: 'Menus', icon: <LayoutGrid size={18}/>, link: '/admin/menus' },
+                    { label: 'Orders', icon: <ShoppingBag size={18}/>, link: '/admin/orders' },
+                    { label: 'Users', icon: <Users size={18}/>, link: '/admin/user-management' },
+                    { label: 'Settings', icon: <Settings size={18}/>, link: '/admin/settings' }
+                  ].map((act, idx) => (
+                    <Link key={idx} href={act.link} className="flex flex-col items-center gap-3 p-4 rounded-3xl bg-gray-50 hover:bg-[#1A4E11] hover:text-white transition-all group">
+                       <span className="text-gray-400 group-hover:text-white">{act.icon}</span>
+                       <span className="text-[10px] font-black uppercase tracking-tighter">{act.label}</span>
+                    </Link>
+                  ))}
+               </div>
             </div>
 
-            {/* নিচে পার্সেন্টেজ টেক্সট */}
-            <div className="flex justify-between text-[11px] font-bold text-gray-400">
-              <div>
-                Direct{" "}
-                <p className="text-gray-900 text-sm">
-                  {getPercent(trafficStats.direct)}%
-                </p>
-              </div>
-              <div>
-                Social{" "}
-                <p className="text-gray-900 text-sm">
-                  {getPercent(trafficStats.social)}%
-                </p>
-              </div>
-              <div>
-                Organic{" "}
-                <p className="text-gray-900 text-sm">
-                  {getPercent(trafficStats.organic)}%
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Low Stock Items Section */}
-          <div className="bg-white p-8 rounded-[40px] border border-gray-50 shadow-sm">
-            <h3 className="font-bold text-xl text-gray-900 mb-8">
-              Low Stock Items
-            </h3>
-            <div className="space-y-6">
-              {lowStockItems.length > 0 ? (
-                lowStockItems.map((item) => (
-                  <div
-                    key={item._id}
-                    onClick={() => handleLowStockClick(item)} // এখানে ক্লিক ইভেন্ট
-                    className="flex items-center justify-between group cursor-pointer hover:bg-gray-50 p-2 rounded-2xl transition-all"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-12 rounded-2xl overflow-hidden relative border border-gray-50">
-                        <Image
-                          src={item.image.url}
-                          fill
-                          alt={item.title}
-                          className="object-cover"
-                        />
-                      </div>
-                      <div>
-                        <p className="font-extrabold text-sm text-gray-900">
-                          {item.title}
-                        </p>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase">
-                          ৳{item.price} • {item.categoryId?.name}
-                        </p>
-                      </div>
+            <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+               <h3 className="font-black text-gray-900 text-lg tracking-tight mb-8">Visitor Traffic</h3>
+               <div className="space-y-6">
+                  {[
+                    { label: 'Direct', val: trafficStats.direct, color: '#4F46E5' },
+                    { label: 'Social', val: trafficStats.social, color: '#F59E0B' },
+                    { label: 'Organic', val: trafficStats.organic, color: '#EF4444' }
+                  ].map((t, idx) => (
+                    <div key={idx} className="space-y-2">
+                       <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                          <span className="text-gray-400">{t.label}</span>
+                          <span className="text-gray-900">{getTrafficPercent(t.val)}%</span>
+                       </div>
+                       <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${getTrafficPercent(t.val)}%`, backgroundColor: t.color }}></div>
+                       </div>
                     </div>
-                    <span className="text-[#EF4444] font-black text-[11px] bg-[#FEF2F2] px-3 py-1 rounded-lg">
-                      {item.stock.toString().padStart(2, "0")}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-center text-gray-400 text-xs py-4">
-                  Inventory is healthy! ✨
-                </p>
-              )}
+                  ))}
+               </div>
             </div>
           </div>
         </div>
-      </div>
-      </div>
-     
 
-      {/* --- Reusable Modal --- */}
-      <MenuModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedItem(null);
-        }}
-        editData={selectedItem}
-        categories={categories}
-        chefs={chefs}
-        onSuccess={() => {
-          fetchLowStockData(); // লিস্ট আপডেট করবে
-          fetchOverviewData(); // সম্ভব হলে ওভারভিউ-ও রিফ্রেশ করবে
-        }}
+        {/* --- INVENTORY ALERT --- */}
+        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h3 className="font-black text-xl text-gray-900 tracking-tight">Stock Warnings</h3>
+              <p className="text-[10px] text-red-500 font-bold uppercase mt-1">Found {lowStockItems.length} items below safety limit</p>
+            </div>
+            <Link href="/admin/menus" className="text-[10px] font-black text-[#1A4E11] uppercase tracking-widest bg-[#1A4E11]/5 px-4 py-2 rounded-xl">View All</Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {lowStockItems.length > 0 ? (
+              lowStockItems.map((item) => (
+                <div key={item._id} onClick={() => {setSelectedItem(item); setIsModalOpen(true);}} className="flex items-center gap-4 p-4 bg-gray-50/50 rounded-3xl border border-gray-100 hover:shadow-lg transition-all cursor-pointer group">
+                  <div className="relative w-16 h-16 rounded-2xl overflow-hidden shrink-0 border border-white">
+                    <Image src={item.image.url} fill alt={item.title} className="object-cover group-hover:scale-110 transition-all" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-xs font-black text-gray-800 line-clamp-1">{item.title}</h4>
+                    <p className="text-[9px] text-gray-400 font-bold uppercase">৳{item.price} • {item.categoryId?.name}</p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="flex-1 h-1.5 bg-gray-200 rounded-full">
+                         <div className="h-full bg-red-500 rounded-full" style={{ width: `${Math.min((item.stock/15)*100, 100)}%` }}></div>
+                      </div>
+                      <span className="text-[10px] font-black text-red-500 uppercase">{item.stock} Unit</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-10 opacity-50 font-black uppercase text-[10px]">No low stock alerts today</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <MenuModal 
+        isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} 
+        editData={selectedItem} categories={categories} chefs={chefs} 
+        onSuccess={() => { fetchAllData(); }} 
       />
     </div>
   );

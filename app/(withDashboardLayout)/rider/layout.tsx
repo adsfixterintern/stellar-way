@@ -33,7 +33,9 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
     if (session?.user?.email) {
       const fetchNotifs = async () => {
         try {
-          const { data } = await api.get(`/notifications/${session.user.email}`);
+          const { data } = await api.get(
+            `/notifications/${session.user.email}`,
+          );
           if (data.success) setNotifications(data.data);
         } catch (err) {
           console.log("Notif fetch error", err);
@@ -65,7 +67,6 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
         const audio = new Audio("/notification.mp3");
         audio.play().catch(() => {});
       };
-
       socket.on("new-order-available", handleNewOrder);
       return () => { socket.off("new-order-available", handleNewOrder); };
     }
@@ -96,7 +97,10 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+      if (
+        notifRef.current &&
+        !notifRef.current.contains(event.target as Node)
+      ) {
         setNotifOpen(false);
       }
     };
@@ -106,35 +110,62 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
 
   const menuItems = [
     { name: "Overview", icon: LayoutDashboard, path: "/rider" },
-    { name: "New Orders", icon: ShoppingBag, path: "/rider/new-orders" },
-    { name: "My Deliveries", icon: History, path: "/rider/history" },
+    // { name: "New Orders", icon: ShoppingBag, path: "/rider/new-orders" },
+    { name: "My Deliveries", icon: History, path: "/rider/my-deliveries" },
     { name: "Profile", icon: User, path: "/rider/profile" },
   ];
 
   return (
-    <div className="flex h-screen bg-gray-50 text-gray-900">
-      {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#1e3316] text-white transition-transform lg:static lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex items-center justify-between h-20 px-6 border-b border-white/10">
-          <span className="text-xl font-bold tracking-wider text-[#c2a15e]">RIDER PANEL</span>
-          <button className="lg:hidden" onClick={() => setIsSidebarOpen(false)}><X /></button>
-        </div>
-        <nav className="mt-6 px-4 space-y-2">
-          {menuItems.map((item) => (
-            <Link 
-              key={item.path} 
-              href={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${pathname === item.path ? "bg-[#c2a15e] text-black font-bold" : "hover:bg-white/5 text-gray-300"}`}
+    <div className="flex h-screen bg-[#FDFCFD] font-sans antialiased text-gray-900">
+      {/* Sidebar - ড্যাশবোর্ড থিম অনুযায়ী কালার আপডেট */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#E4F5DC] border-r border-gray-100 transition-transform lg:static lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+      >
+        {/* ১. কন্টেইনারকে flex-col এবং h-full দেওয়া হয়েছে */}
+        <div className="flex flex-col h-full">
+          {/* লোগো সেকশন */}
+          <div className="flex flex-col items-center justify-center h-28 px-6 border-b border-white/20">
+            <span className="text-[10px] font-black tracking-[3px] text-[#1A4E11] uppercase">
+              Rider Panel
+            </span>
+            <h2 className="text-xl font-black text-gray-800 tracking-tighter mt-1">
+              Stellar Way
+            </h2>
+          </div>
+
+          {/* ২. nav-এ flex-1 দেওয়া হয়েছে যাতে এটি বাকি জায়গা দখল করে বাটনকে নিচে পাঠিয়ে দেয় */}
+          <nav className="mt-8 px-4 space-y-2 flex-1 overflow-y-auto">
+            {menuItems.map((item) => {
+              const isActive = pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  onClick={() => setIsSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-5 py-3.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                    isActive
+                      ? "bg-[#1A4E11] text-white shadow-lg translate-x-1"
+                      : "text-gray-500 hover:bg-white/70 hover:text-black"
+                  }`}
+                >
+                  <item.icon size={18} />
+                  <span>{item.name}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* ৩. লগআউট বাটন সেকশন - এখন এটি সবসময় নিচে থাকবে */}
+          <div className="p-4 border-t border-white/10">
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="flex items-center gap-3 px-5 py-3.5 w-full text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all font-bold border border-transparent hover:border-red-100"
             >
-              <item.icon size={20} />
-              <span className="text-sm">{item.name}</span>
-            </Link>
-          ))}
-          <button onClick={() => signOut()} className="flex items-center gap-3 px-4 py-3 w-full text-red-400 hover:bg-red-500/10 rounded-xl mt-10">
-            <LogOut size={20} />
-            <span className="font-medium">Logout</span>
-          </button>
-        </nav>
+              <LogOut size={18} />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
       </aside>
 
       {/* Main Content */}
@@ -232,7 +263,22 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
                       </div>
                    )}
                 </div>
-             </div>
+              </div>
+              <div className="w-11 h-11 rounded-full border-2 border-green-50 overflow-hidden bg-gray-100 shadow-sm relative">
+                {session?.user?.image ? (
+                  <Image
+                    src={session.user.image}
+                    alt="profile"
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center font-black text-[#1A4E11] text-xs">
+                    R
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </header>
 
@@ -240,6 +286,14 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
           {children}
         </main>
       </div>
+
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
     </div>
   );
 };

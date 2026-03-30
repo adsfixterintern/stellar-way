@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -11,12 +12,12 @@ import {
   IoCallOutline,
   IoTrashOutline,
   IoLocationOutline,
-  IoChevronBackOutline,
-  IoChevronForwardOutline,
 } from "react-icons/io5";
 import api from "@/utils/apiInstance"; 
+import PaginationDashboard from "@/components/shared/PaginationDashboard";
 
-// ✅ Booking type
+
+//  Booking type
 interface IBooking {
   _id: string;
   name: string;
@@ -46,10 +47,10 @@ const AdminBookingDashboard: React.FC = () => {
   });
 
   // 📌 Fetch bookings
-  const fetchBookings = async (page = 1) => {
+  const fetchBookings = async (pageNumber = 1) => {
     try {
       setLoading(true);
-      const { data } = await api.get(`/bookings?page=${page}&limit=${meta.limit}`);
+      const { data } = await api.get(`/bookings?page=${pageNumber}&limit=${meta.limit}`);
       if (data.success) {
         setBookings(data.data);
         setMeta(data.meta);
@@ -81,10 +82,8 @@ const AdminBookingDashboard: React.FC = () => {
       customClass: {
         title: "font-black uppercase text-sm tracking-widest",
         htmlContainer: "text-xs font-bold text-gray-500",
-        confirmButton:
-          "px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest",
-        cancelButton:
-          "px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest",
+        confirmButton: "px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest",
+        cancelButton: "px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest",
       },
     });
 
@@ -93,7 +92,6 @@ const AdminBookingDashboard: React.FC = () => {
         const { data } = await api.delete(`/bookings/${id}`);
         if (data.success) {
           toast.success("Booking deleted successfully");
-
           const nextPage = bookings.length === 1 && meta.page > 1 ? meta.page - 1 : meta.page;
           fetchBookings(nextPage);
         }
@@ -142,20 +140,19 @@ const AdminBookingDashboard: React.FC = () => {
               <tbody className="divide-y divide-gray-50">
                 {loading ? (
                   <tr>
-                    <td colSpan={4} className="p-10 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">
+                    <td colSpan={4} className="p-10 text-center text-gray-400 text-xs font-bold uppercase tracking-widest animate-pulse">
                       Loading bookings...
                     </td>
                   </tr>
                 ) : bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="p-10 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">
+                    <td colSpan={4} className="p-10 text-center text-gray-400 text-xs font-bold uppercase tracking-widest italic">
                       No bookings found
                     </td>
                   </tr>
                 ) : (
                   bookings.map((booking) => (
                     <tr key={booking._id} className="hover:bg-gray-50/30 transition-colors group">
-
                       {/* CUSTOMER */}
                       <td className="p-4">
                         <div className="flex flex-col gap-1">
@@ -204,7 +201,6 @@ const AdminBookingDashboard: React.FC = () => {
                           <IoTrashOutline size={18} />
                         </button>
                       </td>
-
                     </tr>
                   ))
                 )}
@@ -212,30 +208,16 @@ const AdminBookingDashboard: React.FC = () => {
             </table>
           </div>
 
-          {/* PAGINATION */}
-          <div className="p-4 bg-gray-50/50 border-t border-gray-100 flex justify-between items-center">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-              Page {meta.page} of {meta.totalPage}
-            </p>
-            <div className="flex gap-2">
-              <button
-                disabled={meta.page === 1}
-                onClick={() => fetchBookings(meta.page - 1)}
-                className="flex items-center gap-1 px-3 py-1 text-[10px] font-black uppercase bg-white border border-gray-200 rounded-xl disabled:opacity-30 hover:border-[#1A4E11] hover:text-[#1A4E11] transition-all"
-              >
-                <IoChevronBackOutline /> Prev
-              </button>
-              <button
-                disabled={meta.page >= meta.totalPage}
-                onClick={() => fetchBookings(meta.page + 1)}
-                className="flex items-center gap-1 px-3 py-1 text-[10px] font-black uppercase bg-white border border-gray-200 rounded-xl disabled:opacity-30 hover:border-[#1A4E11] hover:text-[#1A4E11] transition-all"
-              >
-                Next <IoChevronForwardOutline />
-              </button>
-            </div>
+          {/* PAGINATION SECTION */}
+          <div className="p-5 border-t border-gray-100 bg-gray-50/30">
+            <PaginationDashboard
+              totalItems={meta.total}
+              itemsPerPage={meta.limit}
+              currentPage={meta.page}
+              onPageChange={(page) => fetchBookings(page)}
+            />
           </div>
         </div>
-
       </div>
     </div>
   );

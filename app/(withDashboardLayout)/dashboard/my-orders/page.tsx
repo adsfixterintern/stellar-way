@@ -32,7 +32,7 @@ const MyOrdersPage = () => {
   const openReviewModal = (order: any) => {
     setSelectedOrder(order);
     setIsReviewModalOpen(true);
-    setReviewData({}); // Reset previous inputs
+    setReviewData({}); 
   };
 
   const handleTrackClick = (order: any) => {

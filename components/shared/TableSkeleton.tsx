@@ -1,6 +1,6 @@
 export const TableSkeleton = () => (
   <>
-    {[...Array(5)].map((_, index) => (
+    {[...Array(10)].map((_, index) => (
       <tr key={index} className="animate-pulse">
         <td className="p-5">
           <div className="flex items-center gap-3">

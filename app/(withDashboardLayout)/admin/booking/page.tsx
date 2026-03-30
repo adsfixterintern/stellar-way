@@ -15,6 +15,7 @@ import {
 } from "react-icons/io5";
 import api from "@/utils/apiInstance"; 
 import PaginationDashboard from "@/components/shared/PaginationDashboard";
+import { TableSkeleton } from "@/components/shared/TableSkeleton";
 
 
 //  Booking type
@@ -139,11 +140,7 @@ const AdminBookingDashboard: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {loading ? (
-                  <tr>
-                    <td colSpan={4} className="p-10 text-center text-gray-400 text-xs font-bold uppercase tracking-widest animate-pulse">
-                      Loading bookings...
-                    </td>
-                  </tr>
+                  <TableSkeleton />
                 ) : bookings.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="p-10 text-center text-gray-400 text-xs font-bold uppercase tracking-widest italic">

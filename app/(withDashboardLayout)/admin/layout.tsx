@@ -26,7 +26,7 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-// ১. SidebarContent কে মেইন কম্পোনেন্টের বাইরে নিয়ে আসা হয়েছে
+// ১. SidebarContent 
 const SidebarContent = ({ 
   pathname, 
   setIsSidebarOpen, 

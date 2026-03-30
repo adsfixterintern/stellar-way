@@ -48,7 +48,7 @@ const FAQ = () => {
           <h2 className="secTitle ">Frequently Asked Questions</h2>
         </div>
 
-        {/* Accordion Wrapper */}
+        {/* Accordion Wrapper faq */}
         <div className="max-w-4xl mx-auto space-y-5 relative z-10">
           {isLoading ? (
             <SkeletonFAQ></SkeletonFAQ>

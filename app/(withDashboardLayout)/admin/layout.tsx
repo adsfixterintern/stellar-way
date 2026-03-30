@@ -23,6 +23,7 @@ import {
 import { Toaster } from "react-hot-toast";
 import logo from "@/assets/img/flogo.png"
 import Image from "next/image";
+import { LucideBike } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -94,6 +95,7 @@ const menuItems = [
   { name: "Menus", icon: <IoRestaurantOutline />, path: "/admin/menus" },
 
   { name: "Orders", icon: <IoCartOutline />, path: "/admin/orders" },
+  { name: "Riders", icon: <LucideBike />, path: "/admin/riders" },
 
   { name: "Chef", icon: <IoPeopleOutline />, path: "/admin/chef" },
 

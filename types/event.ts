@@ -22,3 +22,25 @@ export interface IEventResponse {
   message: string;
   data: IEvent[];
 }
+
+
+export interface IEventBooking {
+  _id: string;
+  userId: string;
+  eventId: {
+    _id: string;
+    title: string;
+    subTitle: string;
+    image: string;
+    price: number;
+  } | string;
+  numberOfSeats: number;
+  selectedDate: string;
+  selectedTime: string;
+  transactionId: string;
+  totalAmount: number;
+  paymentMethod: string;
+  phone: string;
+  paymentStatus: "paid" | "pending" | "failed";
+  createdAt: { $date: string } | string;
+}

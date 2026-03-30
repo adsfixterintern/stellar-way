@@ -50,7 +50,7 @@ const MenuPage: React.FC = () => {
   };
 
   const openAddModal = () => {
-    setSelectedMenu(null); // নতুন আইটেমের জন্য ডাটা ক্লিয়ার থাকবে
+    setSelectedMenu(null); 
     setIsModalOpen(true);
   };
 

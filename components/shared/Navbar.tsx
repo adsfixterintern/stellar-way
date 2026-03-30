@@ -279,29 +279,31 @@ const Navbar = () => {
                   <ChevronDown size={14} className="text-white/70" />
                 </div>
 
-                {isDropdownOpen && (
-                  <div className="absolute right-0 top-full w-48 pt-2 z-50">
-                    <div className="bg-[#1e3316] border border-white/10 rounded-xl shadow-2xl py-2">
-                      <Link
-                        href={
-                          (session.user as any)?.role === "admin"
-                            ? "/admin"
-                            : "/dashboard"
-                        }
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10"
-                      >
-                        <LayoutDashboard size={16} /> Dashboard
-                      </Link>
+             {isDropdownOpen && (
+  <div className="absolute right-0 top-full w-48 pt-2 z-50">
+    <div className="bg-[#1e3316] border border-white/10 rounded-xl shadow-2xl py-2">
+      <Link
+        href={
+          (session.user as any)?.role === "admin"
+            ? "/admin"
+            : (session.user as any)?.role === "rider"
+            ? "/rider"
+            : "/dashboard" 
+        }
+        className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10"
+      >
+        <LayoutDashboard size={16} /> Dashboard
+      </Link>
 
-                      <button
-                        onClick={() => signOut({ callbackUrl: "/" })}
-                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-white/10"
-                      >
-                        <LogOut size={16} /> Sign out
-                      </button>
-                    </div>
-                  </div>
-                )}
+      <button
+        onClick={() => signOut({ callbackUrl: "/" })}
+        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-white/10"
+      >
+        <LogOut size={16} /> Sign out
+      </button>
+    </div>
+  </div>
+)}
               </div>
             ) : (
               <Link href="/login">
@@ -330,45 +332,64 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu Content */}
-      <div
-        className={`lg:hidden overflow-hidden transition-all duration-500 ease-in-out ${
-          open ? "max-h-150 opacity-100 mt-4" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="bg-[#1e3316] border border-white/10 rounded-2xl p-6 shadow-2xl">
-          <ul className="flex flex-col gap-5">
-            {navLinks.map((link, index) => (
-              <li key={index}>
-                <Link href={link.path} onClick={() => setOpen(false)} className={`text-lg font-medium block ${pathname === link.path ? "text-[#c2a15e]" : "text-gray-300"}`}>
-                  {link.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
+    <div
+  className={`lg:hidden overflow-hidden transition-all duration-500 ease-in-out ${
+    open ? "max-h-[500px] opacity-100 mt-4" : "max-h-0 opacity-0"
+  }`}
+>
+  <div className="bg-[#1e3316] border border-white/10 rounded-2xl p-6 shadow-2xl">
+    <ul className="flex flex-col gap-5">
+      {navLinks.map((link, index) => (
+        <li key={index}>
+          <Link 
+            href={link.path} 
+            onClick={() => setOpen(false)} 
+            className={`text-lg font-medium block ${pathname === link.path ? "text-[#c2a15e]" : "text-gray-300"}`}
+          >
+            {link.name}
+          </Link>
+        </li>
+      ))}
+    </ul>
 
-          <hr className="my-6 border-white/10" />
+    <hr className="my-6 border-white/10" />
 
-          <div className="flex flex-col gap-4">
-            {/* Mobile User/Login */}
-            {session ? (
-              <button
-                onClick={() => signOut()}
-                className="flex items-center justify-center gap-2 bg-red-500/10 text-red-400 p-3 rounded-xl border border-red-500/20"
-              >
-                <LogOut size={18} /> Sign Out
-              </button>
-            ) : (
-              <Link
-                href="/login"
-                onClick={() => setOpen(false)}
-                className="bg-[#c2a15e] text-black text-center font-bold p-3 rounded-xl"
-              >
-                Sign In
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
+    <div className="flex flex-col gap-4">
+      {session ? (
+        <>
+          <Link
+            href={
+              (session.user as any)?.role === "admin"
+                ? "/admin"
+                : (session.user as any)?.role === "rider"
+                ? "/rider"
+                : "/dashboard"
+            }
+            onClick={() => setOpen(false)}
+            className="flex items-center justify-center gap-2 bg-white/5 text-[#c2a15e] p-3 rounded-xl border border-white/10 font-bold"
+          >
+            <LayoutDashboard size={18} /> Dashboard
+          </Link>
+
+          <button
+            onClick={() => signOut()}
+            className="flex items-center justify-center gap-2 bg-red-500/10 text-red-400 p-3 rounded-xl border border-red-500/20 font-medium"
+          >
+            <LogOut size={18} /> Sign Out
+          </button>
+        </>
+      ) : (
+        <Link
+          href="/login"
+          onClick={() => setOpen(false)}
+          className="bg-[#c2a15e] text-black text-center font-bold p-4 rounded-xl shadow-[0_0_20px_rgba(194,161,94,0.3)] active:scale-95 transition-all"
+        >
+          Sign In
+        </Link>
+      )}
+    </div>
+  </div>
+</div>
     </nav>
   );
 };

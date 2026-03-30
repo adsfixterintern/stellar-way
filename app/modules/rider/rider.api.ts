@@ -61,7 +61,14 @@ export const updateDeliveryStatusApi = async (orderId: string, payload: {
   return response.data;
 };
 
-export const getMyOrdersApi = async (email: string) => {
-  const response = await api.get(`/orders/${email}`);
+
+
+export const updateRiderRatingApi = async (payload: {
+  riderId: string;
+  userId: string;
+  rating: number;
+  comment?: string;
+}) => {
+  const response = await api.patch("/riders/update-rating", payload);
   return response.data;
 };

@@ -9,17 +9,25 @@ export const useSocket = () => {
 
   useEffect(() => {
     const socketInstance = io(SOCKET_URL, {
-      transports: ['websocket'],
-      reconnectionAttempts: 5,
+      transports: ['websocket', 'polling'],
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      withCredentials: true,
     });
 
     setSocket(socketInstance);
 
+    socketInstance.on('connect_error', (err) => {
+      console.error('Socket Connection Error:', err.message);
+    });
+
     socketInstance.on('connect', () => {
-      console.log('Connected with ID:', socketInstance.id);
+      console.log('Successfully connected to socket server!');
     });
 
     return () => {
+      socketInstance.off('connect');
+      socketInstance.off('connect_error');
       socketInstance.disconnect();
     };
   }, []);

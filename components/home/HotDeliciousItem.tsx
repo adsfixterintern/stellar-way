@@ -20,7 +20,7 @@ const HotDeliciousItem = () => {
     <section className='bg-[#F4F1EA]'>
       <div className="py-16 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
         {/* Header & Tabs Part */}
-      <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start mb-12 gap-6">
         <div>
           <p className="superTitle text-primary">About Our Food</p>
           <h2 className="secTitle">Hot Delicious Item</h2>

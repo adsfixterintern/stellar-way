@@ -10,7 +10,7 @@ import {
   Search,
   User,
   ShoppingCart,
-  Menu,
+  Menu as MenuIcon,
   X,
   LogOut,
   LayoutDashboard,
@@ -19,18 +19,18 @@ import {
   Trash2,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
-import axios from "axios";
 import { useCart } from "@/context/CartContext";
 import { useSocket } from "@/app/hooks/useSocket";
 import { toast } from "react-hot-toast";
 
-// Import your notification API module
+// Import APIs
 import { 
   getUserNotifications, 
   markNotificationAsReadApi, 
   clearAllNotificationsApi,
   deleteNotificationApi 
 } from "@/app/modules/notification/notification.api";
+import { getMenus } from "@/app/api/menuApi";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -52,13 +52,12 @@ const Navbar = () => {
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [categories, setCategories] = useState<any[]>([]);
-  const [filteredCats, setFilteredCats] = useState<any[]>([]);
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [filteredMenus, setFilteredMenus] = useState<any[]>([]);
 
-  // Calculate unread count locally for the badge
   const unreadCount = notifications.filter((n) => n.status === "unread").length;
 
-  // 1. Initial Fetch
+  // 1. Initial Notification Fetch
   useEffect(() => {
     const fetchNotifications = async () => {
       if (session?.user?.email) {
@@ -90,60 +89,57 @@ const Navbar = () => {
     }
   }, [socket, session]);
 
-  // 3. Mark as Read
+  // 3. Search Logic with Safety Checks
+  useEffect(() => {
+    const fetchAllMenus = async () => {
+      try {
+        const data = await getMenus();
+        setMenuItems(data || []);
+      } catch (err) {
+        console.error("Menu load failed", err);
+      }
+    };
+    fetchAllMenus();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredMenus([]);
+    } else {
+      // Filtering based on 'title' as per your data object
+      const filtered = menuItems.filter((item) =>
+        item?.title?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredMenus(filtered);
+    }
+  }, [searchQuery, menuItems]);
+
+  // 4. Notification Handlers
   const handleMarkAsRead = async (id: string) => {
     try {
-      setNotifications((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, status: "read" } : n))
-      );
+      setNotifications((prev) => prev.map((n) => (n._id === id ? { ...n, status: "read" } : n)));
       await markNotificationAsReadApi(id);
-    } catch (err) {
-      console.error("Mark as read failed", err);
-    }
+    } catch (err) { console.error(err); }
   };
 
-  // 4. Single Notification Delete
   const handleDeleteNotification = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation(); // Prevents marking as read when clicking delete
+    e.stopPropagation();
     setNotifications((prev) => prev.filter((n) => n._id !== id));
     try {
       await deleteNotificationApi(id);
-    } catch (err) {
-      console.error("Delete failed", err);
-      toast.error("Could not delete notification");
-    }
+    } catch (err) { toast.error("Failed to delete"); }
   };
 
-  // 5. Clear All Notifications
   const handleClearAll = async () => {
     if (!session?.user?.email) return;
-    const previousNotifs = [...notifications];
     setNotifications([]);
     try {
       await clearAllNotificationsApi(session.user.email);
       toast.success("All cleared");
-    } catch (err) {
-      setNotifications(previousNotifs);
-      console.error("Clear all failed", err);
-    }
+    } catch (err) { console.error(err); }
   };
 
-  // --- UI Helpers ---
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const { data } = await axios.get("http://localhost:8000/api/v1/categories");
-        if (data.success) setCategories(data.data);
-      } catch (err) { console.log(err); }
-    };
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    if (searchQuery.trim() === "") setFilteredCats([]);
-    else setFilteredCats(categories.filter((cat) => cat.name.toLowerCase().includes(searchQuery.toLowerCase())));
-  }, [searchQuery, categories]);
-
+  // 5. Utility Effects
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) setSearchOpen(false);
@@ -189,15 +185,42 @@ const Navbar = () => {
         {/* Action Icons */}
         <div className="flex items-center gap-3 md:gap-5">
           
-          {/* Search Dropdown */}
+          {/* Dish Search Dropdown */}
           <div className="hidden sm:block relative" ref={searchRef}>
             <Search size={20} className="text-white/90 cursor-pointer hover:text-white" onClick={() => setSearchOpen(!searchOpen)} />
             {searchOpen && (
-              <div className="absolute right-0 top-12 w-64 bg-[#1e3316] border border-white/10 rounded-xl shadow-2xl p-3 animate-in fade-in slide-in-from-top-2">
-                <input autoFocus type="text" placeholder="Search category..." className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c2a15e]" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-                {filteredCats.map((cat) => (
-                  <div key={cat._id} onClick={() => { setSearchOpen(false); router.push(`/menu?category=${cat.name}`); }} className="mt-2 px-4 py-2 text-sm text-gray-300 hover:bg-white/10 cursor-pointer">{cat.name}</div>
-                ))}
+              <div className="absolute right-0 top-12 w-80 bg-[#1e3316] border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
+                <div className="p-3 border-b border-white/5">
+                  <input autoFocus type="text" placeholder="Search dish..." className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c2a15e]" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                </div>
+                <div className="max-h-72 overflow-y-auto">
+                  {filteredMenus.length > 0 ? (
+                    filteredMenus.map((item) => (
+                      <div 
+                        key={item._id} 
+                        onClick={() => { setSearchOpen(false); router.push(`/menu`); }} 
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 cursor-pointer transition border-b border-white/5 last:border-0"
+                      >
+                        {/* Displaying Image from item.image.url */}
+                        <div className="w-12 h-12 relative shrink-0">
+                          <Image 
+                            src={item.image?.url || "/placeholder.png"} 
+                            alt={item.title} 
+                            fill 
+                            className="rounded-lg object-cover border border-white/10" 
+                          />
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                          {/* Displaying Title and Price */}
+                          <p className="text-xs text-white font-bold truncate">{item.title}</p>
+                          <p className="text-[10px] text-[#c2a15e] mt-0.5">${item.price}</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : searchQuery && (
+                    <div className="p-6 text-center text-xs text-gray-500 italic">No dishes found matching "{searchQuery}"</div>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -231,8 +254,6 @@ const Navbar = () => {
                         </div>
                         <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">{n.message}</p>
                         <p className="text-[9px] text-gray-500 mt-2">{new Date(n.createdAt).toLocaleTimeString()}</p>
-                        
-                        {/* Single Delete React Icon */}
                         <button 
                           onClick={(e) => handleDeleteNotification(e, n._id)}
                           className="absolute top-4 right-4 p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200"
@@ -286,7 +307,7 @@ const Navbar = () => {
 
           {/* Mobile Menu Toggle */}
           <button onClick={() => setOpen(!open)} className="lg:hidden text-white p-1">
-            {open ? <X size={28} /> : <Menu size={28} />}
+            {open ? <X size={28} /> : <MenuIcon size={28} />}
           </button>
         </div>
       </div>
@@ -307,7 +328,7 @@ const Navbar = () => {
                 <button onClick={() => signOut()} className="flex items-center justify-center gap-2 bg-red-500/10 text-red-400 p-3 rounded-xl border border-red-500/20 font-medium"><LogOut size={18} /> Sign Out</button>
               </>
             ) : (
-              <Link href="/login" onClick={() => setOpen(false)} className="bg-[#c2a15e] text-black text-center font-bold p-4 rounded-xl">Sign In</Link>
+              <Link href="/login" onClick={() => setOpen(false)} className="bg-[#c2a15e] text-black text-center font-bold p-4 rounded-xl shadow-lg">Sign In</Link>
             )}
           </div>
         </div>

@@ -13,6 +13,7 @@ import { useSocket } from "@/app/hooks/useSocket";
 import { toast } from "react-hot-toast";
 import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
+import logo from '@/assets/img/flogo.png'
 
 // Importing the Notification API Module
 import { 
@@ -131,44 +132,58 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
     <div className="flex h-screen bg-[#FDFCFD] font-sans antialiased text-gray-900 overflow-hidden">
       {/* Sidebar Section */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#E4F5DC] border-r border-gray-100 transition-transform lg:static lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
-      >
-        <div className="flex flex-col h-full">
-          <div className="flex flex-col items-center justify-center h-28 px-6 border-b border-white/20">
-            <span className="text-[10px] font-black tracking-[3px] text-[#1A4E11] uppercase">Rider Panel</span>
-            <h2 className="text-xl font-black text-gray-800 tracking-tighter mt-1">Stellar Way</h2>
-          </div>
-
-          <nav className="mt-8 px-4 space-y-2 flex-1 overflow-y-auto">
-            {menuItems.map((item) => {
-              const isActive = pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-5 py-3.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-                    isActive ? "bg-[#1A4E11] text-white shadow-lg translate-x-1" : "text-gray-500 hover:bg-white/70 hover:text-black"
-                  }`}
-                >
-                  <item.icon size={18} />
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="p-4 border-t border-white/10">
-            <button
-              onClick={() => signOut({ callbackUrl: "/" })}
-              className="flex items-center gap-3 px-5 py-3.5 w-full text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all font-bold"
-            >
-              <LogOut size={18} />
-              <span>Logout</span>
-            </button>
-          </div>
+  className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#E4F5DC] border-r border-gray-100 transition-transform lg:static lg:translate-x-0 ${
+    isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+  }`}
+>
+  <div className="flex flex-col h-full">
+    {/* Logo Container - Adjusted Height and Padding */}
+   <div className=" mb-6 mt-10 flex justify-center">
+      <Link href="/">
+        <div className=" w-32 h-10 rounded flex items-center justify-center text-xs font-bold uppercase tracking-widest">
+          <Image
+            src={logo}
+            alt="Seoul Mirage"
+            className=" h-auto"
+          />
         </div>
-      </aside>
+      </Link>
+    </div>
+
+    {/* Navigation Links */}
+    <nav className="mt-6 px-4 space-y-1.5 flex-1 overflow-y-auto">
+      {menuItems.map((item) => {
+        const isActive = pathname === item.path;
+        return (
+          <Link
+            key={item.path}
+            href={item.path}
+            onClick={() => setIsSidebarOpen(false)}
+            className={`flex items-center gap-3 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
+              isActive 
+                ? "bg-[#1A4E11] text-white shadow-md translate-x-1" 
+                : "text-gray-600 hover:bg-white/80 hover:text-black"
+            }`}
+          >
+            <item.icon size={18} />
+            <span>{item.name}</span>
+          </Link>
+        );
+      })}
+    </nav>
+
+    {/* Logout Section */}
+    <div className="p-4 border-t border-gray-200/50">
+      <button
+        onClick={() => signOut({ callbackUrl: "/" })}
+        className="flex items-center gap-3 px-5 py-3 w-full text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all font-bold group"
+      >
+        <LogOut size={18} className="group-hover:rotate-12 transition-transform" />
+        <span>Logout</span>
+      </button>
+    </div>
+  </div>
+</aside>
 
       {/* Main Content Wrapper */}
       <div className="flex-1 flex flex-col min-w-0">

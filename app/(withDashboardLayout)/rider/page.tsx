@@ -175,6 +175,8 @@ const RiderDashboard: React.FC = () => {
     return <div className="min-h-[80vh] flex items-center justify-center"><Loader2 className="animate-spin text-orange-500" size={48} /></div>;
   }
 
+  console.log(activeOrder?.transactionId)
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-10 bg-[#f8fafc]">
       <header className="flex justify-between items-center">
@@ -210,7 +212,7 @@ const RiderDashboard: React.FC = () => {
           <div className="bg-slate-900 rounded-[3rem] p-8 text-white shadow-2xl overflow-hidden">
             <div className="flex flex-col lg:flex-row gap-8">
               <div className="flex-1 space-y-6">
-                <h2 className="text-4xl font-black text-orange-400 italic">#{activeOrder.transactionId.slice(-8).toUpperCase()}</h2>
+                <h2 className="text-4xl font-black text-orange-400 italic">#{activeOrder.transactionId.slice(-10)}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-white/5 p-5 rounded-2xl border border-white/10">
                     <p className="text-[10px] font-black text-slate-500 uppercase">Address</p>

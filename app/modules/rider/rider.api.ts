@@ -60,3 +60,8 @@ export const updateDeliveryStatusApi = async (orderId: string, payload: {
   const response = await api.patch(`/orders/update-delivery-status/${orderId}`, payload);
   return response.data;
 };
+
+export const getMyOrdersApi = async (email: string) => {
+  const response = await api.get(`/orders/${email}`);
+  return response.data;
+};

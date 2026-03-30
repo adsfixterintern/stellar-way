@@ -14,7 +14,7 @@ import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import { 
   IoCheckmarkCircleOutline, 
-  IoCloseCircleOutline, // রিজেক্ট আইকন
+  IoCloseCircleOutline,
   IoTrashOutline 
 } from "react-icons/io5";
 
@@ -71,7 +71,7 @@ const RidersPage = () => {
     }
   };
 
-  // ২. রিজেক্ট হ্যান্ডলার (নতুন যোগ করা হয়েছে)
+ 
   const handleReject = async (id: string) => {
     const result = await Swal.fire({
       title: "Reject Rider?",
@@ -237,7 +237,7 @@ const RidersPage = () => {
                       </span>
                     </td>
                     <td className="p-5 text-right space-x-2">
-                      {/* আইicon সরিয়ে রিজেক্ট বাটন বসানো হয়েছে */}
+                    
                       {item.status === "pending" && (
                         <>
                           <button 

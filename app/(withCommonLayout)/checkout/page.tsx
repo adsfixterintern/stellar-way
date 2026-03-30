@@ -56,25 +56,39 @@ const CheckoutPage = () => {
   const grandTotal = subtotal + taxes;
 
 const handleOrderSubmit = async () => {
-  
-    if (status !== "authenticated") {
-      toast.error("Please login to place an order!");
-      return signIn();
-    }
+  if (status !== "authenticated") {
+    toast.error("Please login to place an order!");
+    return signIn();
+  }
 
-    // ২. ফিল্ড ভ্যালিডেশন
-    if (!formData.phone || !formData.address || !formData.town) {
-      return toast.error("Please fill in Phone, Address and City!");
-    }
+  if (!formData.phone || !formData.address || !formData.town) {
+    return toast.error("Please fill in Phone, Address and City!");
+  }
 
-    // ৩. কার্টে আইটেম আছে কি না চেক
-    if (checkoutItems.length === 0) {
-      return toast.error("Your cart is empty!");
-    }
+  if (checkoutItems.length === 0) {
+    return toast.error("Your cart is empty!");
+  }
 
+  const loadingToast = toast.loading("Processing your request...");
+
+  try {
+    const getCoords = (): Promise<{ lat: number; lng: number }> => {
+      return new Promise((resolve) => {
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+            () => resolve({ lat: 23.8103, lng: 90.4125 }),
+            { timeout: 5000 }
+          );
+        } else {
+          resolve({ lat: 23.8103, lng: 90.4125 });
+        }
+      });
+    };
+
+    const coords = await getCoords();
     const pendingOrderId = localStorage.getItem("pending_order_id");
 
-    // ৪. অর্ডার অবজেক্ট তৈরি
     const orderData = {
       orderId: pendingOrderId || null,
       customerInfo: {
@@ -84,6 +98,10 @@ const handleOrderSubmit = async () => {
       },
       phone: formData.phone,
       address: `${formData.address}, ${formData.town}, ${formData.district}`,
+      deliveryLocation: {
+        lat: coords.lat,
+        lng: coords.lng,
+      },
       town: formData.town,
       district: formData.district,
       items: checkoutItems.map((item) => ({
@@ -95,57 +113,33 @@ const handleOrderSubmit = async () => {
       paymentMethod: paymentMethod === "sslcommerz" ? "SSLCommerz" : "Stripe",
     };
 
-    // ডিবাগিংয়ের জন্য ডাটা কনসোলে প্রিন্ট করা
-    console.log("--- Sending Order Data to Backend ---", orderData);
+    const response = paymentMethod === "stripe"
+      ? await createStripeOrder(orderData)
+      : await createSSLOrder(orderData);
 
-    const loadingToast = toast.loading(
-      "Order placing, redirecting to payment gateway...",
-    );
-
-    try {
-      // ৫. এপিআই কল (SSLCommerz বা Stripe)
-      const response =
-        paymentMethod === "stripe"
-          ? await createStripeOrder(orderData)
-          : await createSSLOrder(orderData);
-
-      console.log("--- Backend Response Received ---", response);
-
-      if (response.success && response.data?.paymentUrl) {
-        // ৬. মেইন কার্ট থেকে কেনা আইটেমগুলো রিমুভ করা
-        const mainCartRaw = localStorage.getItem("cart");
-        if (mainCartRaw) {
-          const mainCart = JSON.parse(mainCartRaw);
-          const remainingCart = mainCart.filter(
-            (mainItem: any) =>
-              !checkoutItems.some(
-                (checkItem) => checkItem._id === mainItem._id,
-              ),
-          );
-          localStorage.setItem("cart", JSON.stringify(remainingCart));
-        }
-
-        // ৭. লোকাল স্টোরেজ ক্লিন করা
-        localStorage.removeItem("temp_checkout");
-        localStorage.removeItem("pending_order_id");
-
-        toast.success("Redirecting to payment...");
-        
- 
-        window.location.href = response.data.paymentUrl;
-      } else {
- 
-        console.warn("Payment Initiation Failed:", response.message);
-        toast.error(response.message || "Failed to initiate payment gateway.");
+    if (response.success && response.data?.paymentUrl) {
+      const mainCartRaw = localStorage.getItem("cart");
+      if (mainCartRaw) {
+        const mainCart = JSON.parse(mainCartRaw);
+        const remainingCart = mainCart.filter(
+          (mainItem: any) =>
+            !checkoutItems.some((checkItem) => checkItem._id === mainItem._id)
+        );
+        localStorage.setItem("cart", JSON.stringify(remainingCart));
       }
-    } catch (error: any) {
 
-      console.error("Critical Payment Error:", error);
-      toast.error(error?.response?.data?.message || "Something went wrong! Please try again.");
-    } finally {
-      toast.dismiss(loadingToast);
+      localStorage.removeItem("temp_checkout");
+      localStorage.removeItem("pending_order_id");
+      window.location.href = response.data.paymentUrl;
+    } else {
+      toast.error(response.message || "Failed to initiate payment.");
     }
-  };
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message || "Something went wrong!");
+  } finally {
+    toast.dismiss(loadingToast);
+  }
+};
 
   if (!isLoaded) return null;
 

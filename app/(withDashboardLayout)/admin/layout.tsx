@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  IoCubeOutline,
+ 
   IoCartOutline,
   IoPeopleOutline,
   IoSettingsOutline,
@@ -96,7 +96,7 @@ const menuItems = [
 
   { name: "Chef", icon: <IoPeopleOutline />, path: "/admin/chef" },
 
-  { name: "Events", icon: <IoCalendarOutline />, path: "/admin/events" },
+  { name: "Events", icon: <IoBriefcaseOutline />, path: "/admin/events" },
   { name: "booking", icon: <IoCalendarOutline />, path: "/admin/booking" },
   { name: "User Management", icon: <IoPeopleOutline />, path: "/admin/user-management" },
   { name: "Gallery Management", icon: <IoImageOutline />, path: "/admin/gallery" },

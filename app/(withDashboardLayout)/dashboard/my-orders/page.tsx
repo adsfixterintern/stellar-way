@@ -181,7 +181,7 @@ const MyOrdersPage = () => {
 
       {/* Review Modal */}
       {isReviewModalOpen && selectedOrder && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
+        <div className="fixed inset-0 z-10 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
           <div className="bg-white w-full max-w-xl shadow-2xl rounded-3xl overflow-hidden animate-in zoom-in-95 duration-200">
             {/* Header */}
             <div className="p-6 border-b flex justify-between items-center bg-gray-50/50">
@@ -208,7 +208,7 @@ const MyOrdersPage = () => {
                     return (
                       <div key={mId || idx} className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
                         <div className="flex items-center gap-4 mb-4">
-                          <div className="w-12 h-12 bg-white rounded-xl relative overflow-hidden flex-shrink-0 shadow-sm">
+                          <div className="w-12 h-12 bg-white rounded-xl relative overflow-hidden shrink-0 shadow-sm">
                             {menu?.image?.url ? <Image src={menu.image.url} alt="food" fill className="object-cover" /> : <div className="flex items-center justify-center h-full text-[6px] font-bold">NO IMG</div>}
                           </div>
                           <div>
@@ -245,7 +245,7 @@ const MyOrdersPage = () => {
                      <h3 className="font-black text-xs uppercase tracking-widest text-gray-500">Rate Delivery Service</h3>
                   </div>
 
-                  <div className="bg-orange-50/30 p-6 rounded-[2rem] border border-orange-100">
+                  <div className="bg-orange-50/30 p-6 rounded-2xl border border-orange-100">
                     <div className="flex flex-col items-center text-center mb-6">
                       <div className="w-20 h-20 rounded-2xl bg-white border-4 border-white overflow-hidden relative shadow-md mb-3">
                          <Image src={selectedOrder.riderId.image || "https://i.pravatar.cc/150"} alt="rider" fill className="object-cover" />

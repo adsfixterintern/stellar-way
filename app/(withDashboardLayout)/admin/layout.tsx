@@ -99,7 +99,7 @@ const menuItems = [
   { name: "Events", icon: <IoBriefcaseOutline />, path: "/admin/events" },
   { name: "booking", icon: <IoCalendarOutline />, path: "/admin/booking" },
   { name: "User Management", icon: <IoPeopleOutline />, path: "/admin/user-management" },
-
+  { name: "FAQ", icon: <IoSettingsOutline />, path: "/admin/faq" },
   { name: "Settings", icon: <IoSettingsOutline />, path: "/admin/settings" },
 ];
 
@@ -155,7 +155,7 @@ const menuItems = [
 
       {/* 3. MOBILE SIDEBAR OVERLAY */}
       {isSidebarOpen && (
-        <div className="lg:hidden fixed inset-0 z-[60] flex">
+        <div className="lg:hidden fixed inset-0 z-60 flex">
           <div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
             onClick={() => setIsSidebarOpen(false)}

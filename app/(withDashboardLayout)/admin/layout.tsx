@@ -17,7 +17,8 @@ import {
   IoGridOutline,
   IoRestaurantOutline,
   IoCalendarOutline,
-  IoBriefcaseOutline,
+  IoImageOutline,
+  IoBriefcaseOutline
 } from "react-icons/io5";
 import { Toaster } from "react-hot-toast";
 import logo from "@/assets/img/flogo.png"
@@ -100,6 +101,8 @@ const menuItems = [
   { name: "booking", icon: <IoCalendarOutline />, path: "/admin/booking" },
   { name: "User Management", icon: <IoPeopleOutline />, path: "/admin/user-management" },
   { name: "FAQ", icon: <IoSettingsOutline />, path: "/admin/faq" },
+  { name: "Gallery Management", icon: <IoImageOutline />, path: "/admin/gallery" },
+
   { name: "Settings", icon: <IoSettingsOutline />, path: "/admin/settings" },
 ];
 

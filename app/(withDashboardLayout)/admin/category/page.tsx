@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect, FormEvent } from "react";
-import axios from "axios";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import {
   IoAddOutline,
   IoTrashOutline,
@@ -10,9 +10,17 @@ import {
   IoLayersOutline,
   IoCloseOutline,
   IoReorderThreeOutline,
-  IoCreateOutline // এডিট আইকন
+  IoCreateOutline
 } from "react-icons/io5";
 import Swal from "sweetalert2";
+
+// API মডিউল ইমপোর্ট
+import { 
+  getAllCategoriesApi, 
+  createCategoryApi, 
+  updateCategoryApi, 
+  deleteCategoryApi 
+} from "@/app/modules/category/category.api";
 
 interface Category {
   _id: string;
@@ -22,14 +30,7 @@ interface Category {
   updatedAt: string;
 }
 
-interface FetchResponse {
-  success: boolean;
-  message: string;
-  data: Category[];
-}
-
 const CategoryPage: React.FC = () => {
-  const BASE_URL = "http://localhost:8000/api/v1";
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [btnLoading, setBtnLoading] = useState<boolean>(false);
@@ -38,14 +39,14 @@ const CategoryPage: React.FC = () => {
   const [catName, setCatName] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<number>(1);
   
-  // নতুন স্টেট আপডেট করার জন্য
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  // ডেটা ফেচিং
   const fetchCategories = async (): Promise<void> => {
     setLoading(true);
     try {
-      const { data } = await axios.get<FetchResponse>(`${BASE_URL}/categories`);
+      const data = await getAllCategoriesApi();
       if (data.success) {
         setCategories(data.data);
       }
@@ -60,7 +61,7 @@ const CategoryPage: React.FC = () => {
     fetchCategories();
   }, []);
 
-  // মডাল খোলার ফাংশন (Add এবং Update দুটোর জন্যই)
+  // মডাল কন্ট্রোল
   const openModal = (category: Category | null = null) => {
     if (category) {
       setIsEditMode(true);
@@ -76,173 +77,198 @@ const CategoryPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  // সাবমিট লজিক (Create/Update)
   const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     setBtnLoading(true);
     try {
-      const payload = {
-        name: catName,
-        sortOrder: Number(sortOrder),
-      };
+      const payload = { name: catName, sortOrder: Number(sortOrder) };
 
       let res;
       if (isEditMode && selectedId) {
-        // আপডেট রিকোয়েস্ট
-        res = await axios.patch(`${BASE_URL}/categories/${selectedId}`, payload);
+        res = await updateCategoryApi(selectedId, payload);
       } else {
-        // ক্রিয়েট রিকোয়েস্ট
-        res = await axios.post(`${BASE_URL}/categories/create-category`, payload);
+        res = await createCategoryApi(payload);
       }
 
-      if (res.data.success) {
-        toast.success(isEditMode ? "Updated successfully!" : "Created successfully!");
+      if (res.success) {
+        toast.success(isEditMode ? "Category Updated!" : "Category Created!");
         setIsModalOpen(false);
         fetchCategories();
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Operation failed");
+      toast.error(err.response?.data?.message || "Something went wrong");
     } finally {
       setBtnLoading(false);
     }
   };
 
+  // ডিলিট লজিক
   const handleDelete = async (id: string): Promise<void> => {
     const result = await Swal.fire({
       title: "Are you sure?",
-      text: "This action cannot be undone!",
+      text: "Items in this category might be affected!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#1A4E11",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-      customClass: { popup: "rounded-2xl" },
+      cancelButtonColor: "#EF4444",
+      confirmButtonText: "Yes, Delete!",
+      customClass: { popup: "rounded-[30px]" },
     });
 
     if (result.isConfirmed) {
       try {
-        const { data } = await axios.delete(`${BASE_URL}/categories/${id}`);
+        const data = await deleteCategoryApi(id);
         if (data.success) {
           toast.success("Category deleted");
           fetchCategories();
         }
       } catch (err: any) {
-        toast.error("Delete failed");
+        toast.error("Failed to delete category");
       }
     }
   };
 
   return (
-    <div className="bg-gray-50/50 min-h-screen w-full font-sans p-4 md:p-8">
-      <div className="mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Category Management</h1>
-            <p className="text-xs text-gray-400 font-bold mt-1 uppercase tracking-widest">Organize your menu items</p>
-          </div>
-          <button
-            onClick={() => openModal()}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#1A4E11] text-white px-6 py-3.5 rounded-[8px] cursor-pointer font-bold text-[10px] uppercase tracking-widest hover:opacity-90 transition-all active:scale-95"
-          >
-            <IoAddOutline size={18} /> Add Category
-          </button>
+    <div className="bg-gray-50/30 min-h-screen w-full p-6 md:p-10 font-sans">
+      <Toaster position="top-right" />
+      
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tighter uppercase italic">
+            Categories
+          </h1>
+          <p className="text-[10px] text-gray-400 font-black mt-1 uppercase tracking-[0.4em]">
+            Manage your store classification
+          </p>
         </div>
+        <button
+          onClick={() => openModal()}
+          className="flex items-center gap-2 bg-[#1A4E11] text-white px-8 py-4 rounded-[20px] font-black text-[11px] uppercase tracking-widest hover:scale-105 transition-all shadow-xl shadow-green-900/10 active:scale-95"
+        >
+          <IoAddOutline size={20} /> Add New Category
+        </button>
+      </div>
 
-        <div className="bg-white rounded-[10px] border border-gray-100 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50/50 border-b border-gray-100">
-                  <th className="p-5 text-[10px] font-black uppercase text-gray-400 tracking-widest">Name</th>
-                  <th className="p-5 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">Sort Order</th>
-                  <th className="p-5 text-[10px] font-black uppercase text-gray-400 tracking-widest">Date</th>
-                 <th className="p-5 text-[10px] font-black uppercase text-gray-400 tracking-widest">Update</th>
-                  <th className="p-5 text-[10px] font-black uppercase text-gray-400 text-right tracking-widest">Action</th>
+      {/* Table Container */}
+      <div className="bg-white rounded-[35px] border border-gray-100 shadow-2xl shadow-gray-200/50 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-gray-50/50 border-b border-gray-100">
+                <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest">Name</th>
+                <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">Order</th>
+                <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest">Created At</th>
+                <th className="p-6 text-[10px] font-black uppercase text-gray-400 text-right tracking-widest">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {loading ? (
+                <tr>
+                  <td colSpan={4} className="p-24 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                       <div className="w-10 h-10 border-4 border-[#1A4E11] border-t-transparent rounded-full animate-spin"></div>
+                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Syncing Categories...</p>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {loading ? (
-                  <tr>
-                    <td colSpan={4} className="p-20 text-center text-gray-400 font-bold uppercase text-[10px] tracking-widest">Loading...</td>
-                  </tr>
-                ) : categories.map((cat) => (
-                  <tr key={cat._id} className="hover:bg-gray-50/30 transition-colors group">
-                    <td className="p-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-[#1A4E11]/5 flex items-center justify-center text-[#1A4E11]"><IoLayersOutline size={20} /></div>
-                        <span className="font-bold text-gray-800 text-sm">{cat.name}</span>
+              ) : categories.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="p-20 text-center text-gray-400 font-black uppercase text-xs tracking-widest">No categories found.</td>
+                </tr>
+              ) : categories.map((cat) => (
+                <tr key={cat._id} className="hover:bg-gray-50/50 transition-all group">
+                  <td className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-[#1A4E11] group-hover:bg-white group-hover:shadow-md transition-all">
+                        <IoLayersOutline size={22} />
                       </div>
-                    </td>
-                    <td className="p-5 text-center">
-                      <span className="inline-block px-3 py-1 bg-gray-100 rounded-full text-[11px] font-bold text-gray-600">{cat.sortOrder}</span>
-                    </td>
-                    <td className="p-5">
-                      <div className="flex items-center gap-2 text-gray-500 text-xs font-medium">
-                        <IoCalendarOutline /> {new Date(cat.createdAt).toLocaleDateString()}
-                      </div>
-                    </td>
-                    <td className="p-5 text-right">
-                      <div className="flex justify-end gap-2">
-                        {/* আপডেট বাটন */}
-                        <button 
-                          onClick={() => openModal(cat)} 
-                          className="p-2.5 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
-                        >
-                          <IoCreateOutline size={20} />
-                        </button>
-                        {/* ডিলিট বাটন */}
-                        <button 
-                          onClick={() => handleDelete(cat._id)} 
-                          className="p-2.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                        >
-                          <IoTrashOutline size={20} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      <span className="font-black text-gray-800 text-sm uppercase tracking-tight">{cat.name}</span>
+                    </div>
+                  </td>
+                  <td className="p-6 text-center">
+                    <span className="inline-block px-4 py-1.5 bg-[#1A4E11]/5 rounded-xl text-[11px] font-black text-[#1A4E11] border border-[#1A4E11]/10">
+                      {cat.sortOrder}
+                    </span>
+                  </td>
+                  <td className="p-6">
+                    <div className="flex items-center gap-2 text-gray-400 text-[11px] font-black uppercase">
+                      <IoCalendarOutline size={14} /> {new Date(cat.createdAt).toLocaleDateString('en-GB')}
+                    </div>
+                  </td>
+                  <td className="p-6 text-right">
+                    <div className="flex justify-end gap-3">
+                      <button 
+                        onClick={() => openModal(cat)} 
+                        className="p-3 text-gray-300 hover:text-[#1A4E11] hover:bg-green-50 rounded-2xl transition-all"
+                      >
+                        <IoCreateOutline size={22} />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(cat._id)} 
+                        className="p-3 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
+                      >
+                        <IoTrashOutline size={22} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
+      {/* Modern Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-          <div className="relative bg-white w-full max-w-md shadow-2xl rounded-[10px] overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center p-6 border-b border-gray-50">
-              <h2 className="text-xl font-black text-gray-900 tracking-tight">
-                {isEditMode ? "Update Category" : "Add Category"}
-              </h2>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-all"><IoCloseOutline size={24} /></button>
+          <div 
+            className="absolute inset-0 bg-black/40 backdrop-blur-md animate-in fade-in duration-300" 
+            onClick={() => setIsModalOpen(false)}
+          ></div>
+          <div className="relative bg-white w-full max-w-md shadow-2xl rounded-[40px] overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center p-8 border-b border-gray-50">
+              <div>
+                <h2 className="text-xl font-black text-gray-900 uppercase italic tracking-tighter">
+                  {isEditMode ? "Update Category" : "New Category"}
+                </h2>
+                <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest mt-1">Fill the details below</p>
+              </div>
+              <button 
+                onClick={() => setIsModalOpen(false)} 
+                className="p-3 hover:bg-gray-100 rounded-full transition-all"
+              >
+                <IoCloseOutline size={24} />
+              </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-8 space-y-5">
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Category Name</label>
+            <form onSubmit={handleSubmit} className="p-8 space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-1">Category Name</label>
                 <div className="relative">
                   <input
                     type="text"
                     required
                     value={catName}
                     onChange={(e) => setCatName(e.target.value)}
-                    placeholder="e.g. Italian Pizza"
-                    className="w-full border border-gray-100 p-4 rounded-2xl outline-none focus:border-[#1A4E11] transition-all text-sm bg-gray-50 focus:bg-white font-semibold"
+                    placeholder="e.g. Traditional Burgers"
+                    className="w-full border-2 border-gray-50 p-4 rounded-[20px] outline-none focus:border-[#1A4E11] focus:bg-white transition-all text-sm bg-gray-50 font-bold"
                   />
-                  <IoLayersOutline className="absolute right-4 top-4 text-gray-300" size={20} />
+                  <IoLayersOutline className="absolute right-5 top-4.5 text-gray-300" size={20} />
                 </div>
               </div>
 
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Sort Order</label>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-1">Priority Order</label>
                 <div className="relative">
                   <input
                     type="number"
                     value={sortOrder}
                     onChange={(e) => setSortOrder(Number(e.target.value))}
-                    className="w-full border border-gray-100 p-4 rounded-2xl outline-none focus:border-[#1A4E11] transition-all text-sm bg-gray-50 focus:bg-white font-semibold"
+                    className="w-full border-2 border-gray-50 p-4 rounded-[20px] outline-none focus:border-[#1A4E11] focus:bg-white transition-all text-sm bg-gray-50 font-bold"
                   />
-                  <IoReorderThreeOutline className="absolute right-4 top-4 text-gray-300" size={20} />
+                  <IoReorderThreeOutline className="absolute right-5 top-4.5 text-gray-300" size={22} />
                 </div>
               </div>
 
@@ -250,9 +276,9 @@ const CategoryPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={btnLoading}
-                  className="w-full bg-[#1A4E11] text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:opacity-90 transition-all disabled:opacity-50"
+                  className="w-full bg-[#1A4E11] text-white py-5 rounded-[22px] font-black uppercase tracking-[0.2em] text-[11px] hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-green-900/20 disabled:bg-gray-200"
                 >
-                  {btnLoading ? "Processing..." : (isEditMode ? "Update Category" : "Create Category")}
+                  {btnLoading ? "Processing..." : (isEditMode ? "Save Changes" : "Create Now")}
                 </button>
               </div>
             </form>

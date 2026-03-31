@@ -74,11 +74,24 @@ export const updateRiderRatingApi = async (payload: {
 };
 
 
-
-
-
-
 export const getMyOrdersApi = async (email: string) => {
   const response = await api.get(`/orders/${email}`);
+  return response.data;
+};
+
+
+export const getMyProfileApi = async (userId: string) => {
+  const response = await api.get(`/auth/me?userId=${userId}`);
+  return response.data;
+};
+
+
+export const updateProfileApi = async (updateData: {
+  name: string;
+  phone: string;
+  userId: string;
+  image?: string;
+}) => {
+  const response = await api.patch("/auth/update-profile", updateData);
   return response.data;
 };

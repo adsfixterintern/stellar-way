@@ -3,7 +3,7 @@
 import React, { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { IoCloseOutline, IoImageOutline, IoDocumentTextOutline } from "react-icons/io5";
+import { IoCloseOutline, IoImageOutline} from "react-icons/io5";
 import Image from "next/image";
 import { ICategory } from "@/types/category";
 import { IChef } from "@/types/menu";
@@ -85,7 +85,7 @@ export const MenuModal = ({ isOpen, onClose, editData, categories, chefs, onSucc
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-10 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}></div>
       <div className="relative bg-white w-full max-w-2xl shadow-2xl rounded-2xl overflow-hidden">
         <div className="flex justify-between items-center p-6 border-b border-gray-50">

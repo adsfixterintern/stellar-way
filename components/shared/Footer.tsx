@@ -61,6 +61,7 @@ const Footer = () => {
               At our food delivery service, we are passionate about making your
               dining experience convenient and enjoyable.
             </p>
+            <Link href={'/apply-rider'}><button className="blockBtn">Apply to be a Rider</button></Link>
           </div>
 
           {/* Explore Links - Mapping */}

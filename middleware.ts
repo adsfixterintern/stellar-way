@@ -48,6 +48,7 @@ export const config = {
     "/checkout", 
     "/profile/:path*", 
     "/dashboard/:path*",
-    "/dashboard" 
+    "/dashboard",
+    "/apply-rider",
   ],
 };

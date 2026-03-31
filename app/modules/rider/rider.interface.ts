@@ -2,7 +2,7 @@ export interface IRider {
   _id?: string;          
   userId: string;         
   phoneNumber: string; 
-  vehicleType: 'bike' | 'cycle' | 'car';
+  vehicleType: 'bike' | 'cycle' | 'car' | " ";
   licenseNumber?: string;
   identityCard: string;
   area: string;

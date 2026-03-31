@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from "react";
@@ -12,7 +13,7 @@ const RiderApplyForm = () => {
 
   const [formData, setFormData] = useState<Partial<IRider>>({
     phoneNumber: "",
-    vehicleType: "", 
+    vehicleType: "" as any, 
     licenseNumber: "",
     identityCard: "",
     area: "",
@@ -46,7 +47,7 @@ const RiderApplyForm = () => {
         toast.success("Application Submitted Successfully!");
         setFormData({
           phoneNumber: "",
-          vehicleType: "",
+          vehicleType: "" as any,
           licenseNumber: "",
           identityCard: "",
           area: "",

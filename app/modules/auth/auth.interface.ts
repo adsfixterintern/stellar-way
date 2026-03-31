@@ -3,15 +3,14 @@ export interface IUser {
   name: string;
   email: string;
   role: "admin" | "user";
+  phone?: string; // নতুন যোগ করা হয়েছে
+  image?: string;
 }
 
 export interface IAuthResponse {
   success: boolean;
   message: string;
-  data: {
-    user: IUser;
-    token: string;
-  };
+  data: IUser;
 }
 
 export interface IRegisterData {

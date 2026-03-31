@@ -39,19 +39,29 @@ const LatestBlogs: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-end mb-12">
           <div className="!mb-5">
-            <span className="superTitle flex items-center gap-3 ">Blog
-              <div className="w-10 h-[2px] bg-[#1A4E11]"></div> 
+            <span className="superTitle flex items-center gap-3 ">
+              Blog
+              <div className="w-10 h-[2px] bg-[#1A4E11]"></div>
             </span>
             <h2 className="secTitle mt-4">Latest Blog Post</h2>
           </div>
 
-       
-
-          <div className="flex gap-3">
+          {/* <div className="flex gap-3">
             <button className="blog-prev w-12 h-12 rounded-full border border-gray-300 flex items-center justify-center hover:bg-[#1A4E11] hover:text-white transition-all duration-300">
               <IoArrowBackOutline size={22} />
             </button>
             <button className="blog-next w-12 h-12 rounded-full bg-[#1A4E11] text-white flex items-center justify-center hover:bg-[#133A0C] transition-all duration-300">
+              <IoArrowForwardOutline size={22} />
+            </button>
+          </div> */}
+          <div className="flex gap-3">
+            {/* Previous Button */}
+            <button className="blog-prev w-12 h-12 rounded-lg border-2 border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-[#1A4E11] hover:text-white hover:border-[#1A4E11] transition-all duration-300 shadow-sm">
+              <IoArrowBackOutline size={22} />
+            </button>
+
+            {/* Next Button */}
+            <button className="blog-next w-12 h-12 rounded-lg bg-[#2D4619] text-white flex items-center justify-center hover:bg-[#1A4E11] transition-all duration-300 shadow-sm">
               <IoArrowForwardOutline size={22} />
             </button>
           </div>

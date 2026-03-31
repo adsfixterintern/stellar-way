@@ -1,101 +1,167 @@
 @import "tailwindcss";
 
-
 :root {
-    --primary-green: #1A4E11;
-    --gray-text: #939393;
-    --white: #FFFFFF;
+  --primary-green: #1a4e11;
+  --gray-text: #939393;
+  --white: #ffffff;
+  --section-bg-secondary: #F5F5DC;
 }
 
-/* Color Utility Classes */
-.text-primary { color: var(--primary-green); }
-.text-gray { color: var(--gray-text); }
-.bg-primary { background-color: var(--primary-green); }
+.text-primary {
+  color: var(--primary-green);
+}
+.text-gray {
+  color: var(--gray-text);
+}
+.bg-primary {
+  background-color: var(--primary-green);
+}
+.bg-secondary {
+  background-color: var(--section-bg-secondary);
+}
 
-/* ----------------------------------------- */
-
-/* 2. Typography Styles */
-
+/* Typography */
 .secTitle {
-    font-family: 'Inter Tight', sans-serif;
-    font-weight: 600;
-    font-size: 48px;
-    line-height: 100%;
-    vertical-align: middle;
+  font-weight: 600;
+  font-size: 48px;
+  line-height: 100%;
 }
 
 .superTitle {
-    font-family: 'Inter Tight', sans-serif;
-    font-weight: 700;
-    font-size: 18px;
-    line-height: 24px;
-    letter-spacing: 1.97px;
-    text-transform: uppercase;
-    vertical-align: middle;
-    color: var(--primary-green); 
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: 1.97px;
+  text-transform: uppercase;
+  color: var(--primary-green);
 }
 
 .description {
-    font-family: 'Inter Tight', sans-serif;
-    font-weight: 400;
-    font-size: 18px;
-    line-height: 132%;
-    text-transform: capitalize;
-    vertical-align: middle;
-    color: var(--gray-text);
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 132%;
+  text-transform: capitalize;
+  color: var(--gray-text);
+}
+
+.menuDescription{
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 140%;
+  color: var(--gray-text);
 }
 
 .subTitle {
-    font-family: 'Inter Tight', sans-serif;
-    font-weight: 600;
-    font-size: 30px;
-    line-height: 36px;
-    text-align: center;
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 36px;
 }
 
 .nameText {
-    font-family: 'Inter Tight', sans-serif;
-    font-weight: 600;
-    font-size: 16px;
-    line-height: 150%;
-    text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 150%;
 }
 
 .designationText {
-    font-family: 'Inter Tight', sans-serif;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 132%;
-    text-align: center;
-    color: var(--gray-text);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 132%;
+  color: var(--gray-text);
 }
 
-/* 3. Component Styles */
+.cardTitle {
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 130%;
+  margin-bottom: 22.4px;
+}
 
+.cardDescription {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 140%;
+  margin-bottom: 22.4px;
+}
+
+.price {
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 100%;
+  letter-spacing: 2%;
+  color: var(--primary-green);
+  margin-bottom: 22.4px;
+}
+
+/* Components */
 .blockBtn {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    
-    /* Layout */
-    width: 169px; 
-    height: 50px;
-    gap: 16px;
-    
-    /* Spacing & Style */
-    padding: 14px 32px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    
-    /* Colors */
-    background-color: var(--primary-green);
-    color: var(--white);
-    
-    transition: background 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* width: 169px; */
+  height: 50px;
+  gap: 16px;
+  padding: 14px 32px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background-color: var(--primary-green);
+  color: var(--white);
+  transition: background 0.3s ease;
 }
 
 .blockBtn:hover {
-    filter: brightness(1.1);
+  filter: brightness(1.1);
+}
+
+/* Swiper Slide Responsive Fix */
+.swiper-wrapper {
+  padding-bottom: 50px; 
+}
+
+/* স্লাইডার নেভিগেশন বাটন ডিজাইন */
+.swiper-button-next,
+.swiper-button-prev {
+  color: var(--primary-green) !important;
+  background: white;
+  padding: 25px;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transform: scale(0.7); 
+}
+
+/* Responsive Media Queries */
+@media (max-width: 1024px) {
+  .secTitle {
+    font-size: 36px;
+  }
+  .subTitle {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 767px) {
+  .secTitle {
+    font-size: 28px;
+    line-height: 120%;
+  }
+  .superTitle {
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+  .description {
+    font-size: 16px;
+  }
+  .subTitle {
+    font-size: 22px;
+  }
+  .cardTitle {
+    font-size: 20px;
+  }
+
+  .blockBtn {
+    width: 100%;
+    max-width: 200px;
+    height: 45px;
+  }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from "@/utils/apiInstance"; 
 import { IAuthResponse, ILoginCredentials, IRegisterData } from "../auth/auth.interface";
 
@@ -23,5 +24,26 @@ export const resetPasswordApi = async (token: string, password: string): Promise
 
 export const forgetPasswordApi = async (email: string): Promise<IAuthResponse> => {
   const response = await api.post("/auth/forget-password", { email });
+  return response.data;
+};
+
+export const getMeApi = async (userId?: string): Promise<IAuthResponse> => {
+  const response = await api.get(`/auth/me`, {
+    params: { userId }
+  });
+  return response.data;
+};
+
+
+export const updateProfileApi = async (updateData: any): Promise<IAuthResponse> => {
+  const response = await api.patch("/auth/update-profile", updateData);
+  return response.data;
+};
+
+
+export const getAllUsersApi = async (limit: number = 999): Promise<any> => {
+  const response = await api.get("/auth/all-users", {
+    params: { limit }
+  });
   return response.data;
 };

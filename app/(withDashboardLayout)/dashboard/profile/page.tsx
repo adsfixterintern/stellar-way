@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
 import { 
   IoPersonOutline, 
@@ -13,106 +13,118 @@ import {
   IoCloseOutline
 } from "react-icons/io5";
 import { useSession } from "next-auth/react";
+import { getMeApi, updateProfileApi } from "@/app/modules/auth/auth.api"; 
 
 const UserProfile = () => {
-  const BASE_URL = "http://localhost:8000/api/v1/auth"; 
-  
-  const [user, setUser] = useState(null);
   const { data: session } = useSession();
-  const userId = session?.user.id;
+  const userId = session?.user?.id;
   
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
 
-  // ফর্ম এবং ইমেজ স্টেট
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-  });
-  const [image, setImage] = useState(""); // ব্যাকএন্ডে পাঠানোর জন্য Base64 String
-  const [imagePreview, setImagePreview] = useState(""); // দেখানোর জন্য URL
+  const [formData, setFormData] = useState({ name: "", phone: "" });
+  const [image, setImage] = useState(""); 
+  const [imagePreview, setImagePreview] = useState("");
 
-  // ১. প্রোফাইল ডাটা ফেচ করা
-  const fetchProfile = async () => {
+  const loadProfile = useCallback(async () => {
+    if (!userId) return;
     try {
       setLoading(true);
-      const { data } = await axios.get(`${BASE_URL}/me?userId=${userId}`);      
-      if (data.success) {
-        setUser(data.data);
+      const res: any = await getMeApi(userId);      
+      
+      if (res.success && res.data) {
+        // রেসপন্স স্ট্রাকচার অনুযায়ী ডাটা সেট করা
+        const profileData = res.data.user ? res.data.user : res.data;
+
+        setUser(profileData);
         setFormData({
-          name: data.data.name || "",
-          phone: data.data.phone || "",
+          name: profileData.name || "",
+          phone: profileData.phone || "",
         });
-        setImagePreview(data.data.image || "");
+        setImagePreview(profileData.image || "");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Fetch Error:", err);
-      if (err.response?.status === 401) {
-        toast.error("Please login to access your profile");
-      }
+      toast.error(err.response?.data?.message || "Failed to load profile settings");
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    if (userId) {
-      fetchProfile();
-    }
   }, [userId]);
 
-  // ২. ইমেজ সিলেক্ট এবং Base64 এ রূপান্তর (সাইজ ভ্যালিডেশন সহ)
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
-    // সাইজ চেক (৫ মেগাবাইটের বেশি হলে আটকে দেবে)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File is too large! Please select an image under 5MB.");
-      return;
-    }
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 800; 
+          const scaleSize = MAX_WIDTH / img.width;
+          canvas.width = MAX_WIDTH;
+          canvas.height = img.height * scaleSize;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (reader.readyState === 2) {
-        setImagePreview(reader.result); // ব্রাউজারে দেখাবে
-        setImage(reader.result);        // ব্যাকএন্ডে যাবে Base64 হিসেবে
-      }
-    };
-    reader.readAsDataURL(file);
+          const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+          if (!ctx) {
+            reject("Canvas context not found");
+            return;
+          }
+          
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          resolve(dataUrl);
+        };
+      };
+      reader.onerror = (error) => reject(error);
+    });
   };
 
-  // ৩. প্রোফাইল আপডেট ফাংশন (সরাসরি JSON অবজেক্ট পাঠানো)
-  const handleUpdateProfile = async (e) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const compressedData = await compressImage(file);
+      setImagePreview(compressedData);
+      setImage(compressedData);
+    } catch (error) {
+      console.error(error);
+      toast.error("Image processing failed!");
+    }
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!userId) return;
+
     try {
       setUpdateLoading(true);
-
-      // Multer ছাড়া ডাটা পাঠানোর জন্য সাধারণ JSON অবজেক্ট
-      const updateData = {
+      const updatePayload = {
         name: formData.name,
         phone: formData.phone,
-        userId: userId, // বডিতে আইডি পাঠানো হচ্ছে
-        image: image    // নতুন সিলেক্ট করা ছবির Base64 ডাটা (যদি থাকে)
+        userId: userId,
+        ...(image && { image }) 
       };
 
-      const { data } = await axios.patch(
-        `${BASE_URL}/update-profile`,
-        updateData,
-        { withCredentials: true }
-      );
+      const res: any = await updateProfileApi(updatePayload);
 
-      if (data.success) {
+      if (res.success) {
         toast.success("Profile Updated Successfully!");
-        setUser(data.data);
+        const updatedData = res.data?.user ? res.data.user : res.data;
+        setUser(updatedData);
         setIsEditing(false);
-        setImage(""); // স্টেট রিসেট
+        setImage(""); 
       }
-    } catch (err) {
-      // ৪১৩ এরর হ্যান্ডেল করার জন্য মেসেজ
+    } catch (err: any) {
       if (err.response?.status === 413) {
-        toast.error("Image is too large for the server. Try a smaller one.");
+        toast.error("Image is too large for the server.");
       } else {
         toast.error(err.response?.data?.message || "Update failed!");
       }
@@ -124,15 +136,13 @@ const UserProfile = () => {
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
       <div className="w-10 h-10 border-4 border-[#1A4E11] border-t-transparent rounded-full animate-spin"></div>
-      <p className="mt-4 text-[10px] font-black uppercase tracking-[3px] text-gray-400 font-sans">Loading Account...</p>
+      <p className="mt-4 text-[10px] font-black uppercase tracking-[3px] text-gray-400">Loading Account...</p>
     </div>
   );
 
   return (
     <div className="bg-gray-50/30 min-h-screen p-4 md:p-10 font-sans text-gray-800">
       <div className="max-w-4xl mx-auto">
-        
-        {/* Header */}
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl font-black text-gray-900 tracking-tighter uppercase italic leading-none">Account Settings</h1>
@@ -140,15 +150,14 @@ const UserProfile = () => {
               <IoShieldCheckmarkOutline className="text-[#1A4E11]" /> Manage your personal identity
             </p>
           </div>
-          
           <button 
             type="button"
             onClick={() => {
+              if (isEditing) loadProfile(); 
               setIsEditing(!isEditing);
-              if(isEditing) fetchProfile(); 
             }}
             className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${
-              isEditing ? "bg-red-50 text-red-500" : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-100"
+              isEditing ? "bg-red-50 text-red-500" : "bg-white text-gray-700 border border-gray-100"
             }`}
           >
             {isEditing ? <><IoCloseOutline size={18}/> Cancel Edit</> : <><IoPersonOutline size={16}/> Edit Details</>}
@@ -156,62 +165,41 @@ const UserProfile = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* Left Side: Avatar Section */}
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-white p-8 rounded-[30px] border border-gray-100 text-center relative overflow-hidden">
                <div className="absolute top-0 left-0 w-full h-2 bg-[#1A4E11]"></div>
-               
-               <div className="relative inline-block group mb-4">
-                  <div className="w-32 h-32 rounded-full border-4 border-gray-50 overflow-hidden bg-gray-100  mx-auto flex items-center justify-center">
+               <div className="relative inline-block mb-4">
+                  <div className="w-32 h-32 rounded-full border-4 border-gray-50 overflow-hidden bg-gray-100 mx-auto flex items-center justify-center">
                     {imagePreview ? (
                       <img src={imagePreview} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl font-black text-[#1A4E11]/20">
-                        {user?.name?.charAt(0)}
+                      <div className="w-full h-full flex items-center justify-center text-4xl font-black text-[#1A4E11]/20 uppercase">
+                        {user?.name?.charAt(0) || "U"}
                       </div>
                     )}
                   </div>
-                  
                   {isEditing && (
-                    <label 
-                      htmlFor="image-upload"
-                      className="absolute bottom-0 right-0 bg-[#1A4E11] p-2 rounded-full text-white cursor-pointer  hover:scale-110 transition-transform"
-                    >
+                    <label htmlFor="image-upload" className="absolute bottom-0 right-0 bg-[#1A4E11] p-2 rounded-full text-white cursor-pointer hover:scale-110 transition-transform">
                       <IoCameraOutline size={20} />
-                      <input 
-                        id="image-upload"
-                        type="file" 
-                        accept="image/*"
-                        className="hidden" 
-                        onChange={handleImageChange}
-                      />
+                      <input id="image-upload" type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
                     </label>
                   )}
                </div>
-
-               <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">{user?.name}</h2>
-               <span className="inline-block px-3 py-1 bg-[#1A4E11]/10 text-[#1A4E11] text-[9px] font-black uppercase rounded-full mt-2 tracking-widest">
-                 {user?.role || 'Member'}
-               </span>
-
-               <div className="mt-8 pt-6 border-t border-gray-50 space-y-4 text-left">
-                  <div>
-                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter leading-none mb-1">Email Address</p>
-                    <p className="text-xs font-bold text-gray-700 truncate">{user?.email}</p>
-                  </div>
+               <h2 className="text-lg font-black text-gray-900 uppercase">{user?.name}</h2>
+               <span className="inline-block px-3 py-1 bg-[#1A4E11]/10 text-[#1A4E11] text-[9px] font-black uppercase rounded-full mt-2 tracking-widest">{user?.role || 'Member'}</span>
+               <div className="mt-8 pt-6 border-t border-gray-50 text-left">
+                  <p className="text-[9px] font-bold text-gray-400 uppercase mb-1">Email Address</p>
+                  <p className="text-xs font-bold text-gray-700 truncate">{user?.email}</p>
                </div>
             </div>
           </div>
 
-          {/* Right Side: Form Section */}
           <div className="lg:col-span-8">
-            <div className="bg-white p-8 md:p-10 rounded-[30px] border border-gray-100 ">
+            <div className="bg-white p-8 md:p-10 rounded-[30px] border border-gray-100">
               <form onSubmit={handleUpdateProfile} className="space-y-8">
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Full Name</label>
+                    <label className="text-[10px] font-black uppercase text-gray-400">Full Name</label>
                     <div className="relative">
                       <IoPersonOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                       <input 
@@ -219,14 +207,13 @@ const UserProfile = () => {
                         disabled={!isEditing}
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold text-gray-800 outline-none focus:border-[#1A4E11] focus:bg-white transition-all disabled:opacity-50"
+                        className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold focus:border-[#1A4E11] focus:bg-white outline-none disabled:opacity-50"
                         required
                       />
                     </div>
                   </div>
-
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Phone Number</label>
+                    <label className="text-[10px] font-black uppercase text-gray-400">Phone Number</label>
                     <div className="relative">
                       <IoCallOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                       <input 
@@ -234,44 +221,32 @@ const UserProfile = () => {
                         disabled={!isEditing}
                         value={formData.phone}
                         onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                        className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold text-gray-800 outline-none focus:border-[#1A4E11] focus:bg-white transition-all disabled:opacity-50"
+                        className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold focus:border-[#1A4E11] focus:bg-white outline-none disabled:opacity-50"
                       />
                     </div>
                   </div>
                 </div>
-
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Official Email</label>
+                  <label className="text-[10px] font-black uppercase text-gray-400">Official Email</label>
                   <div className="relative">
                     <IoMailOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
-                    <input 
-                      type="email"
-                      readOnly
-                      value={user?.email || ""}
-                      className="w-full bg-gray-100/50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold text-gray-300 outline-none cursor-not-allowed"
-                    />
+                    <input type="email" readOnly value={user?.email || ""} className="w-full bg-gray-100/50 border border-gray-100 rounded-2xl pl-12 py-4 text-sm font-bold text-gray-300 cursor-not-allowed" />
                   </div>
                 </div>
-
                 {isEditing && (
                   <div className="pt-6 border-t border-gray-50">
                     <button 
                       type="submit"
                       disabled={updateLoading}
-                      className="w-full md:w-auto flex items-center justify-center gap-3 bg-[#1A4E11] text-white px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[2px] hover:bg-[#143d0d] transition-all shadow-xl shadow-[#1A4E11]/20 disabled:opacity-70"
+                      className="w-full md:w-auto flex items-center justify-center gap-3 bg-[#1A4E11] text-white px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[2px] hover:bg-[#143d0d] shadow-xl shadow-[#1A4E11]/20 disabled:opacity-70"
                     >
-                      {updateLoading ? (
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      ) : (
-                        <><IoSaveOutline size={18}/> Update Account</>
-                      )}
+                      {updateLoading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <><IoSaveOutline size={18}/> Update Account</>}
                     </button>
                   </div>
                 )}
               </form>
             </div>
           </div>
-
         </div>
       </div>
     </div>

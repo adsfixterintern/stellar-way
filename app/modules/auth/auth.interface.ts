@@ -10,7 +10,10 @@ export interface IUser {
 export interface IAuthResponse {
   success: boolean;
   message: string;
-  data: IUser;
+  data: {
+    user: IUser;
+    token: string; 
+  };
 }
 
 export interface IRegisterData {

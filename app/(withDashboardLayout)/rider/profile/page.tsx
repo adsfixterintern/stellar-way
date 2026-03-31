@@ -15,7 +15,7 @@ import {
 import { useSession } from "next-auth/react";
 
 // এপিআই মডিউল ইমপোর্ট
-import { getMeApi, updateProfileApi } from "@/app/modules/auth/auth.api";
+import { getMyProfileApi, updateProfileApi } from "@/app/modules/rider/rider.api";
 
 const UserProfile = () => {
   const { data: session } = useSession();
@@ -38,7 +38,7 @@ const UserProfile = () => {
     if (!userId) return;
     try {
       setLoading(true);
-      const data = await getMeApi(userId);      
+      const data = await getMyProfileApi(userId);      
       if (data.success) {
         setUser(data.data);
         setFormData({

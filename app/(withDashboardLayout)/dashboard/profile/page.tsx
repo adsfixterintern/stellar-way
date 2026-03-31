@@ -16,7 +16,7 @@ import { useSession } from "next-auth/react";
 import { getMeApi, updateProfileApi } from "@/app/modules/auth/auth.api"; 
 
 const UserProfile = () => {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession(); 
   const userId = session?.user?.id;
   
   const [user, setUser] = useState<any>(null);
@@ -25,9 +25,10 @@ const UserProfile = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
 
   const [formData, setFormData] = useState({ name: "", phone: "" });
-  const [image, setImage] = useState(""); 
-  const [imagePreview, setImagePreview] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState(""); 
 
+  
   const loadProfile = useCallback(async () => {
     if (!userId) return;
     try {
@@ -35,19 +36,17 @@ const UserProfile = () => {
       const res: any = await getMeApi(userId);      
       
       if (res.success && res.data) {
-        // রেসপন্স স্ট্রাকচার অনুযায়ী ডাটা সেট করা
         const profileData = res.data.user ? res.data.user : res.data;
-
         setUser(profileData);
         setFormData({
           name: profileData.name || "",
           phone: profileData.phone || "",
         });
-        setImagePreview(profileData.image || "");
+        setImagePreview(profileData.image || ""); 
       }
     } catch (err: any) {
       console.error("Fetch Error:", err);
-      toast.error(err.response?.data?.message || "Failed to load profile settings");
+      toast.error(err.response?.data?.message || "Failed to load profile");
     } finally {
       setLoading(false);
     }
@@ -57,47 +56,16 @@ const UserProfile = () => {
     loadProfile();
   }, [loadProfile]);
 
-  const compressImage = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target?.result as string;
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const MAX_WIDTH = 800; 
-          const scaleSize = MAX_WIDTH / img.width;
-          canvas.width = MAX_WIDTH;
-          canvas.height = img.height * scaleSize;
-
-          const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-          if (!ctx) {
-            reject("Canvas context not found");
-            return;
-          }
-          
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-          resolve(dataUrl);
-        };
-      };
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    try {
-      const compressedData = await compressImage(file);
-      setImagePreview(compressedData);
-      setImage(compressedData);
-    } catch (error) {
-      console.error(error);
-      toast.error("Image processing failed!");
+    if (file.size > 2 * 1024 * 1024) {
+      return toast.error("Image size should be less than 2MB");
     }
+
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file)); 
   };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -106,28 +74,40 @@ const UserProfile = () => {
 
     try {
       setUpdateLoading(true);
-      const updatePayload = {
-        name: formData.name,
-        phone: formData.phone,
-        userId: userId,
-        ...(image && { image }) 
-      };
+      
+      const formDataPayload = new FormData();
+      formDataPayload.append("userId", userId);
+      formDataPayload.append("name", formData.name);
+      formDataPayload.append("phone", formData.phone);
+      
+      if (imageFile) {
+        formDataPayload.append("file", imageFile); 
+      }
 
-      const res: any = await updateProfileApi(updatePayload);
+      
+      const res: any = await updateProfileApi(formDataPayload);
 
       if (res.success) {
         toast.success("Profile Updated Successfully!");
-        const updatedData = res.data?.user ? res.data.user : res.data;
-        setUser(updatedData);
+        
+        const updatedUser = res.data?.user || res.data;
+        setUser(updatedUser);
+        
+        await update({
+          ...session,
+          user: {
+            ...session?.user,
+            name: formData.name,
+            image: updatedUser.image 
+          }
+        });
+
         setIsEditing(false);
-        setImage(""); 
+        setImageFile(null);
       }
     } catch (err: any) {
-      if (err.response?.status === 413) {
-        toast.error("Image is too large for the server.");
-      } else {
-        toast.error(err.response?.data?.message || "Update failed!");
-      }
+      console.error("Update Error:", err);
+      toast.error(err.response?.data?.message || "Update failed!");
     } finally {
       setUpdateLoading(false);
     }
@@ -136,7 +116,7 @@ const UserProfile = () => {
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
       <div className="w-10 h-10 border-4 border-[#1A4E11] border-t-transparent rounded-full animate-spin"></div>
-      <p className="mt-4 text-[10px] font-black uppercase tracking-[3px] text-gray-400">Loading Account...</p>
+      <p className="mt-4 text-[10px] font-black uppercase tracking-[3px] text-gray-400 text-center">Loading Account...</p>
     </div>
   );
 
@@ -165,6 +145,7 @@ const UserProfile = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* প্রোফাইল কার্ড */}
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-white p-8 rounded-[30px] border border-gray-100 text-center relative overflow-hidden">
                <div className="absolute top-0 left-0 w-full h-2 bg-[#1A4E11]"></div>
@@ -185,8 +166,10 @@ const UserProfile = () => {
                     </label>
                   )}
                </div>
-               <h2 className="text-lg font-black text-gray-900 uppercase">{user?.name}</h2>
-               <span className="inline-block px-3 py-1 bg-[#1A4E11]/10 text-[#1A4E11] text-[9px] font-black uppercase rounded-full mt-2 tracking-widest">{user?.role || 'Member'}</span>
+               <h2 className="text-lg font-black text-gray-900 uppercase truncate px-2">{user?.name}</h2>
+               <span className="inline-block px-3 py-1 bg-[#1A4E11]/10 text-[#1A4E11] text-[9px] font-black uppercase rounded-full mt-2 tracking-widest">
+                 {user?.role || 'Member'}
+               </span>
                <div className="mt-8 pt-6 border-t border-gray-50 text-left">
                   <p className="text-[9px] font-bold text-gray-400 uppercase mb-1">Email Address</p>
                   <p className="text-xs font-bold text-gray-700 truncate">{user?.email}</p>
@@ -194,6 +177,7 @@ const UserProfile = () => {
             </div>
           </div>
 
+          {/* ফর্ম সেকশন */}
           <div className="lg:col-span-8">
             <div className="bg-white p-8 md:p-10 rounded-[30px] border border-gray-100">
               <form onSubmit={handleUpdateProfile} className="space-y-8">
@@ -207,7 +191,7 @@ const UserProfile = () => {
                         disabled={!isEditing}
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold focus:border-[#1A4E11] focus:bg-white outline-none disabled:opacity-50"
+                        className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold focus:border-[#1A4E11] focus:bg-white outline-none disabled:opacity-50 transition-all"
                         required
                       />
                     </div>
@@ -221,26 +205,37 @@ const UserProfile = () => {
                         disabled={!isEditing}
                         value={formData.phone}
                         onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                        className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold focus:border-[#1A4E11] focus:bg-white outline-none disabled:opacity-50"
+                        className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold focus:border-[#1A4E11] focus:bg-white outline-none disabled:opacity-50 transition-all"
                       />
                     </div>
                   </div>
                 </div>
+                
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black uppercase text-gray-400">Official Email</label>
+                  <label className="text-[10px] font-black uppercase text-gray-400">Official Email (Read Only)</label>
                   <div className="relative">
                     <IoMailOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
-                    <input type="email" readOnly value={user?.email || ""} className="w-full bg-gray-100/50 border border-gray-100 rounded-2xl pl-12 py-4 text-sm font-bold text-gray-300 cursor-not-allowed" />
+                    <input 
+                      type="email" 
+                      readOnly 
+                      value={user?.email || ""} 
+                      className="w-full bg-gray-100/50 border border-gray-100 rounded-2xl pl-12 py-4 text-sm font-bold text-gray-300 cursor-not-allowed" 
+                    />
                   </div>
                 </div>
+
                 {isEditing && (
                   <div className="pt-6 border-t border-gray-50">
                     <button 
                       type="submit"
                       disabled={updateLoading}
-                      className="w-full md:w-auto flex items-center justify-center gap-3 bg-[#1A4E11] text-white px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[2px] hover:bg-[#143d0d] shadow-xl shadow-[#1A4E11]/20 disabled:opacity-70"
+                      className="w-full md:w-auto flex items-center justify-center gap-3 bg-[#1A4E11] text-white px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[2px] hover:bg-[#143d0d] shadow-xl shadow-[#1A4E11]/20 disabled:opacity-70 transition-all"
                     >
-                      {updateLoading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <><IoSaveOutline size={18}/> Update Account</>}
+                      {updateLoading ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <><IoSaveOutline size={18}/> Update Account</>
+                      )}
                     </button>
                   </div>
                 )}

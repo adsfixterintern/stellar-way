@@ -175,7 +175,7 @@ const RiderApplyForm = () => {
 
               <p className="text-[10px] text-gray-400 mt-4 text-center leading-relaxed">
                 Your info will be saved to a Stellar account. By continuing, you
-                agree to Stellar's Terms of Service and acknowledge the Privacy
+                agree to Stellar s Terms of Service and acknowledge the Privacy
                 Policy.
               </p>
             </div>

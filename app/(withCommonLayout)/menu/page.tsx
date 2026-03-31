@@ -17,6 +17,7 @@ import { getMenus } from "@/app/api/menuApi";
 import { SkeletonCard } from "@/components/shared/SkeletonCard";
 import toast from "react-hot-toast";
 import { useCart } from "@/context/CartContext";
+import Link from "next/link";
 
 const MenuPage = () => {
   const [categories, setCategories] = useState<ICategory[]>([]);
@@ -41,7 +42,6 @@ const MenuPage = () => {
     };
     fetchData();
   }, []);
-
 
   // স্ক্রলিং ফাংশন
   const scrollToCategory = (id: string) => {
@@ -104,7 +104,7 @@ const MenuPage = () => {
               <p className="superTitle">customer favorites</p>
               <h2 className="secTitle mt-2">Popular Categories</h2>
             </div>
-            
+
             {/* Category Swiper Navigation */}
             <div className="flex gap-3 mt-4 md:mt-0">
               <button className="popular-prev p-2 rounded-lg border border-gray-400 text-primary hover:bg-primary hover:text-white transition">
@@ -183,17 +183,17 @@ const MenuPage = () => {
                 typeof item.categoryId === "object"
                   ? (item.categoryId as any)?._id
                   : String(item.categoryId);
-              
+
               return itemCatId === category._id;
             });
 
             if (filteredItems.length === 0) return null;
 
             return (
-              <div 
-                key={category._id} 
-                id={category._id} 
-                className="relative mb-3 scroll-mt-24" 
+              <div
+                key={category._id}
+                id={category._id}
+                className="relative mb-3 scroll-mt-24"
               >
                 <div className="flex justify-between items-center mb-10">
                   <p className="subTitle text-primary">{category.name}</p>
@@ -226,38 +226,40 @@ const MenuPage = () => {
                 >
                   {filteredItems.map((item) => (
                     <SwiperSlide key={item._id}>
-                      <div className="group relative mb-20">
-                        <div className="relative h-85 w-full rounded-2xl overflow-hidden shadow-sm">
-                          <Image
-                            src={item.image?.url || ""}
-                            alt={item.title}
-                            fill
-                            className="object-cover group-hover:scale-110 transition-transform duration-700"
-                          />
-                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <button
-                              onClick={() => addToCart(item)} 
-                              className="bg-white text-primary p-4 rounded-full hover:scale-110 transition-transform shadow-2xl"
-                            >
-                              <ShoppingCart size={24} />
-                            </button>
+                      <Link href={`/menu/${item._id}`}>
+                        <div className="group relative mb-20 ">
+                          <div className="relative h-85 w-full rounded-2xl overflow-hidden shadow-sm">
+                            <Image
+                              src={item.image?.url || ""}
+                              alt={item.title}
+                              fill
+                              className="object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <button
+                                onClick={() => addToCart(item)}
+                                className="bg-white text-primary p-4 rounded-full hover:scale-110 transition-transform shadow-2xl"
+                              >
+                                <ShoppingCart size={24} />
+                              </button>
+                            </div>
                           </div>
-                        </div>
 
-                        <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-[85%] bg-white rounded-2xl p-5 text-center shadow-[0_15px_35px_rgba(0,0,0,0.1)] border border-gray-50 z-10 transform group-hover:-translate-y-3 transition-all duration-500">
-                          <h4 className="cardTitle mb-1! text-lg line-clamp-1">
-                            {item.title}
-                          </h4>
-                          <p className="menuDescription italic line-clamp-1">
-                            {item.chefId
-                              ? "Chef Special Recommendation"
-                              : "Fresh and Delicious Meals"}
-                          </p>
-                          <div className="price mb-0! mt-3">
-                            ৳{item.price.toFixed(2)}
+                          <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-[85%] bg-white rounded-2xl p-5 text-center shadow-[0_15px_35px_rgba(0,0,0,0.1)] border border-gray-50 z-10 transform group-hover:-translate-y-3 transition-all duration-500">
+                            <h4 className="cardTitle mb-1! text-lg line-clamp-1">
+                              {item.title}
+                            </h4>
+                            <p className="menuDescription italic line-clamp-1">
+                              {item.chefId
+                                ? "Chef Special Recommendation"
+                                : "Fresh and Delicious Meals"}
+                            </p>
+                            <div className="price mb-0! mt-3">
+                              ৳{item.price.toFixed(2)}
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     </SwiperSlide>
                   ))}
                 </Swiper>

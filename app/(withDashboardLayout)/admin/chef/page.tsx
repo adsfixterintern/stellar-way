@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, FormEvent, ChangeEvent } from "react";
@@ -19,9 +20,9 @@ import { useChefs } from "@/app/hooks/useChefs";
 import { IChef } from "@/types/menu";
 import { TableSkeleton } from "@/components/shared/TableSkeleton";
 import PaginationDashboard from "@/components/shared/PaginationDashboard";
+import { createChef, deleteChefFromDB, updateChef } from "@/app/modules/chef/chef.api";
 
 const ChefPage: React.FC = () => {
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   // React Query Hook
   const { data: chefs = [], isLoading, refetch } = useChefs();
@@ -51,12 +52,12 @@ const ChefPage: React.FC = () => {
   };
 
   const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
-  
-    const currentItems = chefs.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage,
-    );
+  const itemsPerPage = 10;
+
+  const currentItems = chefs.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
 
   const openEditModal = (chef: IChef) => {
     setEditId(chef._id);
@@ -82,7 +83,6 @@ const ChefPage: React.FC = () => {
     setImageFile(null);
     setImagePreview(null);
   };
-
   const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     setBtnLoading(true);
@@ -97,28 +97,21 @@ const ChefPage: React.FC = () => {
       formData.append("status", status);
       if (imageFile) formData.append("image", imageFile);
 
-      const url = editId
-        ? `${BASE_URL}/chefs/${editId}`
-        : `${BASE_URL}/chefs/create-chef`;
-      const method = editId ? "patch" : "post";
+      let response;
+      if (editId) {
+        response = await updateChef(editId, formData);
+      } else {
+        response = await createChef(formData);
+      }
 
-      const response = await axios({
-        method,
-        url,
-        data: formData,
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      if (response.data.success) {
+      if (response.success) {
         toast.success(editId ? "Chef updated!" : "Chef added!");
         closeModal();
         refetch();
       }
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        console.log("Server Error Data:", err.response?.data); 
-        toast.error(err.response?.data?.message || "Operation failed");
-      }
+    } catch (err: any) {
+      console.error("Chef Operation Error:", err);
+      toast.error(err.response?.data?.message || "Operation failed");
     } finally {
       setBtnLoading(false);
     }
@@ -136,14 +129,15 @@ const ChefPage: React.FC = () => {
 
     if (result.isConfirmed) {
       try {
-        const { data } = await axios.delete(`${BASE_URL}/chefs/${id}`);
+        const data = await deleteChefFromDB(id);
+
         if (data.success) {
           toast.success("Removed successfully");
           refetch();
         }
-      } catch (err) {
-        console.log(err);
-        toast.error("Delete failed");
+      } catch (err: any) {
+        console.error(err);
+        toast.error(err.response?.data?.message || "Delete failed");
       }
     }
   };
@@ -402,11 +396,10 @@ const ChefPage: React.FC = () => {
                         key={s}
                         type="button"
                         onClick={() => setStatus(s)}
-                        className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-[1px] transition-all ${
-                          status === s
-                            ? "bg-[#1A4E11] text-white shadow-lg shadow-[#1A4E11]/20 scale-105"
-                            : "bg-white text-gray-400 hover:text-gray-600"
-                        }`}
+                        className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-[1px] transition-all ${status === s
+                          ? "bg-[#1A4E11] text-white shadow-lg shadow-[#1A4E11]/20 scale-105"
+                          : "bg-white text-gray-400 hover:text-gray-600"
+                          }`}
                       >
                         {s}
                       </button>

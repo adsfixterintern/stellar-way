@@ -7,15 +7,36 @@
   --section-bg-secondary: #F5F5DC;
 }
 
+
+.overflow-y-auto::-webkit-scrollbar {
+  width: 5px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 10px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
 .text-primary {
   color: var(--primary-green);
 }
+
 .text-gray {
   color: var(--gray-text);
 }
+
 .bg-primary {
   background-color: var(--primary-green);
 }
+
 .bg-secondary {
   background-color: var(--section-bg-secondary);
 }
@@ -44,7 +65,7 @@
   color: var(--gray-text);
 }
 
-.menuDescription{
+.menuDescription {
   font-weight: 400;
   font-size: 16px;
   line-height: 140%;
@@ -116,7 +137,7 @@
 
 /* Swiper Slide Responsive Fix */
 .swiper-wrapper {
-  padding-bottom: 50px; 
+  padding-bottom: 50px;
 }
 
 /* স্লাইডার নেভিগেশন বাটন ডিজাইন */
@@ -126,8 +147,8 @@
   background: white;
   padding: 25px;
   border-radius: 50%;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  transform: scale(0.7); 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: scale(0.7);
 }
 
 /* Responsive Media Queries */
@@ -135,6 +156,7 @@
   .secTitle {
     font-size: 36px;
   }
+
   .subTitle {
     font-size: 26px;
   }
@@ -145,16 +167,20 @@
     font-size: 28px;
     line-height: 120%;
   }
+
   .superTitle {
     font-size: 14px;
     letter-spacing: 1px;
   }
+
   .description {
     font-size: 16px;
   }
+
   .subTitle {
     font-size: 22px;
   }
+
   .cardTitle {
     font-size: 20px;
   }

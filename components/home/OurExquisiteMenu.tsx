@@ -8,7 +8,7 @@ import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { ArrowLeft, ArrowRight, ShoppingCart, Star } from "lucide-react";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -84,7 +84,15 @@ const OurExquisiteMenu = () => {
                 <SwiperSlide key={item._id}>
                   <div className="bg-white p-6 rounded-3xl flex flex-col items-center text-center shadow-sm relative mt-22 h-102">
                     <div className="absolute -top-22 w-44 h-44 rounded-full overflow-hidden shadow-lg border-4 border-white z-20">
-                      <Image src={item.image?.url || "/fallback-food.png"} alt={item.title} fill sizes="160px" className="object-cover" />
+                      <Image
+                        src={item.image?.url || "/fallback-food.png"}
+                        alt={item.title}
+                        fill
+                        unoptimized={true}
+                        sizes="176px"
+                        className="object-cover"
+                        priority={true}
+                      />
                     </div>
 
                     <div className="mt-20 flex flex-col grow w-full">
@@ -98,9 +106,9 @@ const OurExquisiteMenu = () => {
 
                       <div className="flex items-center justify-between w-full mt-auto pt-4">
                         <span className="price font-bold pt-6">৳{item.price?.toFixed(2)}</span>
-                        
-                    
-                    <button 
+
+
+                        <button
                           onClick={() => addToCart(item)}
                           className="bg-primary p-2 rounded-lg text-white hover:opacity-90 transition-all"
                         >

@@ -64,7 +64,7 @@ const Testimonials = () => {
 
               {/* REVIEW (equal height fix) */}
               <p className="text-gray-700 text-lg italic mb-8 leading-relaxed min-h-[120px] flex items-center justify-center">
-                "{item.review}"
+                &ldquo;{item.review}&rdquo;
               </p>
 
               {/* USER INFO (bottom alignment fix) */}

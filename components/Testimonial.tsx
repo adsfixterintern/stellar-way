@@ -203,7 +203,7 @@ const Testimonial = () => {
 
                     {/* Review */}
                     <p className="text-[#555] text-[17px] leading-[1.7] italic">
-                      "{item.review}"
+                      &ldquo;{item.review}&rdquo;
                     </p>
                   </div>
                 </SwiperSlide>

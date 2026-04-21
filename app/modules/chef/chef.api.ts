@@ -20,3 +20,9 @@ export const deleteChefFromDB = async (id: string) => {
   const res = await api.delete(`/chefs/${id}`);
   return res.data;
 };
+
+
+export const getAllChefFromDB = async () => {
+  const res = await api.get(`/chefs`);
+  return res.data;
+};

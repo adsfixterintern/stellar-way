@@ -13,7 +13,7 @@ const RiderApplyForm = () => {
 
   const [formData, setFormData] = useState<Partial<IRider>>({
     phoneNumber: "",
-    vehicleType: "" as any, 
+    vehicleType: "" as any,
     licenseNumber: "",
     identityCard: "",
     area: "",
@@ -29,19 +29,16 @@ const RiderApplyForm = () => {
       return;
     }
 
-    // ভ্যাহিকল টাইপ চেক
     if (!formData.vehicleType) {
       toast.error("Please select a vehicle type!");
       return;
     }
 
     try {
-      const payload = {
+      const response = await applyForRiderApi({
         ...formData,
-        userId: userId,
-      };
-
-      const response = await applyForRiderApi(payload);
+        userId,
+      });
 
       if (response.success) {
         toast.success("Application Submitted Successfully!");
@@ -54,46 +51,60 @@ const RiderApplyForm = () => {
         });
       }
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Something went wrong!";
-      toast.error(errorMessage);
+      toast.error(error.response?.data?.message || "Something went wrong!");
     }
   };
 
+  const inputClass =
+    "w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#324a1f] focus:ring-2 focus:ring-[#324a1f]/20 outline-none text-sm transition-all";
+
   return (
-    <div className="bg-gray-50 pb-10">
+    <div className="bg-gradient-to-b from-gray-50 to-white pb-16">
       <SingleHero />
-      {/* Container-কে মোবাইলে রেসপন্সিভ করার জন্য px-4 এবং max-w-xl ব্যবহার করেছি */}
-      <div className="max-w-xl mx-auto px-4 sm:px-0">
-        <div className="p-6 sm:p-8 bg-white text-[#333] font-sans my-10 shadow-sm border border-gray-100 rounded-lg">
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Contact Section */}
-            <section>
-              <h3 className="text-lg font-medium mb-4 text-[#324a1f]">
-                Contact
-              </h3>
+
+      {/* CARD */}
+      <div className="max-w-2xl mx-auto px-4">
+        <div className="bg-white shadow-lg border border-gray-100 rounded-2xl p-8 md:p-10 mt-10">
+          {/* HEADER */}
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#1f2d13]">
+              Rider Application
+            </h2>
+            <p className="text-gray-500 text-sm mt-2">
+              Fill up the form to become a delivery partner
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* PHONE */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Phone Number
+              </label>
               <input
                 required
                 type="text"
-                name="phoneNumber"
                 value={formData.phoneNumber}
-                placeholder="Phone Number (+880)"
-                className="w-full py-4 border-b border-gray-200 focus:border-[#324a1f] outline-none transition-colors text-sm bg-transparent"
+                placeholder="+880 1XXXXXXXXX"
+                className={inputClass}
                 onChange={(e) =>
-                  setFormData({ ...formData, phoneNumber: e.target.value })
+                  setFormData({
+                    ...formData,
+                    phoneNumber: e.target.value,
+                  })
                 }
               />
-            </section>
+            </div>
 
-            {/* Vehicle Info */}
-            <section>
-              <h3 className="text-lg font-medium mb-4 text-[#324a1f]">
-                Vehicle Information
-              </h3>
+            {/* VEHICLE */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Vehicle Type
+              </label>
+
               <div className="relative">
                 <select
                   required
-                  className="w-full py-4 border-b border-gray-200 focus:border-[#324a1f] outline-none bg-transparent text-sm mb-4 appearance-none"
                   value={formData.vehicleType}
                   onChange={(e) =>
                     setFormData({
@@ -101,84 +112,90 @@ const RiderApplyForm = () => {
                       vehicleType: e.target.value as any,
                     })
                   }
+                  className={inputClass + " appearance-none"}
                 >
-                  <option value="" disabled>
-                    Select Vehicle Type
-                  </option>
+                  <option value="">Select vehicle</option>
                   <option value="bike">Bike</option>
                   <option value="cycle">Cycle</option>
                   <option value="car">Car</option>
                 </select>
-                {/* অ্যারো আইকন যাতে মোবাইলে সিলেক্ট বক্স বোঝা যায় */}
-                <div className="absolute right-2 top-4 pointer-events-none text-gray-400">
+
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                   ▼
                 </div>
               </div>
-
-              <input
-                type="text"
-                name="licenseNumber"
-                value={formData.licenseNumber}
-                placeholder="License Number"
-                className="w-full py-4 border-b border-gray-200 focus:border-[#324a1f] outline-none text-sm bg-transparent"
-                onChange={(e) =>
-                  setFormData({ ...formData, licenseNumber: e.target.value })
-                }
-              />
-            </section>
-
-            {/* Area Section */}
-            <section>
-              <h3 className="text-lg font-medium mb-4 text-[#324a1f]">
-                Operation Area
-              </h3>
-              <input
-                required
-                type="text"
-                name="area"
-                value={formData.area}
-                placeholder="Area (e.g. Dhaka, Dhanmondi)"
-                className="w-full py-4 border-b border-gray-200 focus:border-[#324a1f] outline-none text-sm bg-transparent"
-                onChange={(e) =>
-                  setFormData({ ...formData, area: e.target.value })
-                }
-              />
-            </section>
-
-            {/* Identity Section */}
-            <section>
-              <h3 className="text-lg font-medium mb-2 text-[#324a1f]">
-                Verification
-              </h3>
-              <p className="text-xs text-gray-500 mb-2">Identity Card </p>
-              <input
-                required
-                type="text"
-                name="identityCard"
-                value={formData.identityCard}
-                placeholder="NID Card No"
-                className="w-full py-4 border-b border-gray-200 focus:border-[#324a1f] outline-none text-sm bg-transparent"
-                onChange={(e) =>
-                  setFormData({ ...formData, identityCard: e.target.value })
-                }
-              />
-            </section>
-
-            {/* Submit Button */}
-            <div className="pt-4">
-              <button
-                type="submit"
-                className="blockBtn w-full py-4 bg-[#324a1f] text-white rounded-md font-bold hover:bg-[#253817] transition-all"
-              >
-                Apply be a Rider
-              </button>
-
-              <p className="text-[10px] text-gray-400 mt-4 text-center leading-relaxed">
-                Your info will be saved to a Stellar account. By continuing, you
-                agree to Stellar s Terms of Service and acknowledge the Privacy
-                Policy.
-              </p>
             </div>
+
+            {/* LICENSE */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                License Number
+              </label>
+              <input
+                type="text"
+                value={formData.licenseNumber}
+                placeholder="Enter license number"
+                className={inputClass}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    licenseNumber: e.target.value,
+                  })
+                }
+              />
+            </div>
+
+            {/* AREA */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Operation Area
+              </label>
+              <input
+                required
+                type="text"
+                value={formData.area}
+                placeholder="e.g. Dhaka, Dhanmondi"
+                className={inputClass}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    area: e.target.value,
+                  })
+                }
+              />
+            </div>
+
+            {/* NID */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Identity Card (NID)
+              </label>
+              <input
+                required
+                type="text"
+                value={formData.identityCard}
+                placeholder="NID number"
+                className={inputClass}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    identityCard: e.target.value,
+                  })
+                }
+              />
+            </div>
+
+            {/* BUTTON */}
+            <button
+              type="submit"
+              className="w-full mt-6 bg-[#324a1f] hover:bg-[#243515] text-white py-4 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg"
+            >
+              Apply as Rider
+            </button>
+
+            <p className="text-[11px] text-gray-400 text-center mt-4 leading-relaxed">
+              By applying, you agree to our Terms & Privacy Policy.
+            </p>
           </form>
         </div>
       </div>

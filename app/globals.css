@@ -29,6 +29,12 @@
   color: var(--primary-green);
 }
 
+
+.react-hot-toast {
+  z-index: 999999 !important;
+}
+
+
 .text-gray {
   color: var(--gray-text);
 }

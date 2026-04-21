@@ -36,7 +36,15 @@ export default function RootLayout({
         <AuthProvider>
        <CartProvider>
          <Providers>
-          <Toaster/>
+          <Toaster
+  position="top-right"
+  toastOptions={{
+    style: {
+      zIndex: 999999,
+    },
+  }}
+/>
+
           {children}
           
         </Providers>

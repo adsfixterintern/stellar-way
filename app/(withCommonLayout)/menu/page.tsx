@@ -227,7 +227,7 @@ const MenuPage = () => {
                   {filteredItems.map((item) => (
                     <SwiperSlide key={item._id}>
                       <Link href={`/menu/${item._id}`}>
-                        <div className="group relative mb-20 ">
+                        <div className="group relative mb-20">
                           <div className="relative h-85 w-full rounded-2xl overflow-hidden shadow-sm">
                             <Image
                               src={item.image?.url || ""}
@@ -235,9 +235,17 @@ const MenuPage = () => {
                               fill
                               className="object-cover group-hover:scale-110 transition-transform duration-700"
                             />
+
                             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                               <button
-                                onClick={() => addToCart(item)}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  // e.stopPropagation();
+                                  const title = addToCart(item);
+                                  toast.success(`${title} added to cart 🛒`, {
+                                    duration: 1500,
+                                  });
+                                }}
                                 className="bg-white text-primary p-4 rounded-full hover:scale-110 transition-transform shadow-2xl"
                               >
                                 <ShoppingCart size={24} />
@@ -249,11 +257,13 @@ const MenuPage = () => {
                             <h4 className="cardTitle mb-1! text-lg line-clamp-1">
                               {item.title}
                             </h4>
+
                             <p className="menuDescription italic line-clamp-1">
                               {item.chefId
                                 ? "Chef Special Recommendation"
                                 : "Fresh and Delicious Meals"}
                             </p>
+
                             <div className="price mb-0! mt-3">
                               ৳{item.price.toFixed(2)}
                             </div>

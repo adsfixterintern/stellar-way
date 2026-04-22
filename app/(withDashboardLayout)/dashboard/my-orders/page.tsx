@@ -16,18 +16,18 @@ import {
 } from "react-icons/io5";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import axios from "axios";
 import { useMenu } from "@/app/hooks/useMenu";
-
 import { updateRiderRatingApi } from "@/app/modules/rider/rider.api";
 import dynamic from "next/dynamic";
+import api from "@/utils/apiInstance";
+
 const OrderTrackingModal = dynamic(
   () => import('@/components/shared/OrderTrackingModal'),
-  { ssr: false } // এটি সার্ভার সাইড রেন্ডারিং বন্ধ করে দেবে
+  { ssr: false }
 );
+
 const MyOrdersPage = () => {
   const { data: session } = useAuthSession();
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const { data: ordersData, isLoading: ordersLoading } = useMyOrders(
     session?.user?.email as string,
@@ -92,11 +92,10 @@ const MyOrdersPage = () => {
           review: reviewData[menuId].comment || "",
           userId: (session?.user as any)?.id,
         };
-        return axios.patch(`${BASE_URL}/menu/${menuId}`, payload);
+        return api.patch(`/menu/${menuId}`, payload);
       });
 
       if (riderRating > 0 && selectedOrder?.riderId?._id) {
-        console.log(selectedOrder.riderId._id);
         await updateRiderRatingApi({
           riderId: selectedOrder.riderId._id,
           userId: (session?.user as any)?.id,
@@ -116,6 +115,8 @@ const MyOrdersPage = () => {
     }
   };
 
+
+  
   return (
     <div className="w-full p-6">
       <h1 className="text-2xl font-black text-gray-900 mb-8 uppercase tracking-tight">
@@ -190,6 +191,7 @@ const MyOrdersPage = () => {
                       </td>
                       <td className="p-5 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {/* Track Button: Only shows if NOT delivered */}
                           {!isDelivered && (
                             <button
                               onClick={() => handleTrackClick(order)}
@@ -198,13 +200,16 @@ const MyOrdersPage = () => {
                               <IoLocationOutline size={20} /> Track
                             </button>
                           )}
-                          <button
-                            onClick={() => openReviewModal(order)}
-                            className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase bg-[#1A4E11] text-white rounded-lg hover:opacity-90 transition-all ${isDelivered ? "w-full justify-center" : ""}`}
-                          >
-                            <IoChatbubbleEllipsesOutline size={20} />
-                            {isDelivered ? "Rate Experience" : "Review"}
-                          </button>
+                          
+                          {/* Review Button: ONLY shows if Delivered */}
+                          {isDelivered && (
+                            <button
+                              onClick={() => openReviewModal(order)}
+                              className="inline-flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase bg-[#1A4E11] text-white rounded-lg hover:opacity-90 transition-all w-full justify-center"
+                            >
+                              <IoChatbubbleEllipsesOutline size={20} /> Rate Experience
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -258,7 +263,6 @@ const MyOrdersPage = () => {
       {isReviewModalOpen && selectedOrder && (
         <div className="fixed inset-0 z-10 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
           <div className="bg-white w-full max-w-xl shadow-2xl rounded-3xl overflow-hidden animate-in zoom-in-95 duration-200">
-            {/* Header */}
             <div className="p-6 border-b flex justify-between items-center bg-gray-50/50">
               <div>
                 <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">
@@ -405,7 +409,6 @@ const MyOrdersPage = () => {
               )}
             </div>
 
-            {/* Footer Button */}
             <div className="p-6 border-t bg-gray-50/50">
               <button
                 onClick={handleSubmitReviews}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from "@/utils/apiInstance";
 
 export const getSingleMenu = async (id: string) => {
@@ -30,5 +31,16 @@ export const updateMenu = async (id: string, formData:object) => {
       'Content-Type': 'multipart/form-data',
     },
   });
+  return res.data;
+};
+
+
+export const submitMenuReview = async (menuId: string, payload: any) => {
+  const res = await api.patch(`/menu/${menuId}`, payload);
+  return res.data;
+};
+
+export const submitRiderReview = async (payload: any) => {
+  const res = await api.post(`/rider/review`, payload);
   return res.data;
 };

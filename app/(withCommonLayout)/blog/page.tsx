@@ -14,7 +14,7 @@ export default function page() {
         title="Savory Nest Blog"
         description="Explore our blog for culinary tips, recipes, and the latest news from Savory Nest."
         buttonTitle="Order Now"
-        buttonLink="/blog"
+        buttonLink="/menu"
       />
       <LatestBlog></LatestBlog>
       <BlogInitialPage></BlogInitialPage>

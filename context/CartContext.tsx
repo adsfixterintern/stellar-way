@@ -32,30 +32,34 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem("cart", JSON.stringify(items));
   };
 
-  const addToCart = (item: any) => {
-    const isExist = cartItems.find((i) => i._id === item._id);
-    let updatedCart;
+ const addToCart = (item: any) => {
+  const isExist = cartItems.find((i) => i._id === item._id);
 
-    if (isExist) {
-      updatedCart = cartItems.map((i) =>
-        i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i
-      );
-    } else {
-      updatedCart = [
-        ...cartItems,
-        {
-          _id: item._id,
-          title: item.title,
-          price: item.price,
-          image: item.image,
-          quantity: 1,
-          size: "Medium",
-        },
-      ];
-    }
-    saveToLocalStorage(updatedCart);
-    toast.success(`${item.title} added to cart!`, { icon: '🛒' });
-  };
+  let updatedCart;
+
+  if (isExist) {
+    updatedCart = cartItems.map((i) =>
+      i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i
+    );
+  } else {
+    updatedCart = [
+      ...cartItems,
+      {
+        _id: item._id,
+        title: item.title,
+        price: item.price,
+        image: item.image,
+        quantity: 1,
+        size: "Medium",
+      },
+    ];
+  }
+
+  saveToLocalStorage(updatedCart);
+
+  return item.title; 
+};
+
 
   const removeFromCart = (id: string) => {
     const updatedCart = cartItems.filter((i) => i._id !== id);

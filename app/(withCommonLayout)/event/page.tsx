@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
@@ -23,8 +24,6 @@ import Link from "next/link";
 const EventsPage = () => {
   const { data: eventResponse, isLoading } = useEvents("?status=active");
   const events = eventResponse?.data || [];
-  console.log(events)
-
   console.log(events);
   const prevRef = useRef<HTMLButtonElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
@@ -123,21 +122,55 @@ const EventsPage = () => {
                       {item.subTitle}
                     </p>
 
-                    {/* Avatars like your image */}
-                    <div className="flex items-center pt-2">
-                      <div className="flex -space-x-2">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                          <img
-                            key={i}
-                            className="w-8 h-8 rounded-full border-2 border-white object-cover"
-                            src={`https://i.pravatar.cc/100?img=${i + 10}`}
-                            alt="user"
-                          />
-                        ))}
+                    <div className="flex items-center justify-between pt-2">
+                      {/* LEFT SIDE (avatars) */}
+                      <div className="flex items-center">
+                        <div className="flex -space-x-2">
+                          {(item?.bookedParticipants?.length
+                            ? item.bookedParticipants.slice(0, 5)
+                            : [1, 2, 3]
+                          ).map((user: any, index: number) => (
+                            <div
+                              key={index}
+                              className="w-8 h-8 rounded-full border-2 border-white overflow-hidden flex items-center justify-center bg-[#1D3A15] text-white text-xs font-bold uppercase"
+                            >
+                              {user?.image ? (
+                                <img
+                                  src={user.image}
+                                  alt={user.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : user?.name ? (
+                                user.name.charAt(0)
+                              ) : (
+                                <img
+                                  src={`https://i.pravatar.cc/100?img=${index + 12}`}
+                                  alt="demo"
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* remaining */}
+                        {(item?.bookedParticipants?.length ?? 0) > 5 && (
+                          <span className="ml-3 text-xs font-bold text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full">
+                            +{(item.bookedParticipants?.length ?? 0) - 5}
+                          </span>
+                        )}
                       </div>
-                      <span className="ml-3 text-xs font-bold text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full">
-                        +15
-                      </span>
+
+                      {/* 🔥 RIGHT SIDE ARROW BUTTON */}
+                      <Link
+                        href={`/event-booking/${item._id}`}
+                        className="w-9 h-9 rounded-full bg-[#F1F5EC] flex items-center justify-center hover:bg-[#1D3A15] group transition-all"
+                      >
+                        <ArrowRight
+                          size={16}
+                          className="text-[#1D3A15] group-hover:text-white transition-all"
+                        />
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -219,5 +252,3 @@ const EventsPage = () => {
 };
 
 export default EventsPage;
-
-

@@ -20,16 +20,12 @@ const EventSuccessPage = ({
   useEffect(() => {
     const confirmPayment = async () => {
       try {
-        // ব্যাকএন্ডে রিডাইরেক্ট লজিক থাকায় আমরা সরাসরি এপিআই হিট করছি
-        // ডাটাবেস আপডেট হওয়ার জন্য এটিই যথেষ্ট
         await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/event-bookings/confirm-payment/${transactionId}?status=success`
+          `${process.env.NEXT_PUBLIC_API_URL}/event-bookings/confirm-payment/${transactionId}?status=success`,
         );
-        
+
         setStatus("success");
       } catch (error) {
-        // রিডাইরেক্টের কারণে Axios এখানে Error থ্রো করতে পারে (CORS/Network Error)
-        // কিন্তু যেহেতু ডাটাবেস আপডেট হয়ে গেছে, আমরা সরাসরি সাকসেস দেখাচ্ছি
         console.log("Database updated, ignoring redirect error");
         setStatus("success");
       } finally {
@@ -61,7 +57,7 @@ const EventSuccessPage = ({
             </p>
           </div>
         ) : (
-          /* সরাসরি সাকসেস ডিজাইন */
+   
           <div className="bg-gray-50 border border-gray-100 rounded-[40px] p-12 shadow-sm">
             <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 text-4xl">
               ✓
@@ -80,7 +76,7 @@ const EventSuccessPage = ({
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/dashboard/my-bookings"
+                href="/dashboard/my-booking"
                 className="bg-[#3D5334] text-white px-8 py-4 rounded-2xl font-bold hover:bg-[#1D3A15] transition-all shadow-lg"
               >
                 VIEW MY BOOKINGS

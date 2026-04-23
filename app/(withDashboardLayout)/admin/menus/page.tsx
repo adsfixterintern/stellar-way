@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from "react";
@@ -18,9 +19,9 @@ import Image from "next/image";
 import { TableSkeleton } from "@/components/shared/TableSkeleton";
 import PaginationDashboard from "@/components/shared/PaginationDashboard";
 import { MenuModal } from "@/components/admin-dashboard/MenuModal";
+import { deleteMenuFromDB } from "@/app/modules/menu/menu.api";
 
 const MenuPage: React.FC = () => {
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   // React Query Hooks (Data fetching)
   const {
@@ -50,7 +51,7 @@ const MenuPage: React.FC = () => {
   };
 
   const openAddModal = () => {
-    setSelectedMenu(null); 
+    setSelectedMenu(null);
     setIsModalOpen(true);
   };
 
@@ -72,18 +73,19 @@ const MenuPage: React.FC = () => {
 
     if (result.isConfirmed) {
       try {
-        const { data } = await axios.delete(`${BASE_URL}/menu/${id}`);
+        const data = await deleteMenuFromDB(id);
+
         if (data.success) {
           toast.success("Deleted successfully");
           refetchMenus();
         }
-      } catch (err) {
-        console.error(err);
-        toast.error("Delete failed");
+      } catch (err: any) {
+        console.error("Delete Error:", err);
+        const errorMessage = err.response?.data?.message || "Delete failed";
+        toast.error(errorMessage);
       }
     }
   };
-
   return (
     <div className="w-full">
       {/* --- Header --- */}
@@ -184,13 +186,13 @@ const MenuPage: React.FC = () => {
       </div>
 
       {/* --- Reusable Modal --- */}
-      <MenuModal 
-        isOpen={isModalOpen} 
-        onClose={closeModal} 
-        editData={selectedMenu} 
-        categories={categories} 
-        chefs={chefs} 
-        onSuccess={refetchMenus} 
+      <MenuModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        editData={selectedMenu}
+        categories={categories}
+        chefs={chefs}
+        onSuccess={refetchMenus}
       />
     </div>
   );

@@ -1,3 +1,8 @@
+export interface IParticipant {
+  name: string;
+  image?: string;
+}
+
 export interface IEvent {
   _id: string;
   title: string;
@@ -9,6 +14,7 @@ export interface IEvent {
   price: number;
   status: "active" | "inactive";
   featured: boolean;
+  bookedParticipants?: IParticipant[];
   createdAt: string;
   updatedAt: string;
   __v?: number;

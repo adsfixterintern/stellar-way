@@ -98,8 +98,9 @@ const menuItems = [
   { name: "Riders", icon: <LucideBike />, path: "/admin/riders" },
 
   { name: "Chef", icon: <IoPeopleOutline />, path: "/admin/chef" },
-   { name: "Blog", icon: <IoPeopleOutline />, path: "/admin/blog" },
-
+  
+  { name: "Blog", icon: <IoPeopleOutline />, path: "/admin/blog" },
+  { name: "Feedback", icon: <IoPeopleOutline />, path: "/admin/feedback" },
   { name: "Events", icon: <IoBriefcaseOutline />, path: "/admin/events" },
   { name: "booking", icon: <IoCalendarOutline />, path: "/admin/booking" },
   { name: "User Management", icon: <IoPeopleOutline />, path: "/admin/user-management" },

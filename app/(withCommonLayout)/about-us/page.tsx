@@ -14,6 +14,7 @@ export default function page() {
         title="About Savory Nest"
         description="Savory Nest is a place where passion for food meets a warm and welcoming dining experience. Since our beginning, we have been dedicated to creating delicious meals that bring people together."
         mainImage="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4"
+         youtubeVideoId="14QoPp2Wl7E"
       />
       <ChefsP></ChefsP>
       <Gallery></Gallery>

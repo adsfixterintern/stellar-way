@@ -24,6 +24,7 @@ const Testimonials = () => {
     fetchFeedbacks();
   }, []);
 
+
   if (loading || feedbacks.length === 0) return null;
 
   return (

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import aboutImage from '@/assets/home/homeAbout.png'; 
 import qualityIcon from '@/assets/home/icon1.png'; 
 import reputationIcon from '@/assets/home/icon2.png';
+import Link from 'next/link';
 
 const AboutSection: React.FC = () => {
 
@@ -118,7 +119,7 @@ const AboutSection: React.FC = () => {
           </motion.div>
 
           <motion.div variants={textItemVariants}>
-            <button className="blockBtn">Explore More</button>
+            <Link href="/about-us"><button className="blockBtn">Explore More</button></Link>
           </motion.div>
         </motion.div>
       </div>

@@ -6,8 +6,6 @@ import Providers from "./providers";
 import { Toaster } from "react-hot-toast";
 import { CartProvider } from "@/context/CartContext";
 
-
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -34,23 +32,22 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-       <CartProvider>
-         <Providers>
-          <Toaster
-  position="top-right"
-  toastOptions={{
-    style: {
-      zIndex: 999999,
-    },
-  }}
-/>
+          <CartProvider>
+            <Providers>
+              <Toaster
+                position="top-center"
+                reverseOrder={false}
+                toastOptions={{
+                  duration: 3000,
+                }}
+                containerStyle={{}}
+                gutter={8}
+              />
 
-          {children}
-          
-        </Providers>
-       </CartProvider>
-            </AuthProvider>
-            
+              {children}
+            </Providers>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

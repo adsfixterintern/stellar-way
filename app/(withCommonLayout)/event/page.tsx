@@ -31,17 +31,18 @@ const EventsPage = () => {
   return (
     <div className="bg-white font-sans">
       <CommonHero
-        isAboutPage={true}
-        title={
-          <span>
-            Events at <br /> Savory Nest
-          </span>
-        }
-        description="Join us at Savory Nest for exciting culinary events, live music nights, and special dining experiences. Reserve your spot and enjoy unforgettable moments."
-        mainImage={eventHero}
-        buttonText="Book Event"
-        buttonPath="/event-booking"
-      />
+  isAboutPage={true}
+  title={
+    <span>
+      Events at <br /> Savory Nest
+    </span>
+  }
+  description="Join us at Savory Nest for exciting culinary events, live music nights, and special dining experiences. Reserve your spot and enjoy unforgettable moments."
+  mainImage={eventHero}
+  buttonText="Book Event"
+  buttonPath="/event-booking"
+  youtubeVideoId="14QoPp2Wl7E"
+/>
 
       <section
         className="py-20 bg-cover bg-center bg-no-repeat"

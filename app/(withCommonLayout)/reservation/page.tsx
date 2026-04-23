@@ -78,6 +78,7 @@ const ReservationPage = () => {
         mainImage={reservationImg.src}
         buttonText=""
         buttonPath=""
+        youtubeVideoId="14QoPp2Wl7E"
       />
 
       <section className="py-20 bg-cover bg-center bg-no-repeat"

@@ -22,7 +22,7 @@ const Baneer = () => {
   `;
 
   return (
-    <div className="relative overflow-hidden min-h-screen">
+    <div className="relative overflow-hidden min-h-[700px]">
       <style>{floatStyle}</style>
 
       {/* Background Image */}

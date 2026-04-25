@@ -64,7 +64,7 @@ const ContactForm = () => {
               Let us Start a <span className="text-[#1A4E11]">Conversation</span>
             </h2>
             <p className="text-gray-600 text-sm font-medium max-w-sm">
-              Have a project in mind? Reach out and we will help you bring it to life.
+              Have a question in mind? Reach out and feel free to ask.
             </p>
           </div>
 

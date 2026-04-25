@@ -3,6 +3,7 @@ import React from "react";
 import ChefsP from "./_components/ChefsP";
 import Gallery from "./_components/Gallery";
 import StatsSection from "./_components/StatsSection";
+import AboutOwnerMessage from "./_components/AboutOwnerMessage";
 
 export default function page() {
   return (
@@ -17,8 +18,9 @@ export default function page() {
         youtubeVideoId="14QoPp2Wl7E"
       />
       <ChefsP></ChefsP>
-      <Gallery></Gallery>
       <StatsSection/>
+      <AboutOwnerMessage/>
+      <Gallery></Gallery>
     </div>
   );
 }

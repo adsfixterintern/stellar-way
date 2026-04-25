@@ -61,14 +61,10 @@ const EventDetailsPage = () => {
         isCenter={true}
         subtitle="EXCLUSIVE EXPERIENCE"
         title={event.title}
-        description={
-          event.subTitle || "Join us for a curated culinary journey."
-        }
       />
 
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-          {/* বাম পাশে ইমেজ এবং ডিটেইলস */}
           <div className="lg:col-span-7 space-y-10">
             <div className="relative h-[400px] md:h-[600px] rounded-[32px] overflow-hidden shadow-sm border border-gray-100">
               <Image

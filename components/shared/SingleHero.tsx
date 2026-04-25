@@ -66,7 +66,7 @@ const SingleHero = ({
             {description}
           </p>
 
-          {/* বাটন যদি buttonTitle থাকে তবেই দেখাবে, নাহলে দেখাবে না */}
+
           {buttonTitle && (
             <div className={`pt-4 ${isCenter ? "flex justify-center" : ""}`}>
               <CustomBtn

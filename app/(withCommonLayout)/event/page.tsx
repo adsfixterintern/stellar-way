@@ -31,18 +31,18 @@ const EventsPage = () => {
   return (
     <div className="bg-white font-sans">
       <CommonHero
-  isAboutPage={true}
-  title={
-    <span>
-      Events at <br /> Savory Nest
-    </span>
-  }
-  description="Join us at Savory Nest for exciting culinary events, live music nights, and special dining experiences. Reserve your spot and enjoy unforgettable moments."
-  mainImage={eventHero}
-  buttonText="Book Event"
-  buttonPath="/event-booking"
-  youtubeVideoId="14QoPp2Wl7E"
-/>
+        isAboutPage={true}
+        title={
+          <span>
+            Events at <br /> Savory Nest
+          </span>
+        }
+        description="Join us at Savory Nest for exciting culinary events, live music nights, and special dining experiences. Reserve your spot and enjoy unforgettable moments."
+        mainImage={eventHero}
+        buttonText=""
+        buttonPath="/event-booking"
+        youtubeVideoId="14QoPp2Wl7E"
+      />
 
       <section
         className="py-20 bg-cover bg-center bg-no-repeat"
@@ -91,92 +91,95 @@ const EventsPage = () => {
               1024: { slidesPerView: 3 },
             }}
           >
-            {events?.map((item: IEvent) => (
-              <SwiperSlide key={item._id}>
-                <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col h-full">
-                  <div className="h-56 w-full relative">
-                    <img
-                      src={
-                        item.image.includes("http") &&
-                        !item.image.includes("create-event")
-                          ? item.image
-                          : "https://via.placeholder.com/400x300"
-                      }
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-6 space-y-4">
-                    <div className="flex gap-4 text-[13px] font-medium text-gray-600">
-                      <div className="flex items-center gap-1 px-3 py-1 border rounded-full">
-                        <Calendar size={14} className="text-primary" />{" "}
-                        {item.date}
-                      </div>
-                      <div className="flex items-center gap-1 px-3 py-1 border rounded-full">
-                        <Clock size={14} className="text-primary" /> {item.time}
-                      </div>
+            {events
+              ?.filter((item: IEvent) => item.status === "active")
+              ?.map((item: IEvent) => (
+                <SwiperSlide key={item._id}>
+                  <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col h-full">
+                    <div className="h-56 w-full relative">
+                      <img
+                        src={
+                          item.image.includes("http") &&
+                          !item.image.includes("create-event")
+                            ? item.image
+                            : "https://via.placeholder.com/400x300"
+                        }
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    <h3 className="text-xl font-bold text-[#1E1E1E]">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-500 text-sm line-clamp-2">
-                      {item.subTitle}
-                    </p>
+                    <div className="p-6 space-y-4">
+                      <div className="flex gap-4 text-[13px] font-medium text-gray-600">
+                        <div className="flex items-center gap-1 px-3 py-1 border rounded-full">
+                          <Calendar size={14} className="text-primary" />{" "}
+                          {item.date}
+                        </div>
+                        <div className="flex items-center gap-1 px-3 py-1 border rounded-full">
+                          <Clock size={14} className="text-primary" />{" "}
+                          {item.time}
+                        </div>
+                      </div>
+                      <h3 className="text-xl font-bold text-[#1E1E1E]">
+                        {item.title}
+                      </h3>
+                      <p className="text-gray-500 text-sm line-clamp-2">
+                        {item.subTitle}
+                      </p>
 
-                    <div className="flex items-center justify-between pt-2">
-                      {/* LEFT SIDE (avatars) */}
-                      <div className="flex items-center">
-                        <div className="flex -space-x-2">
-                          {(item?.bookedParticipants?.length
-                            ? item.bookedParticipants.slice(0, 5)
-                            : [1, 2, 3]
-                          ).map((user: any, index: number) => (
-                            <div
-                              key={index}
-                              className="w-8 h-8 rounded-full border-2 border-white overflow-hidden flex items-center justify-center bg-[#1D3A15] text-white text-xs font-bold uppercase"
-                            >
-                              {user?.image ? (
-                                <img
-                                  src={user.image}
-                                  alt={user.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : user?.name ? (
-                                user.name.charAt(0)
-                              ) : (
-                                <img
-                                  src={`https://i.pravatar.cc/100?img=${index + 12}`}
-                                  alt="demo"
-                                  className="w-full h-full object-cover"
-                                />
-                              )}
-                            </div>
-                          ))}
+                      <div className="flex items-center justify-between pt-2">
+                        {/* LEFT SIDE (avatars) */}
+                        <div className="flex items-center">
+                          <div className="flex -space-x-2">
+                            {(item?.bookedParticipants?.length
+                              ? item.bookedParticipants.slice(0, 5)
+                              : [1, 2, 3]
+                            ).map((user: any, index: number) => (
+                              <div
+                                key={index}
+                                className="w-8 h-8 rounded-full border-2 border-white overflow-hidden flex items-center justify-center bg-[#1D3A15] text-white text-xs font-bold uppercase"
+                              >
+                                {user?.image ? (
+                                  <img
+                                    src={user.image}
+                                    alt={user.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : user?.name ? (
+                                  user.name.charAt(0)
+                                ) : (
+                                  <img
+                                    src={`https://i.pravatar.cc/100?img=${index + 12}`}
+                                    alt="demo"
+                                    className="w-full h-full object-cover"
+                                  />
+                                )}
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* remaining */}
+                          {(item?.bookedParticipants?.length ?? 0) > 5 && (
+                            <span className="ml-3 text-xs font-bold text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full">
+                              +{(item.bookedParticipants?.length ?? 0) - 5}
+                            </span>
+                          )}
                         </div>
 
-                        {/* remaining */}
-                        {(item?.bookedParticipants?.length ?? 0) > 5 && (
-                          <span className="ml-3 text-xs font-bold text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full">
-                            +{(item.bookedParticipants?.length ?? 0) - 5}
-                          </span>
-                        )}
+                        {/* 🔥 RIGHT SIDE ARROW BUTTON */}
+                        <Link
+                          href={`/event-booking/${item._id}`}
+                          className="w-9 h-9 rounded-full bg-[#F1F5EC] flex items-center justify-center hover:bg-[#1D3A15] group transition-all"
+                        >
+                          <ArrowRight
+                            size={16}
+                            className="text-[#1D3A15] group-hover:text-white transition-all"
+                          />
+                        </Link>
                       </div>
-
-                      {/* 🔥 RIGHT SIDE ARROW BUTTON */}
-                      <Link
-                        href={`/event-booking/${item._id}`}
-                        className="w-9 h-9 rounded-full bg-[#F1F5EC] flex items-center justify-center hover:bg-[#1D3A15] group transition-all"
-                      >
-                        <ArrowRight
-                          size={16}
-                          className="text-[#1D3A15] group-hover:text-white transition-all"
-                        />
-                      </Link>
                     </div>
                   </div>
-                </div>
-              </SwiperSlide>
-            ))}
+                </SwiperSlide>
+              ))}
           </Swiper>
         </div>
       </section>

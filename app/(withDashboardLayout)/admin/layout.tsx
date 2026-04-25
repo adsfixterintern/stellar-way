@@ -5,7 +5,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
- 
   IoCartOutline,
   IoPeopleOutline,
   IoSettingsOutline,
@@ -18,10 +17,10 @@ import {
   IoRestaurantOutline,
   IoCalendarOutline,
   IoImageOutline,
-  IoBriefcaseOutline
+  IoBriefcaseOutline,
 } from "react-icons/io5";
 import { Toaster } from "react-hot-toast";
-import logo from "@/assets/img/flogo.png"
+import logo from "@/assets/img/flogo.png";
 import Image from "next/image";
 import { LucideBike } from "lucide-react";
 
@@ -29,13 +28,13 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-// ১. SidebarContent 
-const SidebarContent = ({ 
-  pathname, 
-  setIsSidebarOpen, 
-  menuItems 
-}: { 
-  pathname: string; 
+// ১. SidebarContent
+const SidebarContent = ({
+  pathname,
+  setIsSidebarOpen,
+  menuItems,
+}: {
+  pathname: string;
   setIsSidebarOpen: (val: boolean) => void;
   menuItems: any[];
 }) => (
@@ -43,11 +42,7 @@ const SidebarContent = ({
     <div className="mb-10 flex justify-center">
       <Link href="/">
         <div className=" w-32 h-10 rounded flex items-center justify-center text-xs font-bold uppercase tracking-widest">
-          <Image
-            src={logo}
-            alt="Seoul Mirage"
-            className=" h-auto"
-          />
+          <Image src={logo} alt="Seoul Mirage" className=" h-auto" />
         </div>
       </Link>
     </div>
@@ -87,38 +82,51 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const pathname = usePathname();
 
-const menuItems = [
-  { name: "Overview", icon: <IoStatsChartOutline />, path: "/admin" },
+  const menuItems = [
+    { name: "Overview", icon: <IoStatsChartOutline />, path: "/admin" },
 
-  { name: "Category", icon: <IoGridOutline />, path: "/admin/category" },
+    { name: "Category", icon: <IoGridOutline />, path: "/admin/category" },
 
-  { name: "Menus", icon: <IoRestaurantOutline />, path: "/admin/menus" },
+    { name: "Menus", icon: <IoRestaurantOutline />, path: "/admin/menus" },
 
-  { name: "Orders", icon: <IoCartOutline />, path: "/admin/orders" },
-  { name: "Riders", icon: <LucideBike />, path: "/admin/riders" },
+    { name: "Orders", icon: <IoCartOutline />, path: "/admin/orders" },
+    { name: "Riders", icon: <LucideBike />, path: "/admin/riders" },
 
-  { name: "Chef", icon: <IoPeopleOutline />, path: "/admin/chef" },
-  
-  { name: "Blog", icon: <IoPeopleOutline />, path: "/admin/blog" },
-  { name: "Feedback", icon: <IoPeopleOutline />, path: "/admin/feedback" },
-  { name: "Events", icon: <IoBriefcaseOutline />, path: "/admin/events" },
-  { name: "booking", icon: <IoCalendarOutline />, path: "/admin/booking" },
-  { name: "User Management", icon: <IoPeopleOutline />, path: "/admin/user-management" },
-  { name: "Gallery Management", icon: <IoImageOutline />, path: "/admin/gallery" },
+    { name: "Chef", icon: <IoPeopleOutline />, path: "/admin/chef" },
 
-  { name: "FAQ", icon: <IoSettingsOutline />, path: "/admin/faq" },
-  { name: "Settings", icon: <IoSettingsOutline />, path: "/admin/settings" },
-];
+    { name: "Blog", icon: <IoPeopleOutline />, path: "/admin/blog" },
+    { name: "Feedback", icon: <IoPeopleOutline />, path: "/admin/feedback" },
+    { name: "Events", icon: <IoBriefcaseOutline />, path: "/admin/events" },
+    {
+      name: "Event Booking",
+      icon: <IoBriefcaseOutline />,
+      path: "/admin/event-booking",
+    },
+    { name: "booking", icon: <IoCalendarOutline />, path: "/admin/booking" },
+    {
+      name: "User Management",
+      icon: <IoPeopleOutline />,
+      path: "/admin/user-management",
+    },
+    {
+      name: "Gallery Management",
+      icon: <IoImageOutline />,
+      path: "/admin/gallery",
+    },
+
+    { name: "FAQ", icon: <IoSettingsOutline />, path: "/admin/faq" },
+    { name: "Settings", icon: <IoSettingsOutline />, path: "/admin/settings" },
+  ];
 
   return (
     <div className="flex min-h-screen bg-[#FDFCFD] font-sans antialiased">
       <Toaster position="top-center" reverseOrder={false} />
       {/* 1. DESKTOP SIDEBAR */}
       <aside className="hidden lg:block w-64 fixed inset-y-0 left-0 z-50">
-        <SidebarContent 
-          pathname={pathname} 
-          setIsSidebarOpen={setIsSidebarOpen} 
-          menuItems={menuItems} 
+        <SidebarContent
+          pathname={pathname}
+          setIsSidebarOpen={setIsSidebarOpen}
+          menuItems={menuItems}
         />
       </aside>
 
@@ -145,8 +153,12 @@ const menuItems = [
 
             <div className="flex items-center gap-3 border-l border-gray-100 pl-6">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-gray-900 leading-tight">Admin User</p>
-                <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest mt-0.5">Staff Account</p>
+                <p className="text-sm font-bold text-gray-900 leading-tight">
+                  Admin User
+                </p>
+                <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest mt-0.5">
+                  Staff Account
+                </p>
               </div>
               <div className="w-10 h-10 rounded-full border-2 border-pink-50 overflow-hidden bg-gray-100 shadow-sm flex items-center justify-center">
                 <span className="text-sm font-bold text-gray-400">AU</span>
@@ -175,10 +187,10 @@ const menuItems = [
             >
               <IoCloseOutline />
             </button>
-            <SidebarContent 
-              pathname={pathname} 
-              setIsSidebarOpen={setIsSidebarOpen} 
-              menuItems={menuItems} 
+            <SidebarContent
+              pathname={pathname}
+              setIsSidebarOpen={setIsSidebarOpen}
+              menuItems={menuItems}
             />
           </div>
         </div>

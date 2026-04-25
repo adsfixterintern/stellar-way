@@ -30,6 +30,7 @@ import { Toaster } from "react-hot-toast";
 import logo from "@/assets/img/flogo.png";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
+import { LucideMessageSquareMore } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -123,6 +124,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       name: "Stats Management",
       icon: <IoBarChartOutline />,
       path: "/admin/stats",
+    },
+    {
+      name: "Owner Message",
+      icon: <LucideMessageSquareMore />,
+      path: "/admin/owner-message",
     },
     { name: "FAQ", icon: <IoHelpCircleOutline />, path: "/admin/faq" },
     { name: "Settings", icon: <IoSettingsOutline />, path: "/admin/settings" },

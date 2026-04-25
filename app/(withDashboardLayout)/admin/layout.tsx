@@ -24,6 +24,7 @@ import { Toaster } from "react-hot-toast";
 import logo from "@/assets/img/flogo.png"
 import Image from "next/image";
 import { LucideBike } from "lucide-react";
+import { MdEventSeat } from "react-icons/md";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -102,6 +103,7 @@ const menuItems = [
   { name: "Blog", icon: <IoPeopleOutline />, path: "/admin/blog" },
   { name: "Feedback", icon: <IoPeopleOutline />, path: "/admin/feedback" },
   { name: "Events", icon: <IoBriefcaseOutline />, path: "/admin/events" },
+  { name: "Tables", icon: <MdEventSeat />, path: "/admin/table" },
   { name: "booking", icon: <IoCalendarOutline />, path: "/admin/booking" },
   { name: "User Management", icon: <IoPeopleOutline />, path: "/admin/user-management" },
   { name: "Gallery Management", icon: <IoImageOutline />, path: "/admin/gallery" },

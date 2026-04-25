@@ -126,6 +126,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       path: "/admin/stats",
     },
     {
+      name: "Offers Management",
+      icon: <IoBarChartOutline />,
+      path: "/admin/manage-offers",
+    },
+    {
       name: "Owner Message",
       icon: <LucideMessageSquareMore />,
       path: "/admin/owner-message",

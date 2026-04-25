@@ -23,6 +23,7 @@ import { Toaster } from "react-hot-toast";
 import logo from "@/assets/img/flogo.png";
 import Image from "next/image";
 import { LucideBike } from "lucide-react";
+import { MdEventSeat } from "react-icons/md";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

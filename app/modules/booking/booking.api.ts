@@ -7,7 +7,7 @@ export const createBooking = async (bookingData: ICreateBookingRequest) => {
   return response.data;
 };
 
-// Get My Bookings (আমরা এখানে POST এর বদলে GET ও ব্যবহার করতে পারি যদি ব্যাকএন্ড সাপোর্ট করে, তবে আপনার কোড অনুযায়ী POST রাখলাম)
+// Get My Bookings 
 export const getMyBookingsApi = async (userId: string) => {
   const response = await api.post('/bookings/my-bookings', { userId });
   return response.data;
@@ -22,5 +22,16 @@ export const updateBookingApi = async (id: string, bookingData: Partial<IBooking
 // Delete Booking
 export const deleteBookingApi = async (id: string) => {
   const response = await api.delete(`/bookings/${id}`);
+  return response.data;
+};
+
+export const checkTableAvailability = async (date: string, startTime: string, endTime: string) => {
+  const response = await api.get('/bookings/check-availability', {
+    params: {
+      date,
+      startTime,
+      endTime
+    }
+  });
   return response.data;
 };

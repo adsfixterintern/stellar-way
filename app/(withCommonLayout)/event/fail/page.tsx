@@ -46,7 +46,7 @@ const PaymentFailPage = () => {
         <div className="grid grid-cols-1 gap-3">
           {/* Back to Events Button */}
           <button
-            onClick={() => router.push("/events")} // Apnar event listing path-ti ekhane din
+            onClick={() => router.push("/event")} // Apnar event listing path-ti ekhane din
             className="w-full bg-[#1D3A15] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-[#2d5a21] transition-all shadow-lg shadow-green-900/10"
           >
             <ArrowLeft size={18} /> Back to Events

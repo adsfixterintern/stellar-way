@@ -199,7 +199,7 @@ const EventsPage = () => {
                           </div>
 
                           <Link
-                            href={`/event-booking/${item._id}`}
+                            href={`/event/${item._id}`}
                             className="w-9 h-9 rounded-full bg-[#F1F5EC] flex items-center justify-center hover:bg-[#1D3A15] group transition-all"
                           >
                             <ArrowRight

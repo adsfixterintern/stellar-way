@@ -6,13 +6,22 @@ export const createOfferApi = async (data: any) => {
   return response.data;
 };
 
+export const getAllOffersApi = async () => {
+  const response = await api.get("/offer");
+  return response.data;
+};
+
 export const getActiveOffersApi = async () => {
   const response = await api.get("/offer/active");
-  console.log(response)
   return response.data;
 };
 
 export const deleteOfferApi = async (id: string) => {
   const response = await api.delete(`/offer/${id}`);
+  return response.data;
+};
+
+export const updateOfferApi = async (id: string, payload: any) => {
+  const response = await api.patch(`/offer/${id}`, payload);
   return response.data;
 };

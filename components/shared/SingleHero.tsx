@@ -62,9 +62,12 @@ const SingleHero = ({
             {title}
           </h1>
 
-          <p className="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto lg:mx-0">
+          {/* <p className="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto lg:mx-0">
             {description}
-          </p>
+          </p> */}
+          <p className={`text-gray-300 text-lg md:text-xl max-w-2xl ${isCenter ? "mx-auto" : "mx-auto lg:mx-0"}`}>
+    {description}
+  </p>
 
 
           {buttonTitle && (

@@ -8,6 +8,7 @@ import OurExquisiteMenu from '@/components/home/OurExquisiteMenu'
 import Exp from '@/components/home/Exp'
 import LatestBlogs from '@/components/home/LatestBlogs'
 import Feedback from '@/components/home/Feedback'
+import OfferSection from '@/components/home/OfferSection'
 
 export default function page() {
   return (
@@ -15,6 +16,7 @@ export default function page() {
 
 
       <Baneer></Baneer>
+      <OfferSection/>
       <AboutSection />
       <HotDeliciousItem></HotDeliciousItem>
       <OurExquisiteMenu></OurExquisiteMenu>

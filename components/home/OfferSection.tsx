@@ -4,13 +4,7 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  FiClock,
-  FiChevronRight,
-  FiCalendar,
-  FiX,
-  FiArrowRight,
-} from "react-icons/fi";
+import { FiClock, FiChevronRight, FiX, FiArrowRight } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { getActiveOffersApi } from "@/app/modules/offer/offer.api";
 
@@ -48,6 +42,25 @@ const useCountdown = (targetDate: string) => {
   return timeLeft;
 };
 
+// --- COMPONENT: SKELETON CARD ---
+const OfferCardSkeleton = () => (
+  <div className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 h-[560px] flex flex-col animate-pulse shadow-sm">
+    <div className="h-64 bg-gray-200" />
+    <div className="p-8 space-y-6 flex-1">
+      <div className="space-y-3">
+        <div className="h-8 bg-gray-200 rounded-xl w-3/4" />
+        <div className="h-4 bg-gray-100 rounded-lg w-full" />
+        <div className="h-4 bg-gray-100 rounded-lg w-5/6" />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="h-14 bg-gray-50 rounded-2xl" />
+        <div className="h-14 bg-gray-50 rounded-2xl" />
+      </div>
+      <div className="h-14 bg-gray-200 rounded-2xl w-full mt-auto" />
+    </div>
+  </div>
+);
+
 // --- MAIN COMPONENT ---
 const OfferSection = () => {
   const [offers, setOffers] = useState<any[]>([]);
@@ -62,7 +75,8 @@ const OfferSection = () => {
       } catch (err) {
         console.error("Fetch Error:", err);
       } finally {
-        setLoading(false);
+        // loading skeleton check করার জন্য ১ সেকেন্ড ডিলে দেওয়া হয়েছে
+        setTimeout(() => setLoading(false), 1000);
       }
     };
     fetchOffers();
@@ -89,12 +103,25 @@ const OfferSection = () => {
           </motion.h2>
         </div>
 
-        {/* Grid */}
+        {/* Grid with AnimatePresence */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           <AnimatePresence mode="wait">
             {loading ? (
-              [...Array(3)].map((_, i) => <OfferCardSkeleton key={i} />)
+              // রেন্ডার হবে যখন ডাটা ফেচ হচ্ছে
+              <React.Fragment key="skeleton-group">
+                {[...Array(3)].map((_, i) => (
+                  <motion.div
+                    key={`skeleton-${i}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <OfferCardSkeleton />
+                  </motion.div>
+                ))}
+              </React.Fragment>
             ) : offers.length > 0 ? (
+              // রেন্ডার হবে যখন ডাটা চলে আসবে
               offers.map((offer, index) => (
                 <OfferCard
                   key={offer._id}
@@ -104,15 +131,21 @@ const OfferSection = () => {
                 />
               ))
             ) : (
-              <div className="col-span-full text-center py-20 text-gray-400 font-bold">
+              // রেন্ডার হবে যখন কোনো অফার নেই
+              <motion.div
+                key="no-offers"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="col-span-full text-center py-20 text-gray-400 font-bold"
+              >
                 No active offers right now.
-              </div>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
       </div>
 
-      {/* --- MODAL --- */}
+      {/* --- MODAL (unchanged but wrapped for consistency) --- */}
       <AnimatePresence>
         {selectedOffer && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -124,9 +157,9 @@ const OfferSection = () => {
               className="fixed inset-0 bg-black/60 backdrop-blur-md"
             />
             <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
               className="relative bg-white w-full max-w-2xl rounded-[2.5rem] overflow-hidden shadow-2xl z-10"
             >
               <button
@@ -140,7 +173,7 @@ const OfferSection = () => {
                   <span className="text-[#1A4E11] font-black text-[10px] uppercase tracking-widest bg-[#1A4E11]/5 px-4 py-2 rounded-full">
                     Menu List
                   </span>
-                  <h3 className="text-3xl font-black text-gray-900 mt-4 line-clamp-1">
+                  <h3 className="text-3xl font-black text-gray-900 mt-4">
                     {selectedOffer.title}
                   </h3>
                 </div>
@@ -204,7 +237,6 @@ const OfferCard = ({
   const isRunning = now >= startDate && now <= endDate;
   const isUpcoming = now < startDate;
 
-  // different fallback images based on index
   const fallbackImages = [
     "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=2070&auto=format&fit=crop",
@@ -215,7 +247,8 @@ const OfferCard = ({
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.4, delay: index * 0.05 }}
       whileHover={{ y: -12 }}
       className="group relative bg-white rounded-[2.5rem] overflow-hidden shadow-xl border border-gray-100 flex flex-col h-full"
     >
@@ -227,7 +260,6 @@ const OfferCard = ({
         </div>
       </div>
 
-      {/* Image & Overlay */}
       <div className="relative h-64 overflow-hidden">
         <img
           src={
@@ -238,7 +270,6 @@ const OfferCard = ({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent" />
 
-        {/* DYNAMIC COUNTDOWN / STATUS */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%]">
           {isRunning ? (
             <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 flex justify-between items-center text-white">
@@ -286,7 +317,6 @@ const OfferCard = ({
         </div>
       </div>
 
-      {/* Content */}
       <div className="p-8 flex flex-col flex-1">
         <h3 className="text-2xl font-black text-gray-800 mb-2 group-hover:text-[#1A4E11] transition-colors line-clamp-1">
           {offer.title}
@@ -294,7 +324,6 @@ const OfferCard = ({
         <p className="text-gray-500 text-sm font-medium line-clamp-2 mb-6 italic leading-relaxed">
           {offer.description}
         </p>
-
         <div className="grid grid-cols-2 gap-4 mb-8">
           <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
             <span className="text-[8px] font-black text-gray-400 uppercase block mb-1 tracking-tighter">
@@ -313,8 +342,6 @@ const OfferCard = ({
             </span>
           </div>
         </div>
-
-        {/* --- ALWAYS ACTIVE BUTTON --- */}
         <button
           onClick={onOpenMenu}
           className="w-full h-14 rounded-2xl flex items-center justify-center gap-2 transition-all font-black text-xs uppercase tracking-widest bg-[#1A4E11] text-white hover:bg-[#153d0e] shadow-lg shadow-[#1A4E11]/20 active:scale-95"
@@ -325,18 +352,5 @@ const OfferCard = ({
     </motion.div>
   );
 };
-
-// --- COMPONENT: SKELETON ---
-const OfferCardSkeleton = () => (
-  <div className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 h-[560px] animate-pulse">
-    <div className="h-64 bg-gray-200" />
-    <div className="p-8 space-y-4">
-      <div className="h-8 bg-gray-200 rounded-md w-3/4" />
-      <div className="h-4 bg-gray-100 rounded-md w-full" />
-      <div className="h-20 bg-gray-50 rounded-2xl" />
-      <div className="h-14 bg-gray-200 rounded-2xl w-full" />
-    </div>
-  </div>
-);
 
 export default OfferSection;

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -90,7 +91,6 @@ const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
       lastName: formData.get("lastName") as string,
     });
 
-    // পেমেন্ট পেজে রিডাইরেক্ট (event-pay এর মতই)
     router.push(`/reservation/table-pay?${queryParams.toString()}`);
   };
 

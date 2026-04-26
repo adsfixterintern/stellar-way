@@ -76,10 +76,10 @@ const EventSuccessPage = ({
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/dashboard/my-booking"
+                href="/dashboard/my-events"
                 className="bg-[#3D5334] text-white px-8 py-4 rounded-2xl font-bold hover:bg-[#1D3A15] transition-all shadow-lg"
               >
-                VIEW MY BOOKINGS
+                VIEW MY EVENTS
               </Link>
 
               <Link

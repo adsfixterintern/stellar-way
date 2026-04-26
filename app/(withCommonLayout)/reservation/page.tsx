@@ -9,9 +9,6 @@ import TableReservationForm from "./_components/TableReservationForm";
 import ViewAllTables from "./_components/ViewAllTables";
 
 const ReservationPage = () => {
- 
-  
-
   return (
     <div className="bg-white">
       <CommonHero
@@ -27,7 +24,7 @@ const ReservationPage = () => {
         buttonPath=""
         youtubeVideoId="14QoPp2Wl7E"
       />
-<ViewAllTables></ViewAllTables>
+      <ViewAllTables></ViewAllTables>
       <TableReservationForm />
 
       <div className="py-20 bg-white">

@@ -18,12 +18,32 @@ import "swiper/css/pagination";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// --- SKELETON COMPONENT ---
+const BlogCardSkeleton = () => (
+  <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 animate-pulse h-full">
+    {/* Image Skeleton */}
+    <div className="w-full h-64 bg-slate-200"></div>
+    {/* Content Skeleton */}
+    <div className="p-6 space-y-4">
+      <div className="flex gap-2">
+        <div className="h-4 w-20 bg-slate-200 rounded-full"></div>
+        <div className="h-4 w-24 bg-slate-100 rounded-full"></div>
+      </div>
+      <div className="h-6 w-full bg-slate-200 rounded-lg"></div>
+      <div className="h-6 w-2/3 bg-slate-200 rounded-lg"></div>
+      <div className="pt-4 flex justify-between items-center border-t border-slate-50">
+        <div className="h-4 w-24 bg-slate-100 rounded"></div>
+        <div className="h-8 w-8 rounded-full bg-slate-100"></div>
+      </div>
+    </div>
+  </div>
+);
+
 const LatestBlogs: React.FC = () => {
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const router = useRouter();
-
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
 
@@ -45,10 +65,9 @@ const LatestBlogs: React.FC = () => {
 
   /* ---------------- GSAP SCROLL ANIMATION ---------------- */
   useEffect(() => {
-    if (!blogs.length) return;
+    if (loading || !blogs.length) return;
 
     const ctx = gsap.context(() => {
-      // Section fade
       gsap.from(sectionRef.current, {
         opacity: 0,
         y: 60,
@@ -56,7 +75,6 @@ const LatestBlogs: React.FC = () => {
         ease: "power3.out",
       });
 
-      // Cards scroll animation (BOTTOM → TOP)
       gsap.from(cardsRef.current, {
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -73,10 +91,7 @@ const LatestBlogs: React.FC = () => {
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [blogs]);
-
-  if (loading)
-    return <div className="py-20 text-center font-bold">Loading...</div>;
+  }, [blogs, loading]);
 
   return (
     <section ref={sectionRef} className="py-20 px-4 md:px-12 bg-[#E4F5DC]">
@@ -84,25 +99,25 @@ const LatestBlogs: React.FC = () => {
         {/* HEADER */}
         <div className="flex justify-between items-end mb-12">
           <div className="!mb-5">
-            <span className="superTitle flex items-center gap-3">
+            <span className="superTitle flex items-center gap-3 text-[#1A4E11] font-bold uppercase tracking-widest text-sm">
               Blog
               <div className="w-10 h-[2px] bg-[#1A4E11]"></div>
             </span>
-            <h2 className="secTitle mt-4">Latest Blog Post</h2>
+            <h2 className="secTitle mt-4 text-3xl md:text-5xl font-black text-slate-900">Latest Blog Post</h2>
           </div>
 
           <div className="flex gap-3">
-            <button className="blog-prev w-12 h-12 rounded-lg border-2 border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-[#1A4E11] hover:text-white transition-all">
+            <button className="blog-prev w-12 h-12 rounded-lg border-2 border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-[#1A4E11] hover:text-white transition-all shadow-sm">
               <IoArrowBackOutline size={22} />
             </button>
 
-            <button className="blog-next w-12 h-12 rounded-lg bg-[#2D4619] text-white flex items-center justify-center hover:bg-[#1A4E11] transition-all">
+            <button className="blog-next w-12 h-12 rounded-lg bg-[#2D4619] text-white flex items-center justify-center hover:bg-[#1A4E11] transition-all shadow-lg">
               <IoArrowForwardOutline size={22} />
             </button>
           </div>
         </div>
 
-        {/* SWIPER */}
+        {/* SWIPER / SKELETON LOGIC */}
         <Swiper
           modules={[Navigation, Pagination]}
           spaceBetween={30}
@@ -119,19 +134,26 @@ const LatestBlogs: React.FC = () => {
           }}
           className="pb-10"
         >
-          {blogs.map((blog, index) => (
-            <SwiperSlide key={blog._id}>
-              <div
-                ref={(el) => {
-                  if (el) cardsRef.current[index] = el;
-                }}
-                onClick={() => router.push(`/blog/${blog._id}`)}
-                className="cursor-pointer"
-              >
-                <BlogCard blog={blog} />
-              </div>
-            </SwiperSlide>
-          ))}
+          {loading
+            ? 
+              Array.from({ length: 3 }).map((_, idx) => (
+                <SwiperSlide key={`skeleton-${idx}`}>
+                  <BlogCardSkeleton />
+                </SwiperSlide>
+              ))
+            : blogs.map((blog, index) => (
+                <SwiperSlide key={blog._id}>
+                  <div
+                    ref={(el) => {
+                      if (el) cardsRef.current[index] = el;
+                    }}
+                    onClick={() => router.push(`/blog/${blog._id}`)}
+                    className="cursor-pointer h-full"
+                  >
+                    <BlogCard blog={blog} />
+                  </div>
+                </SwiperSlide>
+              ))}
         </Swiper>
       </div>
     </section>

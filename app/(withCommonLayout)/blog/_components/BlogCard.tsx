@@ -61,14 +61,14 @@ const BlogCard = ({ blog }: { blog: any }) => {
             <div className="flex items-center gap-3">
               <div className="relative w-10 h-10 rounded-full overflow-hidden border border-gray-200 bg-gray-50">
                 <Image
-                  src="/assets/img/FAQ1.png"
+                  src={blog?.userId?.image}
                   alt="author"
                   fill
                   className="object-cover"
                 />
               </div>
               <span className="font-bold text-[15px] text-[#1a1a1a] group-hover:text-white transition-colors">
-                Albert Flores
+                {blog?.userId?.name}
               </span>
             </div>
 

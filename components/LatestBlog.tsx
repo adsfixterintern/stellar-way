@@ -5,6 +5,7 @@ import Image from "next/image";
 import { getAllBlogs } from "../app/modules/blog/blog.api";
 import { IBlog } from "../types/blog.interface";
 import leafImg from "../assets/img/FAQ1.png";
+import Link from "next/link";
 
 // 👉 Simple Skeleton Component
 const BlogSkeleton = () => {
@@ -36,7 +37,6 @@ const LatestBlog = () => {
         const res = await getAllBlogs();
 
         if (res?.success && res?.data?.length > 0) {
-          // 👉 draft বাদ দিয়ে last published blog নিচ্ছে
           const publishedBlogs = res.data.filter(
             (b: any) => b.status !== "draft",
           );
@@ -134,22 +134,24 @@ const LatestBlog = () => {
               {blog.contentSections?.[0]?.desc || "No description available."}
             </p>
 
-            <button className="flex items-center gap-2 text-[#1B4314] font-bold text-lg border-b-2 border-[#1B4314] pb-1 hover:gap-4 transition-all">
+           <Link href={`blog/${blog._id}`}>
+            <button className="flex items-center gap-2 text-[#1B4314] font-bold text-lg border-b-2 border-[#1B4314] pb-1 cursor-pointer hover:gap-4 transition-all">
               Read More <span>→</span>
             </button>
+           </Link>
 
             {/* Author */}
             <div className="flex items-center gap-4 pt-6 border-t border-gray-100 w-full mt-6">
               <div className="relative w-12 h-12 rounded-full overflow-hidden">
                 <Image
-                  src="/assets/img/FAQ1.png"
+                  src={blog?.userId?.image || "/assets/img/default-avatar.png"}
                   alt="Author"
                   fill
                   className="object-cover"
                 />
               </div>
               <div>
-                <h4 className="font-bold text-[#1a1a1a]">Albert Flores</h4>
+                <h4 className="font-bold text-[#1a1a1a]">{blog?.userId?.name}</h4>
                 <p className="text-gray-400 text-sm">Author</p>
               </div>
             </div>

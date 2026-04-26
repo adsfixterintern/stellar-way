@@ -117,10 +117,9 @@ export default function BlogDetailsPage() {
     );
   }
 
-  if (!blog)
-    return (
-      <div className="py-20 text-center">Blog not found!</div>
-    );
+  console.log(blog);
+
+  if (!blog) return <div className="py-20 text-center">Blog not found!</div>;
 
   return (
     <main className="bg-white min-h-screen">
@@ -138,22 +137,44 @@ export default function BlogDetailsPage() {
         <div className="flex flex-col md:flex-row justify-between mb-12 pb-8 border-b border-gray-100 gap-6">
           <div className="flex items-center gap-4">
             <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-[#3A4D39]/10">
-              <Image src="/assets/img/FAQ1.png" alt="Author" fill className="object-cover" />
+              {blog.userId?.image && (
+                <Image
+                  src={blog.userId.image}
+                  alt="Author"
+                  fill
+                  className="object-cover"
+                />
+              )}
             </div>
             <div>
-              <h4 className="font-bold text-[#1a1a1a] text-lg">Albert Flores</h4>
-              <p className="text-gray-400 text-sm">Digital Marketer</p>
+              <h4 className="font-bold text-[#1a1a1a] text-lg">
+                {blog?.userId?.name}
+              </h4>
             </div>
           </div>
 
           <div className="flex gap-8 md:gap-16 text-sm md:text-base">
             <div>
-              <p className="text-gray-400 text-xs mb-1 uppercase tracking-wider">Category</p>
-              <p className="font-bold text-[#1a1a1a]">Digital Marketing</p>
+              <p className="text-gray-400 text-xs mb-1 uppercase tracking-wider">
+                Category
+              </p>
+              <p className="font-bold text-[#1a1a1a]">
+                {blog?.categoryId?.name}
+              </p>
             </div>
             <div>
-              <p className="text-gray-400 text-xs mb-1 uppercase tracking-wider">Publish Date</p>
-              <p className="font-bold text-[#1a1a1a]">June 10, 2024</p>
+              <p className="text-gray-400 text-xs mb-1 uppercase tracking-wider">
+                Publish Date
+              </p>
+              <p className="font-bold text-[#1a1a1a]">
+                {blog?.publishDate
+                  ? new Date(blog.publishDate).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })
+                  : ""}
+              </p>
             </div>
           </div>
         </div>
@@ -166,7 +187,11 @@ export default function BlogDetailsPage() {
 
             <div className="space-y-16">
               {blog.contentSections?.map((section, index) => (
-                <div key={index} id={`section-${index}`} className="scroll-mt-32">
+                <div
+                  key={index}
+                  id={`section-${index}`}
+                  className="scroll-mt-32"
+                >
                   <h3 className="text-2xl font-bold text-[#1a1a1a] mb-6">
                     {index + 1}. {section.title}
                   </h3>
@@ -177,7 +202,12 @@ export default function BlogDetailsPage() {
 
                   {index === 0 && (
                     <div className="relative h-[450px] w-full rounded-[40px] overflow-hidden my-12 shadow-xl">
-                      <Image src={blog.thumbnail} alt="Banner" fill className="object-cover" />
+                      <Image
+                        src={blog.thumbnail}
+                        alt="Banner"
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                   )}
                 </div>
@@ -211,7 +241,7 @@ export default function BlogDetailsPage() {
                   <button
                     onClick={() =>
                       window.open(
-                        `https://facebook.com/sharer/sharer.php?u=${shareUrl}`
+                        `https://facebook.com/sharer/sharer.php?u=${shareUrl}`,
                       )
                     }
                     className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center"
@@ -222,7 +252,7 @@ export default function BlogDetailsPage() {
                   <button
                     onClick={() =>
                       window.open(
-                        `https://linkedin.com/sharing/share-offsite/?url=${shareUrl}`
+                        `https://linkedin.com/sharing/share-offsite/?url=${shareUrl}`,
                       )
                     }
                     className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center"

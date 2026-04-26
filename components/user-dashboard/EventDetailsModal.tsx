@@ -11,15 +11,18 @@ import {
   IoCallOutline,
   IoCheckmarkCircle,
   IoQrCodeOutline,
+  IoDownloadOutline,
+  IoLocationOutline,
+  IoWalletOutline,
 } from "react-icons/io5";
-import Image from "next/image";
-import { QRCodeSVG } from "qrcode.react"; // QR Code লাইব্রেরি
+import { QRCodeSVG } from "qrcode.react";
 
 interface EventDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   booking: any;
   user: any;
+  onDownload?: () => void;
 }
 
 const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
@@ -27,162 +30,138 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
   onClose,
   booking,
   user,
+  onDownload,
 }) => {
   if (!isOpen || !booking) return null;
 
-  // QR কোডের জন্য ডাটা স্ট্রিং (বুকিং আইডি এবং ট্রানজেকশন আইডি)
   const qrValue = `BookingID: ${booking._id} | TXN: ${booking.transactionId} | Event: ${booking.eventId?.title}`;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all overflow-hidden">
-      <div className="bg-white w-full max-w-2xl rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] sm:max-h-[85vh]">
-        {/* Header */}
-        <div className="flex justify-between items-center p-4 sm:p-5 border-b border-gray-100 bg-gray-50/50 shrink-0">
-          <div className="min-w-0">
-            <h2 className="text-base sm:text-lg font-black text-gray-900 uppercase tracking-tight">
-              Booking Details
-            </h2>
-            <p className="text-[9px] sm:text-[10px] text-gray-400 font-bold uppercase tracking-widest truncate">
-              TXN: {booking.transactionId}
-            </p>
-          </div>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all overflow-hidden print:bg-white print:p-0 print:static print:overflow-visible">
+      {/* --- Ticket Print CSS --- */}
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .printable-ticket,
+          .printable-ticket * {
+            visibility: visible;
+          }
+          .printable-ticket {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: white !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      {/* Main Ticket Modal - Following your requested design */}
+      <div className="bg-white w-full max-w-md rounded-[35px] shadow-2xl overflow-hidden relative animate-in zoom-in duration-200 printable-ticket print:shadow-none print:max-w-full print:rounded-none">
+        
+        {/* Header Section */}
+        <div className="bg-[#1A4E11] p-6 text-center text-white print:bg-white print:text-black print:border-b">
+          <p className="text-[9px] font-black uppercase tracking-[3px] opacity-60 print:opacity-100">
+            Event Entry Ticket
+          </p>
+          <h2 className="text-xl font-black uppercase tracking-tighter italic print:text-black">
+            Booking Confirmed
+          </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors shrink-0"
+            className="absolute top-5 right-5 text-white/50 hover:text-white no-print"
           >
-            <IoCloseOutline size={24} className="text-gray-500" />
+            <IoCloseOutline size={28} />
           </button>
         </div>
 
-        {/* Scrollable Content */}
-        <div className="p-5 sm:p-8 overflow-y-auto custom-scrollbar flex-grow">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Left Side: Event Info */}
-            <div className="space-y-4">
-              <h3 className="text-[10px] sm:text-[11px] font-black uppercase text-[#1A4E11] tracking-widest border-b pb-2">
-                Event Information
-              </h3>
-              <div className="relative w-full h-40 sm:h-44 rounded-xl overflow-hidden border border-gray-100 shadow-inner">
-                <Image
-                  src={booking.eventId?.image || "/placeholder.png"}
-                  alt="event"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div>
-                <h4 className="font-black text-gray-900 text-base sm:text-lg leading-tight">
-                  {booking.eventId?.title}
-                </h4>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  <div className="flex items-center gap-2 text-[10px] font-black text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                    <IoCalendarOutline className="text-[#1A4E11]" />{" "}
-                    {booking.selectedDate}
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px] font-black text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                    <IoTimeOutline className="text-[#1A4E11]" />{" "}
-                    {booking.selectedTime}
-                  </div>
-                </div>
-              </div>
-
-              {/* QR Code Section - মোবাইলে নিচেই দেখাবে */}
-              <div className="pt-4 flex flex-col items-center sm:items-start">
-                <div className="p-3 bg-white border-2 border-dashed border-gray-200 rounded-2xl shadow-sm">
-                  <QRCodeSVG
-                    value={qrValue}
-                    size={120}
-                    level="H"
-                    includeMargin={false}
-                  />
-                </div>
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-2 flex items-center gap-1">
-                  <IoQrCodeOutline /> Scan at Entrance
-                </p>
-              </div>
-            </div>
-
-            {/* Right Side: Customer & Payment */}
-            <div className="space-y-6">
-              {/* Customer Info */}
-              <div className="space-y-3">
-                <h3 className="text-[10px] sm:text-[11px] font-black uppercase text-[#1A4E11] tracking-widest border-b pb-2">
-                  Customer Info
-                </h3>
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-3 text-xs font-bold text-gray-700">
-                    <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100">
-                      <IoPersonOutline className="text-[#1A4E11]" size={14} />
-                    </div>
-                    {user?.name}
-                  </div>
-                  <div className="flex items-center gap-3 text-xs font-bold text-gray-700">
-                    <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100">
-                      <IoMailOutline className="text-[#1A4E11]" size={14} />
-                    </div>
-                    <span className="truncate">{user?.email}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs font-bold text-gray-700">
-                    <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100">
-                      <IoCallOutline className="text-[#1A4E11]" size={14} />
-                    </div>
-                    {booking.phone}
-                  </div>
-                </div>
-              </div>
-
-              {/* Payment Summary */}
-              <div className="bg-[#1A4E11]/5 p-5 rounded-2xl border border-[#1A4E11]/10 space-y-3">
-                <h3 className="text-[10px] sm:text-[11px] font-black uppercase text-[#1A4E11] tracking-widest">
-                  Payment Summary
-                </h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-[10px] sm:text-[11px] font-bold text-gray-500">
-                    <span>Seats:</span>
-                    <span className="text-gray-900">
-                      {booking.numberOfSeats} Person(s)
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] sm:text-[11px] font-bold text-gray-500">
-                    <span>Method:</span>
-                    <span className="text-gray-900 uppercase">
-                      {booking.paymentMethod}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] sm:text-[11px] font-bold text-gray-500">
-                    <span>Status:</span>
-                    <span className="text-green-600 flex items-center gap-1 uppercase">
-                      <IoCheckmarkCircle /> {booking.paymentStatus}
-                    </span>
-                  </div>
-                  <div className="pt-3 border-t border-[#1A4E11]/10 flex justify-between items-end">
-                    <span className="text-[10px] sm:text-[11px] font-black text-[#1A4E11] uppercase">
-                      Amount Paid
-                    </span>
-                    <span className="text-xl sm:text-2xl font-black text-gray-900">
-                      ৳{booking.totalAmount}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-amber-50 p-3 rounded-xl border border-amber-100">
-                <p className="text-[9px] font-bold text-amber-700 leading-tight">
-                  * Please present this QR code or Booking ID at the event venue
-                  for entry verification.
-                </p>
-              </div>
+        <div className="p-8 space-y-6">
+          {/* QR Code Section */}
+          <div className="flex justify-center">
+            <div className="bg-gray-50 p-3 rounded-2xl border border-dashed border-gray-200 print:border-solid">
+              <QRCodeSVG
+                value={qrValue}
+                size={150}
+                level="H"
+                includeMargin={false}
+              />
             </div>
           </div>
-        </div>
 
-        {/* Footer */}
-        <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end shrink-0">
+          {/* Event Title */}
+          <div className="text-center border-b border-gray-50 pb-4">
+             <p className="text-[9px] text-gray-400 uppercase font-black">Event Name</p>
+             <h3 className="font-black text-gray-900 text-lg leading-tight uppercase italic">
+                {booking.eventId?.title}
+             </h3>
+          </div>
+
+          {/* Details Grid */}
+          <div className="grid grid-cols-2 gap-y-4 pt-2">
+            <div>
+              <p className="text-[9px] text-gray-400 uppercase font-black">Date</p>
+              <p className="text-sm font-bold text-gray-800">
+                {booking.selectedDate}
+              </p>
+            </div>
+            <div>
+              <p className="text-[9px] text-gray-400 uppercase font-black">Time</p>
+              <p className="text-sm font-bold text-gray-800">
+                {booking.selectedTime}
+              </p>
+            </div>
+            <div>
+              <p className="text-[9px] text-gray-400 uppercase font-black">Guests</p>
+              <p className="text-sm font-bold text-gray-800">
+                {booking.numberOfSeats} Person(s)
+              </p>
+            </div>
+            <div>
+              <p className="text-[9px] text-gray-400 uppercase font-black">Amount Paid</p>
+              <p className="text-sm font-black text-[#1A4E11]">
+                ৳ {booking.totalAmount}
+              </p>
+            </div>
+          </div>
+
+          {/* Customer Info Section */}
+          <div className="space-y-2 border-t border-gray-50 pt-4">
+            <p className="text-[9px] text-gray-400 uppercase font-black">Customer Details</p>
+            <div className="bg-gray-50 p-3 rounded-xl space-y-1.5">
+               <p className="text-[10px] font-bold text-gray-700 flex items-center gap-2">
+                  <IoPersonOutline className="text-[#1A4E11]"/> {user?.name}
+               </p>
+               <p className="text-[10px] font-bold text-gray-700 flex items-center gap-2">
+                  <IoCallOutline className="text-[#1A4E11]"/> {booking.phone}
+               </p>
+            </div>
+          </div>
+
+          {/* Transaction Info */}
+          <div className="bg-[#F9FBFA] p-4 rounded-xl border border-gray-100 print:bg-white">
+            <p className="text-[8px] text-gray-400 uppercase font-black mb-1">
+              Transaction Info
+            </p>
+            <div className="flex items-center gap-2 text-[10px] font-mono text-gray-500 truncate">
+              <IoWalletOutline /> {booking.transactionId}
+            </div>
+          </div>
+
+          {/* Download Button */}
           <button
-            onClick={onClose}
-            className="w-full sm:w-auto px-10 py-3 bg-[#1A4E11] text-white text-[10px] sm:text-[11px] font-black uppercase tracking-[2px] rounded-xl shadow-lg hover:shadow-[#1A4E11]/20 transition-all active:scale-95"
+            onClick={onDownload}
+            className="w-full flex items-center justify-center gap-2 py-4 bg-[#1A4E11] text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-green-900/10 no-print"
           >
-            Close Details
+            <IoDownloadOutline size={18} /> Download Ticket
           </button>
         </div>
       </div>

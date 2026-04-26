@@ -16,7 +16,6 @@ import {
   IoGridOutline,
   IoRestaurantOutline,
   IoCalendarOutline,
-  IoImageOutline,
   IoBicycleOutline,
   IoNewspaperOutline,
   IoChatbubblesOutline,
@@ -26,6 +25,7 @@ import {
   IoBarChartOutline,
   IoHelpCircleOutline,
 } from "react-icons/io5";
+import { SiAirtable } from "react-icons/si";
 import { Toaster } from "react-hot-toast";
 import logo from "@/assets/img/flogo.png";
 import Image from "next/image";
@@ -99,6 +99,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: "Chefs", icon: <IoPeopleOutline />, path: "/admin/chef" },
     { name: "Blog", icon: <IoNewspaperOutline />, path: "/admin/blog" },
     { name: "Feedback", icon: <IoChatbubblesOutline />, path: "/admin/feedback" },
+    { name: "Tables", icon: <SiAirtable />, path: "/admin/table" },
     { name: "Events", icon: <IoCalendarOutline />, path: "/admin/events" },
     {
       name: "Event Booking",

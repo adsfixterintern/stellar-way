@@ -12,7 +12,7 @@ import { SkeletonFAQ } from "../shared/SkeletonFAQ";
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-  const { data: faqData = [], isLoading } = useFaqs();
+  const { data: faqData = [], isLoading } = useFaqs({ status: "active" });
 
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);

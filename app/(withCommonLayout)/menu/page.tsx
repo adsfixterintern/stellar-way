@@ -11,13 +11,13 @@ import "swiper/css/navigation";
 import popularBg from "@/assets/img/popularItem_bg.png";
 import SingleHero from "@/components/shared/SingleHero";
 import { ICategory } from "@/types/category";
-import { IMenu, ICartItem } from "@/types/menu";
-import { getCategories } from "@/app/api/categoryApi";
+import { IMenu } from "@/types/menu";
 import { getMenus } from "@/app/api/menuApi";
 import { SkeletonCard } from "@/components/shared/SkeletonCard";
 import toast from "react-hot-toast";
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
+import { getAllCategoriesApi } from "@/app/modules/category/category.api";
 
 const MenuPage = () => {
   const [categories, setCategories] = useState<ICategory[]>([]);
@@ -26,24 +26,25 @@ const MenuPage = () => {
   const { addToCart } = useCart();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [catData, menuData] = await Promise.all([
-          getCategories(),
-          getMenus(),
-        ]);
-        setCategories(catData);
-        setMenuItems(menuData);
-      } catch (error) {
-        console.error("Failed to fetch menu data", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const fetchData = async () => {
+    try {
+      const [catRes, menuData] = await Promise.all([
+        getAllCategoriesApi(), 
+        getMenus(),
+      ]);
 
-  // স্ক্রলিং ফাংশন
+      setCategories(catRes.data || []); 
+      setMenuItems(menuData);
+    } catch (error) {
+      console.error("Failed to fetch menu data", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchData();
+}, []);
+
+
   const scrollToCategory = (id: string) => {
     const element = document.getElementById(id);
     if (element) {

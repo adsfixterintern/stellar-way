@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
 import React, { useState, useMemo, useEffect } from 'react';
@@ -10,7 +11,6 @@ const HotDeliciousItem = () => {
   const { data: menus, isLoading } = useMenu();
   const [activeTab, setActiveTab] = useState<string | null>(null);
 
-  
   const processedData = useMemo(() => {
     if (!menus || menus.length === 0) return { topCategories: [], categoryItems: {} };
 
@@ -18,25 +18,30 @@ const HotDeliciousItem = () => {
       totalRating: number; 
       count: number; 
       items: any[]; 
-      name: string 
+      name: string;
+      status: string; 
     }> = {};
 
     menus.forEach((item: IMenu) => {
-     
+      const categoryObj = typeof item.categoryId === 'object' ? item.categoryId : null;
+      if (categoryObj && categoryObj.status === 'inactive') {
+        return; 
+      }
+
       const itemAvgRating = item.reviews?.length 
         ? item.reviews.reduce((acc, rev) => acc + rev.rating, 0) / item.reviews.length 
         : 0;
 
-      
-      const catId = typeof item.categoryId === 'object' ? item.categoryId._id : item.categoryId;
-      const catName = typeof item.categoryId === 'object' ? item.categoryId.name : "Category";
+      const catId = categoryObj ? categoryObj._id : item.categoryId;
+      const catName = categoryObj ? categoryObj.name : "Category";
 
       if (!catStats[catId]) {
         catStats[catId] = { 
           totalRating: 0, 
           count: 0, 
           items: [], 
-          name: catName 
+          name: catName,
+          status: categoryObj?.status || 'active' 
         };
       }
 
@@ -45,17 +50,17 @@ const HotDeliciousItem = () => {
       catStats[catId].items.push({ ...item, avgRating: itemAvgRating });
     });
 
-    
     const sortedCategories = Object.keys(catStats)
       .map(id => ({
         id,
         name: catStats[id].name,
-        avgScore: catStats[id].totalRating / catStats[id].count
+        avgScore: catStats[id].totalRating / catStats[id].count,
+        status: catStats[id].status
       }))
+      .filter(cat => cat.status === 'active') 
       .sort((a, b) => b.avgScore - a.avgScore)
       .slice(0, 3);
 
-    
     const finalCategoryItems: Record<string, IMenu[]> = {};
     sortedCategories.forEach(cat => {
       finalCategoryItems[cat.id] = catStats[cat.id].items
@@ -68,7 +73,6 @@ const HotDeliciousItem = () => {
       categoryItems: finalCategoryItems
     };
   }, [menus]);
-
   
   useEffect(() => {
     if (processedData.topCategories.length > 0 && !activeTab) {
@@ -128,7 +132,7 @@ const HotDeliciousItem = () => {
             ))
           )}
         </div>
-{/* comment */}
+        {/* comment */}
         {!isLoading && processedData.topCategories.length === 0 && (
           <div className="text-center py-10 text-gray-500">
             No highly rated items found.

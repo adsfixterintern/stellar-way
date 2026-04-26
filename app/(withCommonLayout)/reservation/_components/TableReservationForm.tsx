@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useTables } from "@/app/hooks/useTables"; 
 import { useAvailability } from "@/app/hooks/useAvailability"; 
-import { createBooking } from "@/app/modules/booking/booking.api";
+
 import bookingtableHero from "@/assets/img/bookingtableHero.png";
 import { IoChevronDown, IoCheckmark, IoWalletOutline } from "react-icons/io5";
 
@@ -60,40 +60,40 @@ const TableReservationForm = () => {
     );
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+
+const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
     if (status === "unauthenticated") {
       toast.error("Please login first");
       return router.push("/login");
     }
 
-    setLoading(true);
+    if (!date || !startTime || !endTime || selectedTables.length === 0) {
+      return toast.error("Please fill all fields and select a table");
+    }
+
+    const totalBill = calculateTotalBill();
     const formData = new FormData(e.currentTarget);
-    const payload = {
-      userId: user.id || user._id, 
-      name: `${formData.get("firstName")} ${formData.get("lastName")}`,
-      email: user.email,
+    
+  
+    const queryParams = new URLSearchParams({
+      date,
+      startTime,
+      endTime,
+      tableIds: selectedTables.join(","),
+      totalPrice: totalBill.toString(),
+      guest: formData.get("guest") as string,
       phone: formData.get("phone") as string,
       address: (formData.get("address") as string) || "Not Specified",
-      guest: Number(formData.get("guest")),
-      date, startTime, endTime,     
-      tableIds: selectedTables, 
-      totalPrice: Number(calculateTotalBill()) // ব্যাকএন্ডে প্রাইস পাঠানোর জন্য
-    };
+      firstName: formData.get("firstName") as string,
+      lastName: formData.get("lastName") as string,
+    });
 
-    try {
-      const res = await createBooking(payload);
-      if (res.success) {
-        toast.success("Reservation Successful!");
-        setSelectedTables([]);
-        (e.target as HTMLFormElement).reset();
-      }
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Booking failed.");
-    } finally {
-      setLoading(false);
-    }
+    // পেমেন্ট পেজে রিডাইরেক্ট (event-pay এর মতই)
+    router.push(`/reservation/table-pay?${queryParams.toString()}`);
   };
+
 
   return (
     <div className="bg-white">
@@ -156,7 +156,7 @@ const TableReservationForm = () => {
                 </div>
 
                 {isDropdownOpen && (
-                  <div className="absolute top-full left-0 w-full mt-2 bg-white  rounded-2xl shadow-2xl z-[100] max-h-60 overflow-y-auto p-2">
+                  <div className="absolute top-full left-0 w-full mt-2 bg-white  rounded-2xl shadow-2xl z-100 max-h-60 overflow-y-auto p-2">
                     {availableTables.map((table: any) => (
                       <div 
                         key={table._id}

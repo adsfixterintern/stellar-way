@@ -377,7 +377,6 @@ export default function DashboardPage() {
     return Math.round((count / total) * 100);
   };
 
-<<<<<<< HEAD
   // ─── Skeleton ─────────────────────────────────────────────────────────────
   if (loading || usersLoading) {
     return (
@@ -440,9 +439,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-=======
-  if (loading || usersLoading) return <DashboardSkeleton />;
->>>>>>> 96aa966 (add:admin dashboard overview skeleton for loadind)
 
   // ─── Main UI ──────────────────────────────────────────────────────────────
   return (

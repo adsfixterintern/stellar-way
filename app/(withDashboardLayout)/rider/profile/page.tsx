@@ -137,6 +137,7 @@ const UserProfile = () => {
         toast.error(res.message || "Failed to change password");
       }
     } catch (err: any) {
+      console.log(err)
       toast.error("Error changing password!");
     } finally {
       setPasswordLoading(false);

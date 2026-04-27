@@ -45,100 +45,73 @@ const Footer = () => {
         }}
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12 pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+   
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-10 text-center md:text-left">
           
-          {/* Brand Section */}
-          <div className="space-y-6">
-            <div className="flex items-center">
-              <Image
-                src={logo}
-                alt="Savory Nest Logo"
-                className="h-14 w-auto object-contain"
-                priority
-              />
-            </div>
+          
+          <div className="col-span-2 lg:col-span-1 space-y-6 flex flex-col items-center md:items-start">
+            <Image src={logo} alt="Logo" className="h-14 w-auto object-contain" priority />
             <p className="description">
-              At our food delivery service, we are passionate about making your
-              dining experience convenient and enjoyable.
+              Passionate about making your dining experience enjoyable.
             </p>
             <Link href={'/apply-rider'}><button className="blockBtn">Apply to be a Rider</button></Link>
           </div>
 
-          {/* Explore Links - Mapping */}
-          <div className="lg:pl-8">
+          
+          <div className="flex flex-col items-center md:items-start">
             <h3 className="nameText">Explore</h3>
             <ul className="space-y-3 text-[#2d402d] font-semibold text-[15px]">
               {footerData.explore.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="hover:text-[#4c6b4c] transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
+                <li key={link.name}><Link href={link.href} className="hover:text-[#4c6b4c]">{link.name}</Link></li>
               ))}
             </ul>
           </div>
 
-          {/* Resources & Legal - Mapping */}
-          <div className="grid grid-cols-2 gap-4 lg:block">
-            <div className="mb-10">
-              <h3 className="nameText">Resources</h3>
-              <ul className="space-y-3 text-[#2d402d] font-semibold text-[15px]">
-                {footerData.resources.map((link) => (
-                  <li key={link.name}>
-                    <Link href={link.href} className="hover:text-[#4c6b4c]">
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="nameText">Legal</h3>
-              <ul className="space-y-3 text-[#2d402d] font-semibold text-[15px]">
-                {footerData.legal.map((link) => (
-                  <li key={link.name}>
-                    <Link href={link.href} className="hover:text-[#4c6b4c]">
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+        
+          <div className="flex flex-col items-center md:items-start">
+            <h3 className="nameText">Resources</h3>
+            <ul className="space-y-3 text-[#2d402d] font-semibold text-[15px]">
+              {footerData.resources.map((link) => (
+                <li key={link.name}><Link href={link.href} className="hover:text-[#4c6b4c]">{link.name}</Link></li>
+              ))}
+            </ul>
           </div>
 
-          {/* Contact Us & Socials - Mapping */}
-          <div>
+         
+          <div className="col-span-2 lg:col-span-1 flex flex-col items-center md:items-start">
+            <h3 className="nameText">Legal</h3>
+            <ul className="space-y-3 text-[#2d402d] font-semibold text-[15px]">
+              {footerData.legal.map((link) => (
+                <li key={link.name}><Link href={link.href} className="hover:text-[#4c6b4c]">{link.name}</Link></li>
+              ))}
+            </ul>
+          </div>
+
+        
+          <div className="col-span-2 lg:col-span-1 flex flex-col items-center md:items-start">
             <h3 className="nameText">Contact Us</h3>
-            <div className="space-y-5">
+            <div className="space-y-4 flex flex-col items-center md:items-start">
               <div className="flex items-center gap-3 text-[#2d402d] font-semibold">
                 <IoCallOutline className="text-xl" />
                 <span>+1-555-123-4567</span>
               </div>
               <div className="flex items-center gap-3 text-[#2d402d] font-semibold">
                 <IoMailOutline className="text-xl" />
-                <span>support@Savorynest.com</span>
+                <span className="text-sm">support@Savorynest.com</span>
               </div>
-
-              {/* Social Icons Mapping */}
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-3 pt-2">
                 {footerData.socials.map((social, index) => (
-                  <a
-                    key={index}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-9 h-9 rounded-full bg-[#a3b18a] text-white flex items-center justify-center hover:bg-[#2d402d] transition-all duration-300"
-                  >
+                  <a key={index} href={social.href} className="w-8 h-8 rounded-full bg-[#a3b18a] text-white flex items-center justify-center hover:bg-[#2d402d] transition-all">
                     {social.icon}
                   </a>
                 ))}
               </div>
             </div>
           </div>
+
         </div>
       </div>
 
-      {/* Bottom Copyright Bar */}
       <div className="w-full bg-[#1b2b1b] py-5 text-center">
         <p className="text-white/90 text-[13px] tracking-widest font-light">
           © 2026 Savorynest. All Rights Reserved.

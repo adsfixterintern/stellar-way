@@ -70,7 +70,7 @@ const MyBookingsTable = () => {
     } catch (error) {
       toast.error("Failed to fetch bookings");
     } finally {
-      // 500ms delay to make the skeleton feel smoother
+    
       setTimeout(() => setLoading(false), 500);
     }
   }, [userId]);
@@ -110,7 +110,7 @@ const MyBookingsTable = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-10 bg-white min-h-screen">
+    <div className="max-w-6xl mx-auto p-2 md:p-8 bg-white min-h-screen">
       <div className="mb-8 print:hidden">
         <h1 className="text-2xl font-black text-gray-900 uppercase italic tracking-tight">
           Booking History

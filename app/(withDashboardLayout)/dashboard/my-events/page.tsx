@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 import { TableSkeleton } from "@/components/shared/TableSkeleton";
 import { 
@@ -9,8 +9,7 @@ import {
   IoTicketOutline, 
   IoTimeOutline,
   IoCheckmarkCircleOutline,
-  IoEllipsisHorizontalCircleOutline,
-  IoDownloadOutline 
+  IoEllipsisHorizontalCircleOutline, 
 } from "react-icons/io5";
 import Image from "next/image";
 import EventDetailsModal from "@/components/user-dashboard/EventDetailsModal";
@@ -44,7 +43,7 @@ const MyEventsPage = () => {
   };
 
   return (
-    <div className="w-full p-4 md:p-6 font-sans">
+    <div className="w-full p-2 md:p-8 font-sans">
       <div className="mb-8 print:hidden">
         <h1 className="text-2xl font-black text-gray-900 tracking-tight uppercase ">My Booked Events</h1>
         <p className="text-[10px] text-gray-400 font-bold mt-1 uppercase tracking-[3px]">Manage your event reservations</p>

@@ -143,7 +143,7 @@ const MyOrdersPage = () => {
 
   console.log(selectedTrackOrder);
   return (
-    <div className="w-full p-6">
+    <div className="w-full p-2 md:p-8">
       <h1 className="text-2xl font-black text-gray-900 mb-8 uppercase tracking-tight">
         My Orders
       </h1>

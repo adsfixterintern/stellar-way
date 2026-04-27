@@ -22,6 +22,13 @@ export const getSingleRiderApi = async (id: string) => {
 };
 
 
+
+export const getRiderByUserIdApi = async (userId: string) => {
+  const response = await api.get(`/riders?userId=${userId}`);
+  return response.data; 
+};
+
+
 export const approveRiderApi = async (id: string) => {
   const response = await api.patch(`/riders/approve-rider/${id}`);
   return response.data;

@@ -79,43 +79,85 @@ const UserProfile = () => {
 
   useEffect(() => { fetchProfile(); }, [currentUserId]);
 
+  // const handleUpdate = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setUpdateLoading(true); 
+
+  //   try {
+  //     const userPayload = {
+  //       name: formData.name,
+  //       phone: formData.phone,
+  //       userId: currentUserId as string,
+  //       image: formData.image
+  //     };
+  //     await updateProfileApi(userPayload);
+
+  //     const riderPayload = {
+  //       phoneNumber: formData.phoneNumber,
+  //       vehicleType: formData.vehicleType as any,
+  //       area: formData.area,
+  //       isBusy: formData.isBusy
+  //     };
+  //     const riderRes = await updateRiderApi(riderData._id, riderPayload);
+
+  //     if (riderRes.success) {
+  //       await update({
+  //         ...session,
+  //         user: { ...session?.user, name: formData.name, image: formData.image || session?.user?.image }
+  //       });
+  //       toast.success("Profile updated successfully!");
+  //       setIsEditing(false);
+  //       fetchProfile();
+  //     }
+  //   } catch (err: any) {
+  //     toast.error("Not able to update profile!");
+  //   } finally {
+  //     setUpdateLoading(false);
+  //   }
+  // };
+
+
+
   const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setUpdateLoading(true); 
+  e.preventDefault();
+  setUpdateLoading(true); 
 
-    try {
-      const userPayload = {
-        name: formData.name,
-        phone: formData.phone,
-        userId: currentUserId as string,
-        image: formData.image
-      };
-      await updateProfileApi(userPayload);
+  try {
+   
+    const userPayload = {
+      name: formData.name,
+      phone: formData.phone,
+      userId: currentUserId as string,
+      image: formData.image
+    };
+    await updateProfileApi(userPayload);
 
-      const riderPayload = {
-        phoneNumber: formData.phoneNumber,
-        vehicleType: formData.vehicleType as any,
-        area: formData.area,
-        isBusy: formData.isBusy
-      };
-      const riderRes = await updateRiderApi(riderData._id, riderPayload);
+   
+    const riderPayload = {
+      phoneNumber: formData.phoneNumber,
+      vehicleType: formData.vehicleType as any,
+      area: formData.area,
+  
+    };
+    
+    const riderRes = await updateRiderApi(riderData._id, riderPayload);
 
-      if (riderRes.success) {
-        await update({
-          ...session,
-          user: { ...session?.user, name: formData.name, image: formData.image || session?.user?.image }
-        });
-        toast.success("Profile updated successfully!");
-        setIsEditing(false);
-        fetchProfile();
-      }
-    } catch (err: any) {
-      toast.error("Not able to update profile!");
-    } finally {
-      setUpdateLoading(false);
+    if (riderRes.success) {
+      // সেশন আপডেট
+      await update({
+        ...session,
+        user: { ...session?.user, name: formData.name, image: formData.image || session?.user?.image }
+      });
+      toast.success("Profile updated successfully!");
+      setIsEditing(false);
+      fetchProfile(); 
     }
-  };
-
+  } catch (err: any) {
+    toast.error(err.response?.data?.message || "Not able to update profile!");
+  } finally {
+    setUpdateLoading(false);
+  }
+};
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -320,3 +362,6 @@ const UserProfile = () => {
 };
 
 export default UserProfile;
+
+
+

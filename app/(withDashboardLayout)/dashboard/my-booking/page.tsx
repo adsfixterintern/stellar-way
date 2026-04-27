@@ -4,54 +4,74 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
-import { 
-  IoCalendarOutline, 
-  IoTimeOutline, 
+import {
+  IoEyeOutline,
+  IoTrashOutline,
+  IoCheckmarkCircle,
+  IoTimeOutline,
   IoCloseOutline,
-  IoSaveOutline,
-  IoCreateOutline,
-  IoTrashOutline
+  IoLocationOutline,
+  IoWalletOutline,
+  IoDownloadOutline,
 } from "react-icons/io5";
 
-// API এবং ইন্টারফেস ইমপোর্ট
-import { getMyBookingsApi, updateBookingApi, deleteBookingApi } from "@/app/modules/booking/booking.api";
-import { IBooking } from "@/app/modules/booking/booking.interface";
+import {
+  getMyBookingsApi,
+  deleteBookingApi,
+} from "@/app/modules/booking/booking.api";
 import Swal from "sweetalert2";
 
-const MyBookings = () => {
+// --- Skeleton Component ---
+const TableSkeleton = () => (
+  <div className="animate-pulse">
+    {[...Array(5)].map((_, i) => (
+      <tr key={i} className="border-b border-gray-50">
+        <td className="p-5 space-y-2">
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+          <div className="h-3 w-32 bg-gray-100 rounded"></div>
+        </td>
+        <td className="p-5">
+          <div className="h-4 w-16 bg-gray-200 rounded"></div>
+        </td>
+        <td className="p-5">
+          <div className="h-4 w-20 bg-gray-200 rounded"></div>
+        </td>
+        <td className="p-5">
+          <div className="h-6 w-16 bg-gray-100 rounded-full"></div>
+        </td>
+        <td className="p-5">
+          <div className="flex justify-center gap-2">
+            <div className="h-8 w-8 bg-gray-100 rounded-lg"></div>
+            <div className="h-8 w-8 bg-gray-100 rounded-lg"></div>
+          </div>
+        </td>
+      </tr>
+    ))}
+  </div>
+);
+
+const MyBookingsTable = () => {
   const { data: session } = useSession();
   const userId = (session?.user as any)?.id;
 
-  const [bookings, setBookings] = useState<IBooking[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState<IBooking | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
 
-  const [editFormData, setEditFormData] = useState({
-    name: "",
-    phone: "",
-    address: "",
-    guest: 0,
-    date: "",
-    time: ""
-  });
-
-  // বুকিং ডাটা ফেচ করার ফাংশন
   const fetchMyBookings = useCallback(async () => {
     if (!userId) return;
     try {
       setLoading(true);
       const res = await getMyBookingsApi(userId);
-      if (res.success) {
+      if (res?.success) {
         setBookings(res.data);
       }
-    } catch (error: any) {
-      console.error("Fetch Error:", error);
-      toast.error(error.response?.data?.message || "Failed to load bookings");
+    } catch (error) {
+      toast.error("Failed to fetch bookings");
     } finally {
-      setLoading(false);
+    
+      setTimeout(() => setLoading(false), 500);
     }
   }, [userId]);
 
@@ -59,222 +79,182 @@ const MyBookings = () => {
     fetchMyBookings();
   }, [fetchMyBookings]);
 
-  // ডিলিট হ্যান্ডলার
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
+  const handleDownloadTicket = () => {
+    if (typeof window !== "undefined") {
+      window.print();
+    }
+  };
 
+  const handleDelete = async (id: string) => {
     Swal.fire({
-      title: "Are you sure?",
-      text: "This booking will be permanently removed!",
+      title: "Cancel Booking?",
+      text: "This action cannot be undone!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#1A4E11",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-     customClass: {
-    popup: 'rounded-[30px]', 
-  }
+      confirmButtonText: "Yes, Cancel",
+      customClass: { popup: "rounded-[20px]" },
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           const res = await deleteBookingApi(id);
-          if (res.success) {
-            Swal.fire("Deleted!", "Booking has been removed.", "success");
-            setBookings(prev => prev.filter(b => b._id !== id));
+          if (res?.success) {
+            setBookings((prev) => prev.filter((b) => b._id !== id));
+            toast.success("Booking deleted");
           }
         } catch (error) {
-          toast.error("Delete failed!");
+          toast.error("Error deleting booking");
         }
       }
     });
   };
 
-  // এডিট মোডাল ওপেন
-  const openEditModal = (e: React.MouseEvent, booking: IBooking) => {
-    e.stopPropagation();
-    setSelectedBooking(booking);
-    setEditFormData({
-      name: booking.name || "",
-      phone: booking.phone || "",
-      address: booking.address || "",
-      guest: Number(booking.guest) || 0,
-      date: booking.date || "",
-      time: booking.time || ""
-    });
-    setIsEditModalOpen(true);
-  };
-
-  // আপডেট হ্যান্ডলার
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedBooking?._id) return;
-
-    try {
-      const res = await updateBookingApi(selectedBooking._id, {
-        ...editFormData,
-        guest: Number(editFormData.guest) // Ensuring number type
-      });
-
-      if (res.success) {
-        setIsEditModalOpen(false);
-        toast.success("Booking updated successfully!");
-        fetchMyBookings(); 
-      }
-    } catch (error) {
-      toast.error("Update failed!");
-    }
-  };
-
-  if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh]">
-      <div className="w-10 h-10 border-4 border-[#1A4E11] border-t-transparent rounded-full animate-spin"></div>
-    </div>
-  );
-
   return (
-    <div className="bg-gray-50/30 min-h-screen p-4 md:p-10 font-sans text-gray-800">
-      <div className="max-w-5xl mx-auto">
-        
-        <div className="mb-10 text-center md:text-left">
-          <h1 className="text-3xl md:text-4xl font-black text-gray-900 tracking-tighter uppercase italic">My Reservations</h1>
-          <p className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-[4px]">Active booking history</p>
-        </div>
-
-        {bookings.length === 0 ? (
-          <div className="bg-white p-20 rounded-[40px] border border-gray-100 text-center shadow-sm">
-            <p className="text-[11px] text-gray-400 font-black uppercase tracking-[2px]">No bookings found</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {bookings.map((booking) => (
-              <div 
-                key={booking._id} 
-                onClick={() => { setSelectedBooking(booking); setIsDetailsModalOpen(true); }}
-                className="bg-white p-6 rounded-[30px] border border-gray-100 cursor-pointer hover:border-[#1A4E11] transition-all group shadow-sm hover:shadow-md"
-              >
-                <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
-                  <div className="space-y-3">
-                    <span className="px-3 py-1 bg-gray-50 text-gray-400 text-[8px] font-black uppercase rounded-full border border-gray-100">
-                      ID: {booking._id?.slice(-6).toUpperCase()}
-                    </span>
-                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">
-                      Booking for {booking.guest} Persons
-                    </h3>
-                    <div className="flex gap-4 text-gray-400 text-[11px] font-bold">
-                       <span className="flex items-center gap-1"><IoCalendarOutline/> {booking.date}</span>
-                       <span className="flex items-center gap-1"><IoTimeOutline/> {booking.time}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button 
-                      onClick={(e) => openEditModal(e, booking)}
-                      className="p-3 border border-gray-100 hover:bg-gray-50 rounded-2xl text-gray-600 transition-all"
-                    >
-                      <IoCreateOutline size={18}/>
-                    </button>
-                    <button 
-                      onClick={(e) => handleDelete(e, booking._id!)}
-                      className="p-3 border border-gray-100 hover:bg-red-50 hover:text-red-500 rounded-2xl text-gray-600 transition-all"
-                    >
-                      <IoTrashOutline size={18}/>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+    <div className="max-w-6xl mx-auto p-2 md:p-8 bg-white min-h-screen">
+      <div className="mb-8 print:hidden">
+        <h1 className="text-2xl font-black text-gray-900 uppercase italic tracking-tight">
+          Booking History
+        </h1>
+        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+          Manage your table reservations
+        </p>
       </div>
 
-      {/* --- Details View Modal --- */}
-      {isDetailsModalOpen && selectedBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-lg rounded-[40px] border border-gray-100 p-8 md:p-12 relative animate-in fade-in zoom-in duration-300">
-            <button onClick={() => setIsDetailsModalOpen(false)} className="absolute top-8 right-8 text-gray-400 hover:text-black">
-              <IoCloseOutline size={28}/>
-            </button>
-            <div className="mb-8 border-b border-gray-50 pb-6">
-              <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter">Reservation Details</h2>
+      <div className="overflow-x-auto rounded-[24px] border border-gray-100 shadow-sm print:hidden">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-100">
+              <th className="p-5 text-[10px] font-black uppercase text-gray-400 tracking-widest">Date & Time</th>
+              <th className="p-5 text-[10px] font-black uppercase text-gray-400 tracking-widest">Guest</th>
+              <th className="p-5 text-[10px] font-black uppercase text-gray-400 tracking-widest">Total Price</th>
+              <th className="p-5 text-[10px] font-black uppercase text-gray-400 tracking-widest">Payment</th>
+              <th className="p-5 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {loading ? (
+              <TableSkeleton />
+            ) : bookings.length > 0 ? (
+              bookings.map((booking) => (
+                <tr key={booking._id} className="hover:bg-gray-50/50 transition-colors">
+                  <td className="p-5">
+                    <p className="text-sm font-bold text-gray-800">{booking.date}</p>
+                    <p className="text-[10px] text-gray-400 flex items-center gap-1 font-medium">
+                      <IoTimeOutline /> {booking.startTime} - {booking.endTime}
+                    </p>
+                  </td>
+                  <td className="p-5 text-sm font-bold text-gray-700">{booking.guest} Persons</td>
+                  <td className="p-5 text-sm font-black text-[#1A4E11]">৳ {booking.totalPrice}</td>
+                  <td className="p-5">
+                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${
+                        booking.paymentStatus === "paid" ? "bg-green-50 text-green-600" : "bg-orange-50 text-orange-600"
+                      }`}>
+                      {booking.paymentStatus === "paid" && <IoCheckmarkCircle />} {booking.paymentStatus}
+                    </span>
+                  </td>
+                  <td className="p-5 text-center">
+                    <div className="flex justify-center gap-2">
+                      <button onClick={() => { setSelectedBooking(booking); setIsModalOpen(true); }}
+                        className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-[#1A4E11] hover:text-white transition-all">
+                        <IoEyeOutline size={18} />
+                      </button>
+                      <button onClick={() => handleDelete(booking._id)}
+                        className="p-2 bg-gray-100 text-red-400 rounded-lg hover:bg-red-500 hover:text-white transition-all">
+                        <IoTrashOutline size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="p-10 text-center text-gray-400 text-xs font-bold uppercase">No Bookings Found</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* --- Ticket Modal --- */}
+      {isModalOpen && selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm print:static print:bg-white print:p-0">
+          <div className="bg-white w-full max-w-md rounded-[35px] shadow-2xl overflow-hidden relative animate-in zoom-in duration-200 print:shadow-none print:max-w-full print:rounded-none">
+            {/* Modal Header */}
+            <div className="bg-[#1A4E11] p-6 text-center text-white print:bg-white print:text-black print:border-b">
+              <p className="text-[9px] font-black uppercase tracking-[3px] opacity-60 print:opacity-100">Reservation Ticket</p>
+              <button onClick={() => setIsModalOpen(false)} className="absolute top-5 right-5 text-white/50 hover:text-white print:hidden">
+                <IoCloseOutline size={28} />
+              </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-               <div className="space-y-6">
-                  <div>
-                     <p className="text-[9px] font-black text-gray-400 uppercase">Number of Guests</p>
-                     <p className="text-sm font-bold text-gray-800">{selectedBooking.guest} Persons</p>
+
+            <div className="p-8 space-y-6">
+              {/* QR Section */}
+              <div className="flex justify-center">
+                {selectedBooking.qrCode ? (
+                  <div className="bg-gray-50 p-3 rounded-2xl border border-dashed border-gray-200 print:border-solid">
+                    <img src={selectedBooking.qrCode} alt="QR" className="w-[150px] h-[150px] rounded-lg" />
                   </div>
-                  <div>
-                     <p className="text-[9px] font-black text-gray-400 uppercase">Booked Date</p>
-                     <p className="text-sm font-bold text-gray-800">{selectedBooking.date}</p>
-                  </div>
-               </div>
-               <div className="space-y-6">
-                  <div>
-                     <p className="text-[9px] font-black text-gray-400 uppercase">Reserved By</p>
-                     <p className="text-sm font-bold text-gray-800">{selectedBooking.name}</p>
-                  </div>
-                  <div>
-                     <p className="text-[9px] font-black text-gray-400 uppercase">Address</p>
-                     <p className="text-sm font-bold text-gray-800 leading-tight">{selectedBooking.address || 'Not Provided'}</p>
-                  </div>
-               </div>
+                ) : (
+                  <div className="w-32 h-32 bg-gray-100 rounded-2xl flex items-center justify-center text-[10px] text-gray-400 font-bold uppercase">No QR Generated</div>
+                )}
+              </div>
+
+              {/* Booking Stats Grid */}
+              <div className="grid grid-cols-2 gap-y-4 border-t border-gray-50 pt-6">
+                <div>
+                  <p className="text-[9px] text-gray-400 uppercase font-black">Date</p>
+                  <p className="text-sm font-bold text-gray-800">{selectedBooking.date}</p>
+                </div>
+                <div>
+                  <p className="text-[9px] text-gray-400 uppercase font-black">Time Slot</p>
+                  <p className="text-sm font-bold text-gray-800">{selectedBooking.startTime}-{selectedBooking.endTime}</p>
+                </div>
+                <div>
+                  <p className="text-[9px] text-gray-400 uppercase font-black">Guests</p>
+                  <p className="text-sm font-bold text-gray-800">{selectedBooking.guest} Persons</p>
+                </div>
+                <div>
+                  <p className="text-[9px] text-gray-400 uppercase font-black">Total Price</p>
+                  <p className="text-sm font-black text-[#1A4E11]">৳ {selectedBooking.totalPrice}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-[9px] text-gray-400 uppercase font-black">Location/Address</p>
+                <p className="text-xs text-gray-600 bg-gray-50 p-3 rounded-xl flex items-center gap-2 font-medium">
+                  <IoLocationOutline className="text-[#1A4E11]" /> {selectedBooking.address || "Main Restaurant"}
+                </p>
+              </div>
+
+              <div className="bg-[#F9FBFA] p-4 rounded-xl border border-gray-100">
+                <p className="text-[8px] text-gray-400 uppercase font-black mb-1">Transaction Info</p>
+                <div className="flex items-center gap-2 text-[10px] font-mono text-gray-500">
+                  <IoWalletOutline /> {selectedBooking.transactionId}
+                </div>
+              </div>
+
+              <button onClick={handleDownloadTicket} className="w-full flex items-center justify-center gap-2 py-4 bg-[#1A4E11] text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-green-900/10 print:hidden">
+                <IoDownloadOutline size={18} /> Download Ticket
+              </button>
             </div>
-            <button onClick={() => setIsDetailsModalOpen(false)} className="w-full mt-10 py-4 border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 transition-all">
-              Close Details
-            </button>
           </div>
         </div>
       )}
 
-      {/* --- Edit Modal --- */}
-      {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-md rounded-[40px] border border-gray-100 p-8 max-h-[90vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-black uppercase italic tracking-tighter text-gray-900">Edit Reservation</h2>
-              <button onClick={() => setIsEditModalOpen(false)} className="text-gray-400 hover:text-black">
-                <IoCloseOutline size={24}/>
-              </button>
-            </div>
-            <form onSubmit={handleUpdate} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase text-gray-400 ml-1">Name</label>
-                <input type="text" value={editFormData.name} onChange={(e) => setEditFormData({...editFormData, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-xs font-bold outline-none focus:border-[#1A4E11] transition-all" required />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase text-gray-400 ml-1">Phone</label>
-                <input type="text" value={editFormData.phone} onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-xs font-bold outline-none focus:border-[#1A4E11] transition-all" required />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[9px] font-black uppercase text-gray-400 ml-1">Date</label>
-                  <input type="date" value={editFormData.date} onChange={(e) => setEditFormData({...editFormData, date: e.target.value})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-xs font-bold outline-none focus:border-[#1A4E11] transition-all" required />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] font-black uppercase text-gray-400 ml-1">Time</label>
-                  <input type="text" value={editFormData.time} onChange={(e) => setEditFormData({...editFormData, time: e.target.value})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-xs font-bold outline-none focus:border-[#1A4E11] transition-all" required />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase text-gray-400 ml-1">Number of Guests</label>
-                <input type="number" value={editFormData.guest} onChange={(e) => setEditFormData({...editFormData, guest: Number(e.target.value)})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-xs font-bold outline-none focus:border-[#1A4E11] transition-all" required />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase text-gray-400 ml-1">Address</label>
-                <textarea value={editFormData.address} onChange={(e) => setEditFormData({...editFormData, address: e.target.value})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-xs font-bold outline-none focus:border-[#1A4E11] min-h-[80px] transition-all" />
-              </div>
-
-              <button type="submit" className="w-full py-4 bg-[#1A4E11] text-white rounded-2xl text-[11px] font-black uppercase tracking-[2px] mt-2 flex items-center justify-center gap-2 hover:bg-[#143d0d] transition-all shadow-lg shadow-[#1a4e11]/20">
-                 <IoSaveOutline size={18}/> Update All Info
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Global CSS for Printing */}
+      <style jsx global>{`
+        @media print {
+          body * { visibility: hidden; }
+          .fixed.inset-0, .fixed.inset-0 * { visibility: visible; }
+          .fixed.inset-0 { position: absolute; left: 0; top: 0; width: 100%; background: white !important; }
+          .print\\:hidden { display: none !important; }
+          .print\\:bg-white { background-color: white !important; }
+          .print\\:text-black { color: black !important; }
+          .print\\:border-b { border-bottom: 1px solid #eee !important; }
+        }
+      `}</style>
     </div>
   );
 };
 
-export default MyBookings;
+export default MyBookingsTable;

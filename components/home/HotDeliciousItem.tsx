@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
 import React, { useState, useMemo, useEffect } from 'react';
@@ -10,7 +11,6 @@ const HotDeliciousItem = () => {
   const { data: menus, isLoading } = useMenu();
   const [activeTab, setActiveTab] = useState<string | null>(null);
 
-  
   const processedData = useMemo(() => {
     if (!menus || menus.length === 0) return { topCategories: [], categoryItems: {} };
 
@@ -18,25 +18,30 @@ const HotDeliciousItem = () => {
       totalRating: number; 
       count: number; 
       items: any[]; 
-      name: string 
+      name: string;
+      status: string; 
     }> = {};
 
     menus.forEach((item: IMenu) => {
-     
+      const categoryObj = typeof item.categoryId === 'object' ? item.categoryId : null;
+      if (categoryObj && categoryObj.status === 'inactive') {
+        return; 
+      }
+
       const itemAvgRating = item.reviews?.length 
         ? item.reviews.reduce((acc, rev) => acc + rev.rating, 0) / item.reviews.length 
         : 0;
 
-      
-      const catId = typeof item.categoryId === 'object' ? item.categoryId._id : item.categoryId;
-      const catName = typeof item.categoryId === 'object' ? item.categoryId.name : "Category";
+      const catId = categoryObj ? categoryObj._id : item.categoryId;
+      const catName = categoryObj ? categoryObj.name : "Category";
 
       if (!catStats[catId]) {
         catStats[catId] = { 
           totalRating: 0, 
           count: 0, 
           items: [], 
-          name: catName 
+          name: catName,
+          status: categoryObj?.status || 'active' 
         };
       }
 
@@ -45,17 +50,17 @@ const HotDeliciousItem = () => {
       catStats[catId].items.push({ ...item, avgRating: itemAvgRating });
     });
 
-    
     const sortedCategories = Object.keys(catStats)
       .map(id => ({
         id,
         name: catStats[id].name,
-        avgScore: catStats[id].totalRating / catStats[id].count
+        avgScore: catStats[id].totalRating / catStats[id].count,
+        status: catStats[id].status
       }))
+      .filter(cat => cat.status === 'active') 
       .sort((a, b) => b.avgScore - a.avgScore)
       .slice(0, 3);
 
-    
     const finalCategoryItems: Record<string, IMenu[]> = {};
     sortedCategories.forEach(cat => {
       finalCategoryItems[cat.id] = catStats[cat.id].items
@@ -68,7 +73,6 @@ const HotDeliciousItem = () => {
       categoryItems: finalCategoryItems
     };
   }, [menus]);
-
   
   useEffect(() => {
     if (processedData.topCategories.length > 0 && !activeTab) {
@@ -81,18 +85,18 @@ const HotDeliciousItem = () => {
       <div className="py-16 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
         
         {/* Header & Category Tabs */}
-        <div className="flex flex-col md:flex-row justify-between items-start mb-12 gap-6">
-          <div>
+        <div className="flex flex-col md:flex-row justify-between md:items-start mb-12 gap-6">
+          <div className='text-center md:text-start'>
             <p className="superTitle text-primary">About Our Food</p>
             <h2 className="secTitle">Hot Delicious Item</h2>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 items-center justify-center md:justify-start">
             {processedData.topCategories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveTab(cat.id)}
-                className={`px-8 py-2 rounded-full border transition-all duration-300 font-semibold ${
+                className={`px-4 md:px-8 py-2 rounded-full border transition-all duration-300 font-semibold ${
                   activeTab === cat.id 
                   ? 'bg-primary text-white border-primary' 
                   : 'border-gray-200 text-gray-600 hover:border-primary'
@@ -128,7 +132,7 @@ const HotDeliciousItem = () => {
             ))
           )}
         </div>
-{/* comment */}
+        {/* comment */}
         {!isLoading && processedData.topCategories.length === 0 && (
           <div className="text-center py-10 text-gray-500">
             No highly rated items found.

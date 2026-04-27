@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// @/app/modules/faq/faq.api.ts
 import axios from 'axios';
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}`;
@@ -9,8 +8,8 @@ export const createFaq = async (data: any) => {
   return response.data;
 };
 
-export const getAllFaqs = async () => {
-  const response = await axios.get(`${API_URL}/faq/all-faq`);
+export const getAllFaqs = async (params?: Record<string, any>) => {
+  const response = await axios.get(`${API_URL}/faq/all-faq`, { params });
   return response.data.data; 
 };
 

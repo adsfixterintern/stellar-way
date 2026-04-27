@@ -9,6 +9,7 @@ import Exp from '@/components/home/Exp'
 import LatestBlogs from '@/components/home/LatestBlogs'
 import Feedback from '@/components/home/Feedback'
 import OfferSection from '@/components/home/OfferSection'
+import Testimonial from '@/components/Testimonial'
 
 export default function page() {
   return (
@@ -21,7 +22,7 @@ export default function page() {
       <HotDeliciousItem></HotDeliciousItem>
       <OurExquisiteMenu></OurExquisiteMenu>
       <Exp></Exp>
-      <Feedback/>
+      <Testimonial/>
       <Reserve></Reserve>
       <LatestBlogs></LatestBlogs>
       <FAQ></FAQ>

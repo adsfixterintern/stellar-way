@@ -14,14 +14,13 @@ import {
   Clock,
   Tag,
   ArrowRight,
-  Copy,
-  Check,
   Calendar,
   Sparkles,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import CustomerDashboardSkeleton from "@/components/skeletons/CustomerDashboardSkeleton";
 
 export default function CustomerDashboardOverview() {
   const { data: session } = useSession();
@@ -37,29 +36,25 @@ export default function CustomerDashboardOverview() {
     useMyBookings(userId);
   const { data: eventsData, isLoading: eventsLoading } = useEvents();
 
-  // --- Safe order Data Extraction  ---
-
+  // --- Safe Data Extraction ---
   const orders = Array.isArray(ordersData?.data)
     ? ordersData.data
     : Array.isArray(ordersData)
       ? ordersData
       : [];
 
-  // ২. Menu data(Special for You)
   const menusList = Array.isArray(menusData?.data)
     ? menusData.data
     : Array.isArray(menusData)
       ? menusData
       : [];
 
-  // ৩. booking data 
   const myBookingsList = Array.isArray(bookingsData?.data)
     ? bookingsData.data
     : Array.isArray(bookingsData)
       ? bookingsData
       : [];
 
-  // ৪. Event Data 
   const globalEventsList = Array.isArray(eventsData?.data)
     ? eventsData.data
     : Array.isArray(eventsData)
@@ -87,7 +82,6 @@ export default function CustomerDashboardOverview() {
     (menu: any) => (menu._id?.$oid || menu._id) === firstItemId,
   );
 
-  // Recommended items logic
   const recommendedItems = menusList.slice(0, 2);
 
   // --- Events Logic ---
@@ -107,28 +101,18 @@ export default function CustomerDashboardOverview() {
   const monthlyGoal = 5000;
   const spendingPercentage = Math.min((totalSpent / monthlyGoal) * 100, 100);
 
-  const handleCopy = (text: string) => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text);
-      setCopied(true);
-      toast.success("Coupon code copied!");
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
 
+  // ─── Skeleton Loading ───
   if (ordersLoading || menuLoading || bookingsLoading || eventsLoading) {
-    return (
-      <div className="p-20 text-center font-black text-gray-400 animate-pulse uppercase tracking-widest">
-        Loading Your Universe...
-      </div>
-    );
+    return <CustomerDashboardSkeleton />;
   }
 
+  // ─── Main UI ───
   return (
-    <div className="bg-[#FDFCFD] min-h-screen p-4 md:p-8 font-sans antialiased">
+    <div className="bg-[#FDFCFD] min-h-screen p-2  md:p-8 font-sans antialiased">
       {/* Header */}
-      <div className="flex justify-between items-center mb-10">
-        <div>
+      <div className="md:flex justify-between items-center mb-10">
+        <div className="text-center md:text-start mb-4 md:mb-0">
           <h1 className="text-3xl font-black text-gray-900 tracking-tighter">
             Welcome back, {session?.user?.name?.split(" ")[0] || "Guest"}!
           </h1>
@@ -138,7 +122,7 @@ export default function CustomerDashboardOverview() {
         </div>
         <Link
           href="/menu"
-          className="bg-[#1A4E11] text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-green-900/10 hover:opacity-90 transition-all"
+          className="bg-[#1A4E11] text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-green-900/10 hover:opacity-90 transition-all"
         >
           Order Now <ArrowRight size={16} />
         </Link>
@@ -223,10 +207,14 @@ export default function CustomerDashboardOverview() {
                     <h4 className="font-black text-lg text-gray-900">
                       {recentMenuDetails?.title || "Delicious Feast"}{" "}
                       {recentOrder.items?.length > 1 &&
-                        ` +${recentOrder.items.length - 1} more`}
+                        `+${recentOrder.items.length - 1} more`}
                     </h4>
                     <span
-                      className={`inline-block px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${recentOrder.deliveryStatus === "delivered" ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-700"}`}
+                      className={`inline-block px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                        recentOrder.deliveryStatus === "delivered"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-orange-100 text-orange-700"
+                      }`}
                     >
                       {recentOrder.deliveryStatus || "Pending"}
                     </span>
@@ -326,8 +314,8 @@ export default function CustomerDashboardOverview() {
               </div>
             </div>
           </div>
- 
-          {/* Recommended Items (Special for You) */}
+
+          {/* Special for You */}
           <div className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm">
             <h3 className="font-black text-lg text-gray-900 uppercase tracking-tight mb-6">
               Special for You
@@ -335,9 +323,7 @@ export default function CustomerDashboardOverview() {
             <div className="space-y-5">
               {recommendedItems.length > 0 ? (
                 recommendedItems.map((item: any) => {
-            
-                  let displayRating = "0.0"; 
-
+                  let displayRating = "0.0";
                   if (
                     item?.reviews &&
                     Array.isArray(item.reviews) &&
@@ -348,14 +334,14 @@ export default function CustomerDashboardOverview() {
                         acc + (Number(rev.rating) || 0),
                       0,
                     );
-                    displayRating = (totalRating / item.reviews.length).toFixed(
-                      1,
-                    );
+                    displayRating = (
+                      totalRating / item.reviews.length
+                    ).toFixed(1);
                   }
                   return (
                     <Link
                       key={item._id?.$oid || item._id}
-                      href="/menu"
+                      href={`/menu/${item._id?.$oid || item._id}`}
                       className="flex items-center gap-4 group pb-5 border-b border-gray-100 last:border-0 last:pb-0"
                     >
                       <div className="w-16 h-16 bg-gray-50 rounded-xl relative overflow-hidden shrink-0 border border-gray-200">
@@ -398,33 +384,7 @@ export default function CustomerDashboardOverview() {
 
         {/* Right Column */}
         <div className="xl:col-span-4 space-y-8">
-          <div className="bg-[#1A4E11] p-8 rounded-3xl text-white relative overflow-hidden shadow-2xl">
-            <div className="relative z-10">
-              <div className="bg-white/10 w-12 h-12 rounded-full flex items-center justify-center mb-6 border border-white/10">
-                <Tag size={24} className="text-yellow-400" />
-              </div>
-              <p className="text-[10px] font-black uppercase tracking-[3px] text-green-200">
-                Exclusive Offer
-              </p>
-              <h3 className="text-4xl font-extrabold mt-2 leading-tight uppercase">
-                30% OFF
-              </h3>
-              <div className="mt-8 flex items-center gap-3 bg-white/10 border border-white/10 p-2 rounded-xl backdrop-blur-sm">
-                <span className="flex-1 text-center font-black text-xl tracking-[4px] text-yellow-300 uppercase">
-                  NEST30
-                </span>
-                <button
-                  onClick={() => handleCopy("NEST30")}
-                  className="bg-white text-[#1A4E11] px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase flex items-center gap-2 active:scale-95"
-                >
-                  {copied ? <Check size={14} /> : <Copy size={14} />}{" "}
-                  {copied ? "Copied" : "Copy"}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Stellar Spotlights (Events) */}
+          {/* Stellar Spotlights */}
           <div className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm">
             <h3 className="font-black text-lg text-gray-900 uppercase tracking-tight mb-6 flex items-center gap-2">
               <Sparkles size={18} className="text-yellow-500" /> Stellar
@@ -434,7 +394,7 @@ export default function CustomerDashboardOverview() {
               {upcomingGlobalEvents.map((event: any) => (
                 <Link
                   key={event._id}
-                  href="/dashboard/my-events"
+                  href="/event"
                   className="block relative group rounded-2xl overflow-hidden aspect-video border border-gray-100"
                 >
                   <Image
@@ -443,7 +403,7 @@ export default function CustomerDashboardOverview() {
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
                     <p className="text-[8px] font-black text-yellow-400 uppercase tracking-widest mb-1">
                       Upcoming Rally
                     </p>

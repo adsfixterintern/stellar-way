@@ -85,18 +85,18 @@ const HotDeliciousItem = () => {
       <div className="py-16 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
         
         {/* Header & Category Tabs */}
-        <div className="flex flex-col md:flex-row justify-between items-start mb-12 gap-6">
-          <div>
+        <div className="flex flex-col md:flex-row justify-between md:items-start mb-12 gap-6">
+          <div className='text-center md:text-start'>
             <p className="superTitle text-primary">About Our Food</p>
             <h2 className="secTitle">Hot Delicious Item</h2>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 items-center justify-center md:justify-start">
             {processedData.topCategories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveTab(cat.id)}
-                className={`px-8 py-2 rounded-full border transition-all duration-300 font-semibold ${
+                className={`px-4 md:px-8 py-2 rounded-full border transition-all duration-300 font-semibold ${
                   activeTab === cat.id 
                   ? 'bg-primary text-white border-primary' 
                   : 'border-gray-200 text-gray-600 hover:border-primary'

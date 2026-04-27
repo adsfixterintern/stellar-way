@@ -410,7 +410,6 @@ const MyOrdersPage = () => {
 
       {/* Track Modal */}
       {isTrackModalOpen && selectedTrackOrder && (
-        // MyOrdersPage.tsx er Modal Call-er ekhane ei change-ti korun:
         <OrderTrackingModal
           isOpen={isTrackModalOpen}
           onClose={() => {
@@ -419,8 +418,8 @@ const MyOrdersPage = () => {
           }}
           status={selectedTrackOrder?.deliveryStatus || "preparing"}
           order={{
-            _id: selectedTrackOrder?._id, // Direct ID pass kora better
-            riderId: selectedTrackOrder?.riderId, // Full rider object pathaben
+            _id: selectedTrackOrder?._id, 
+            riderId: selectedTrackOrder?.riderId, 
             otp: selectedTrackOrder?.deliveryOTP,
             deliveryLocation: selectedTrackOrder?.deliveryLocation,
             driver: {

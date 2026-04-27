@@ -105,10 +105,15 @@ const OrderTrackingModal = ({ isOpen, onClose, order, status }: any) => {
   const [etaTime, setEtaTime] = useState<string>("Calculating...");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [riderLocation, setRiderLocation] = useState<[number, number]>([
-    order?.riderId?.lastLocation?.lat || 23.8103,
-    order?.riderId?.lastLocation?.lng || 90.4125,
-  ]);
+  const [riderLocation, setRiderLocation] = useState<[number, number]>(() => {
+    const rLat = order?.riderId?.lastLocation?.lat;
+    const rLng = order?.riderId?.lastLocation?.lng;
+
+    if (rLat && rLng && rLat !== 0) {
+      return [rLat, rLng];
+    }
+    return [22.701, 90.3535]; 
+  });
 
   const customerLocation: [number, number] = useMemo(
     () => [
@@ -131,28 +136,27 @@ const OrderTrackingModal = ({ isOpen, onClose, order, status }: any) => {
     socket.emit("join-order", orderId);
 
     const handleLocationUpdate = (data: any) => {
-      if (data?.currentLocation) {
+      // কনসোল চেক করুন ডেটা আসছে কিনা
+      console.log("Received Tracking Data:", data);
+
+      if (data?.currentLocation?.lat && data?.currentLocation?.lng) {
         const newLat = data.currentLocation.lat;
         const newLng = data.currentLocation.lng;
-        setRiderLocation([newLat, newLng]);
+        if (newLat !== 0 && newLng !== 0) {
+          setRiderLocation([newLat, newLng]);
 
-        // Calculate Distance & ETA
-        const dist = calculateDistance(
-          newLat,
-          newLng,
-          customerLocation[0],
-          customerLocation[1],
-        );
+          const dist = calculateDistance(
+            newLat,
+            newLng,
+            customerLocation[0],
+            customerLocation[1],
+          );
 
-        // Speed logic: assuming 20km/h average speed in city
-        const timeInMin = Math.round((dist / 20) * 60);
-
-        if (dist < 0.2) {
-          setEtaTime("Arriving Now");
-        } else {
-          setEtaTime(`${timeInMin + 2} mins`); // +2 buffer
+          const timeInMin = Math.round((dist / 20) * 60);
+          setEtaTime(dist < 0.2 ? "Arriving Now" : `${timeInMin + 2} mins`);
         }
       }
+
       if (data?.status) {
         setLiveStatus(data.status);
       }

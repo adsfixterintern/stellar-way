@@ -39,8 +39,7 @@ interface IOrder {
     | "cooking"
     | "on-the-way"
     | "delivered"
-    | 'near-location'
-    ;
+    | "near-location";
   phone?: string;
   customerName?: string;
 }
@@ -89,10 +88,6 @@ const RiderDashboard: React.FC = () => {
 
         // Filter out orders that are already available for pickup
         setAvailableOrders(res.data.availableOrders || []);
-
-        /** * Logic: Delivered orders should NOT show in the dashboard cards.
-         * We filter the list to keep only active missions.
-         */
         const activeOnly = (res.data.myAcceptedOrders || []).filter(
           (order: IOrder) => order.deliveryStatus !== "delivered",
         );
@@ -109,30 +104,45 @@ const RiderDashboard: React.FC = () => {
   useEffect(() => {
     if (!socket || myAcceptedOrders.length === 0) return;
 
+    const sendLocationToSocket = (lat: number, lng: number) => {
+      myAcceptedOrders.forEach((order) => {
+        if (
+          order.deliveryStatus === "on-the-way" ||
+          order.deliveryStatus === "near-location"
+        ) {
+          socket.emit("update-location", {
+            orderId: order._id,
+            currentLocation: { lat, lng },
+            riderId: (session?.user as any)?.id,
+            status: order.deliveryStatus,
+          });
+        }
+      });
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        sendLocationToSocket(latitude, longitude);
+      },
+      (err) => console.error("Initial GPS Error:", err),
+      {
+        enableHighAccuracy: false,
+        timeout: 20000,
+        maximumAge: 0,
+      },
+    );
+
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-
-        myAcceptedOrders.forEach((order) => {
-          if (
-            order.deliveryStatus === "on-the-way" ||
-            order.deliveryStatus === "near-location"
-          ) {
-            // সকেটে ডাটা পাঠানো
-            socket.emit("update-location", {
-              orderId: order._id,
-              currentLocation: { lat: latitude, lng: longitude },
-              riderId: (session?.user as any)?.id,
-              status: order.deliveryStatus,
-            });
-          }
-        });
+        sendLocationToSocket(latitude, longitude);
       },
-      (err) => console.error("GPS Error:", err),
+      (err) => console.error("GPS Watch Error:", err),
       {
-        enableHighAccuracy: true, // সঠিক লোকেশনের জন্য
-        maximumAge: 5000,
-        timeout: 10000,
+        enableHighAccuracy: false,
+        timeout: 20000,
+        maximumAge: 10000,
       },
     );
 

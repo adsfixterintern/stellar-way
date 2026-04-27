@@ -29,8 +29,8 @@ const OrderPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFCFD]">
-      <div className="w-full p-2 md:p-4">
+    <div className="min-h-screen ">
+      <div className="w-full">
         {/* Header Section */}
         <div className="flex justify-between items-end mb-8">
           <div>

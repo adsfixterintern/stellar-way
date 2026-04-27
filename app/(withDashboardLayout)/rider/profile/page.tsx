@@ -137,12 +137,13 @@ const UserProfile = () => {
         toast.error(res.message || "Failed to change password");
       }
     } catch (err: any) {
+      console.log(err)
       toast.error("Error changing password!");
     } finally {
       setPasswordLoading(false);
     }
   };
-
+//image handler
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {

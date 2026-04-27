@@ -40,6 +40,12 @@ export const updateProfileApi = async (updateData: any): Promise<IAuthResponse> 
   return response.data;
 };
 
+// Change Password API
+export const changePasswordApi = async (passwords: any): Promise<IAuthResponse> => {
+  const response = await api.patch("/auth/change-password", passwords);
+  return response.data;
+};
+
 
 export const getAllUsersApi = async (limit: number = 999): Promise<any> => {
   const response = await api.get("/auth/all-users", {

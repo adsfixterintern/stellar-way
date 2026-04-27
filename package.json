@@ -20,6 +20,7 @@
     "leaflet": "^1.9.4",
     "lucide": "^1.7.0",
     "lucide-react": "^0.577.0",
+    "match-sorter": "^8.3.0",
     "modern-screenshot": "^4.6.8",
     "next": "16.1.6",
     "next-auth": "^4.24.13",

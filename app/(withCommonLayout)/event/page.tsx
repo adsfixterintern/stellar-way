@@ -247,7 +247,7 @@ const EventsPage = () => {
             <div className="flex gap-4 pt-4">
               <button className="blockBtn">Learn More</button>
               <Link href={"/contact"}>
-                <button className="px-8 py-3 rounded-lg border border-gray-300 font-bold hover:bg-gray-50 transition-all text-sm md:text-base">
+                <button className="px-3 md:px-8 py-3 rounded-lg border border-gray-300 font-bold hover:bg-gray-50 transition-all text-sm md:text-base">
                   Contact Us
                 </button>
               </Link>

@@ -276,19 +276,31 @@ const Navbar = () => {
 
           {/* Notifications Dropdown */}
           <div className="relative" ref={notifRef}>
+            {/* Bell Icon */}
             <Bell
               size={22}
               className="text-white/90 cursor-pointer hover:text-white"
               onClick={() => setNotifOpen(!notifOpen)}
             />
+
+            {/* Badge */}
             {unreadCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#1e3316]">
                 {unreadCount}
               </span>
             )}
 
+            {/* Notifications Dropdown */}
             {notifOpen && (
-              <div className="absolute right-0 top-12 w-80 bg-[#1e3316] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 z-[60]">
+              <div
+                className="absolute 
+      -left-12 -translate-x-1/2 
+      md:left-auto md:right-0 md:translate-x-0 
+      top-12 
+      w-[90vw] max-w-80 
+      bg-[#1e3316] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 z-[60]"
+              >
+                {/* Header */}
                 <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
                   <h3 className="text-sm font-bold text-white">
                     Notifications
@@ -302,17 +314,27 @@ const Navbar = () => {
                     </button>
                   )}
                 </div>
-                <div className="max-h-80 overflow-y-auto">
+
+                {/* Notification List Area */}
+                <div className="max-h-80 overflow-y-auto custom-scrollbar">
                   {notifications.length > 0 ? (
                     notifications.map((n) => (
                       <div
                         key={n._id}
                         onClick={() => handleMarkAsRead(n._id)}
-                        className={`p-4 border-b border-white/5 cursor-pointer hover:bg-white/5 transition-all relative group ${n.status === "unread" ? "bg-white/[0.07]" : "opacity-60"}`}
+                        className={`p-4 border-b border-white/5 cursor-pointer hover:bg-white/5 transition-all relative group ${
+                          n.status === "unread"
+                            ? "bg-white/[0.07]"
+                            : "opacity-60"
+                        }`}
                       >
                         <div className="flex justify-between items-start gap-2 pr-6">
                           <p
-                            className={`text-xs font-bold ${n.status === "unread" ? "text-white" : "text-gray-400"}`}
+                            className={`text-xs font-bold ${
+                              n.status === "unread"
+                                ? "text-white"
+                                : "text-gray-400"
+                            }`}
                           >
                             {n.title}
                           </p>
@@ -326,9 +348,11 @@ const Navbar = () => {
                         <p className="text-[9px] text-gray-500 mt-2">
                           {new Date(n.createdAt).toLocaleTimeString()}
                         </p>
+
+                        {/* Delete Button */}
                         <button
                           onClick={(e) => handleDeleteNotification(e, n._id)}
-                          className="absolute top-4 right-4 p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200"
+                          className="absolute top-4 right-4 p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg md:opacity-0 md:group-hover:opacity-100 transition-all duration-200"
                         >
                           <X size={14} />
                         </button>

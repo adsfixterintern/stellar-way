@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -40,14 +41,11 @@ const MenuDetailsPage = () => {
     fetchDetails();
   }, [id]);
 
- 
-
   const handleAddToCart = () => {
     if (item) {
       try {
-     
         addToCart(item);
-
+        toast.success(`${item.title} added to cart`);
       } catch (error) {
         console.error(error);
         toast.error("Failed to add to cart");

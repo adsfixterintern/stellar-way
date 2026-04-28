@@ -1,9 +1,7 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
-import { HiOutlineArrowLeft, HiOutlineArrowRight } from "react-icons/hi";
 
 // swiper
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -13,6 +11,7 @@ import "swiper/css";
 // API
 import { getAllPublishedFeedbacks } from "@/app/modules/feedback/feedback.api";
 import { IFeedback } from "@/app/modules/feedback/feedback.interface";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 /* -------------------- SKELETON -------------------- */
 const TestimonialSkeleton = () => {
@@ -27,7 +26,7 @@ const TestimonialSkeleton = () => {
 
       {/* Profile Image Skeleton */}
       <div className="w-20 h-20 rounded-full bg-gray-300/50 mb-4 shadow-xl"></div>
-      
+
       {/* Name and Designation Skeleton */}
       <div className="h-6 bg-gray-300/50 rounded-md w-32 mb-2"></div>
       <div className="h-3 bg-gray-300/50 rounded-md w-24"></div>
@@ -71,30 +70,31 @@ const Testimonial = () => {
       <div className="absolute inset-0 bg-[#F5F5DC]/90"></div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
-        
         {/* Header Section */}
+
         <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
           <div>
             <span className="superTitle flex mb-2 items-center gap-2">
-               Testimonial
+              Testimonial
             </span>
             <h2 className="secTitle leading-[1.1]">
-              Where <span className="text-[#1a4e11]">Sound</span> Becomes Experience
+              Sounds <span className="text-[#1a4e11]">That Matter</span>
             </h2>
           </div>
 
-          <div className="flex gap-3">
+          <div className="hidden md:flex gap-4 pb-2">
             <button
               onClick={() => swiperRef.current?.slidePrev()}
-              className="w-[52px] h-[52px] rounded-lg border border-gray-300 flex items-center justify-center bg-white hover:bg-[#3A4D39] hover:text-white transition-all shadow-sm"
+              className="px-3 py-2 rounded-lg border border-gray-400 text-[#3A4D39] hover:bg-gray-100 transition-all"
             >
-              <HiOutlineArrowLeft size={24} />
+              <ArrowLeft size={20} />
             </button>
+
             <button
               onClick={() => swiperRef.current?.slideNext()}
-              className="w-[52px] h-[52px] rounded-lg bg-[#3A4D39] text-white flex items-center justify-center hover:bg-[#2d3d2d] transition-all shadow-sm"
+              className="px-3 py-2 rounded-lg bg-[#3A4D39] text-white hover:bg-[#2d3d2d] transition-all"
             >
-              <HiOutlineArrowRight size={24} />
+              <ArrowRight size={20} />
             </button>
           </div>
         </div>
@@ -105,12 +105,12 @@ const Testimonial = () => {
           modules={[Navigation, Autoplay]}
           spaceBetween={50}
           slidesPerView={1}
-          loop={!loading} 
-          speed={1000} 
-          autoplay={{ 
+          loop={!loading}
+          speed={1000}
+          autoplay={{
             delay: 2000,
             disableOnInteraction: false,
-            pauseOnMouseEnter: true 
+            pauseOnMouseEnter: true,
           }}
           className="testimonial-swiper relative"
         >
@@ -122,7 +122,6 @@ const Testimonial = () => {
             feedbacks.map((item) => (
               <SwiperSlide key={item._id}>
                 <div className="flex flex-col items-center text-center max-w-2xl mx-auto py-10 relative">
-                  
                   <p className="text-[#555] text-[18px] md:text-[22px] leading-[1.8] italic mb-14 px-4 font-medium">
                     &quot;{item.description}&quot;
                   </p>
@@ -130,7 +129,10 @@ const Testimonial = () => {
                   <div className="flex flex-col items-center">
                     <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-xl bg-gray-50 mb-4">
                       <Image
-                        src={item?.userId?.image || "https://ui-avatars.com/api/?name=User"}
+                        src={
+                          item?.userId?.image ||
+                          "https://ui-avatars.com/api/?name=User"
+                        }
                         alt={item.name}
                         fill
                         className="object-cover"
@@ -146,15 +148,15 @@ const Testimonial = () => {
 
                   {/* Quotation SVG */}
                   <div className="absolute bottom-0 right-0 md:right-10 opacity-30 hidden md:block transform rotate-180">
-                    <svg 
-                      width="80" 
-                      height="80" 
-                      viewBox="0 0 24 24" 
+                    <svg
+                      width="80"
+                      height="80"
+                      viewBox="0 0 24 24"
                       fill="#3A4D39"
-                      stroke="white" 
+                      stroke="white"
                       strokeWidth="0.5"
                     >
-                       <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                     </svg>
                   </div>
                 </div>

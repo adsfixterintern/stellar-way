@@ -109,7 +109,7 @@ const CartPage = () => {
                 >
                   <div className="flex justify-between items-start mb-4">
                     <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                      ID: {order.transactionId.slice(-8)}
+                      ID: {order.transactionId}
                     </span>
                     <div className="p-2 bg-[#f8faf7] rounded-full text-[#1A4E11] group-hover:bg-[#1A4E11] group-hover:text-white transition-colors">
                       <Eye size={14} />

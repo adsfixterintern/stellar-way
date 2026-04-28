@@ -4,7 +4,7 @@
 import React, { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { Calendar, Clock, CreditCard, Lock, Users, Info } from "lucide-react";
 import SingleHero from "@/components/shared/SingleHero";
 import api from "@/utils/apiInstance";
@@ -67,7 +67,6 @@ const TablePayContent = () => {
 
   return (
     <div className="bg-[#F4F7F2] ">
-      <Toaster />
 
       <SingleHero
         subtitle="SECURE CHECKOUT"

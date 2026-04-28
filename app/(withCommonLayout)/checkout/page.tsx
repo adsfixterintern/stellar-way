@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import SingleHero from "@/components/shared/SingleHero";
 import { ICartItem } from "@/types/menu";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import {
   createSSLOrder,
   createStripeOrder,
@@ -134,7 +134,6 @@ const CheckoutPage = () => {
 
   return (
     <div className="bg-white min-h-screen pb-20">
-      <Toaster position="top-center" />
       <SingleHero
         subtitle="Checkout"
         title="Complete Your Order"

@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { getSingleEventFromDB } from "@/app/modules/event/event.api";
 import SingleHero from "@/components/shared/SingleHero";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 const EventDetailsPage = () => {
   const { id } = useParams();
@@ -56,7 +56,6 @@ const EventDetailsPage = () => {
 
   return (
     <div className="bg-white min-h-screen">
-      <Toaster />
       <SingleHero
         isCenter={true}
         subtitle="EXCLUSIVE EXPERIENCE"

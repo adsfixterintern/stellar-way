@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useRef, useState, useEffect } from "react";
@@ -6,9 +7,8 @@ import { HiOutlineArrowLeft, HiOutlineArrowRight } from "react-icons/hi";
 
 // swiper
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
+import { Navigation, Autoplay } from "swiper/modules";
 import "swiper/css";
-import "swiper/css/navigation";
 
 // API
 import { getAllPublishedFeedbacks } from "@/app/modules/feedback/feedback.api";
@@ -17,19 +17,20 @@ import { IFeedback } from "@/app/modules/feedback/feedback.interface";
 /* -------------------- SKELETON -------------------- */
 const TestimonialSkeleton = () => {
   return (
-    <div className="bg-white/70 p-8 rounded-[28px] border border-gray-100 animate-pulse min-h-[340px]">
-      <div className="flex items-center gap-4 mb-8">
-        <div className="w-16 h-16 rounded-full bg-gray-200" />
-        <div className="space-y-2">
-          <div className="h-4 w-32 bg-gray-200 rounded" />
-          <div className="h-3 w-24 bg-gray-200 rounded" />
-        </div>
+    <div className="flex flex-col items-center text-center max-w-2xl mx-auto py-10 animate-pulse">
+      {/* Description Skeleton */}
+      <div className="w-full space-y-3 mb-14 px-4">
+        <div className="h-4 bg-gray-300/50 rounded-full w-full"></div>
+        <div className="h-4 bg-gray-300/50 rounded-full w-5/6 mx-auto"></div>
+        <div className="h-4 bg-gray-300/50 rounded-full w-4/6 mx-auto"></div>
       </div>
-      <div className="space-y-3">
-        <div className="h-4 w-full bg-gray-200 rounded" />
-        <div className="h-4 w-5/6 bg-gray-200 rounded" />
-        <div className="h-4 w-2/3 bg-gray-200 rounded" />
-      </div>
+
+      {/* Profile Image Skeleton */}
+      <div className="w-20 h-20 rounded-full bg-gray-300/50 mb-4 shadow-xl"></div>
+      
+      {/* Name and Designation Skeleton */}
+      <div className="h-6 bg-gray-300/50 rounded-md w-32 mb-2"></div>
+      <div className="h-3 bg-gray-300/50 rounded-md w-24"></div>
     </div>
   );
 };
@@ -45,21 +46,15 @@ const Testimonial = () => {
       try {
         setLoading(true);
         const res = await getAllPublishedFeedbacks();
-        if (res.success) {
-          setFeedbacks(res.data);
-        }
+        if (res.success) setFeedbacks(res.data);
       } catch (error) {
         console.error("Error fetching feedbacks:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchFeedbacks();
   }, []);
-
-  console.log(feedbacks);
-
 
   if (!loading && feedbacks.length === 0) return null;
 
@@ -76,18 +71,18 @@ const Testimonial = () => {
       <div className="absolute inset-0 bg-[#F5F5DC]/90"></div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
+        
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
           <div>
-            <span className="text-[#3A4D39] font-bold tracking-[0.2em] uppercase text-sm block mb-3">
-              TESTIMONIAL
+            <span className="superTitle flex mb-2 items-center gap-2">
+               Testimonial
             </span>
-            <h2 className="text-4xl md:text-[56px] font-bold text-[#1a1a1a] leading-[1.1]">
-              What Our Guests Say
+            <h2 className="secTitle leading-[1.1]">
+              Where <span className="text-[#1a4e11]">Sound</span> Becomes Experience
             </h2>
           </div>
 
-          {/* Custom Navigation Buttons */}
           <div className="flex gap-3">
             <button
               onClick={() => swiperRef.current?.slidePrev()}
@@ -107,59 +102,65 @@ const Testimonial = () => {
         {/* Swiper Slider */}
         <Swiper
           onSwiper={(swiper) => (swiperRef.current = swiper)}
-          modules={[Navigation]}
-          spaceBetween={30}
+          modules={[Navigation, Autoplay]}
+          spaceBetween={50}
           slidesPerView={1}
-          breakpoints={{
-            768: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
+          loop={!loading} 
+          speed={1000} 
+          autoplay={{ 
+            delay: 2000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true 
           }}
-          className="testimonial-swiper"
+          className="testimonial-swiper relative"
         >
-          {loading
-            ? Array.from({ length: 3 }).map((_, i) => (
-                <SwiperSlide key={i}>
-                  <TestimonialSkeleton />
-                </SwiperSlide>
-              ))
-            : feedbacks.map((item) => (
-                <SwiperSlide key={item._id}>
-                  <div className="bg-white/90 backdrop-blur-sm p-8 md:p-10 rounded-[28px] border border-[#E8EED5] flex flex-col min-h-[360px] group hover:border-[#3A4D39]/30 hover:shadow-xl transition-all duration-500">
-                    {/* User Profile Info */}
-                    <div className="flex items-center gap-4 mb-8">
-                      <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md bg-gray-50 shrink-0">
-                        <Image
-                          src={
-                            item?.userId?.image
-                          }
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="overflow-hidden">
-                        <h4 className="text-[20px] md:text-[22px] font-bold text-[#1a1a1a] truncate">
-                          {item.name}
-                        </h4>
-                        <p className="text-[#3A4D39]/70 text-[12px] font-bold uppercase tracking-wider">
-                          {item.designation || "Customer"}
-                        </p>
-                      </div>
-                    </div>
+          {loading ? (
+            <SwiperSlide>
+              <TestimonialSkeleton />
+            </SwiperSlide>
+          ) : (
+            feedbacks.map((item) => (
+              <SwiperSlide key={item._id}>
+                <div className="flex flex-col items-center text-center max-w-2xl mx-auto py-10 relative">
+                  
+                  <p className="text-[#555] text-[18px] md:text-[22px] leading-[1.8] italic mb-14 px-4 font-medium">
+                    &quot;{item.description}&quot;
+                  </p>
 
-                    {/* Review Content */}
-                    <div className="relative">
-                      {/* Quote Icon Background (Optional) */}
-                      <span className="absolute -top-4 -left-2 text-6xl text-[#3A4D39]/5 font-serif select-none">
-                        “
-                      </span>
-                      <p className="text-[#555] text-[16px] md:text-[17px] leading-[1.8] italic relative z-10">
-                        {item.description};
-                      </p>
+                  <div className="flex flex-col items-center">
+                    <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-xl bg-gray-50 mb-4">
+                      <Image
+                        src={item?.userId?.image || "https://ui-avatars.com/api/?name=User"}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
+                    <h4 className="text-[24px] font-bold text-[#1a1a1a]">
+                      {item.name}
+                    </h4>
+                    <p className="text-[#3A4D39]/70 text-[12px] font-black uppercase tracking-widest mt-1">
+                      {item.designation}
+                    </p>
                   </div>
-                </SwiperSlide>
-              ))}
+
+                  {/* Quotation SVG */}
+                  <div className="absolute bottom-0 right-0 md:right-10 opacity-30 hidden md:block transform rotate-180">
+                    <svg 
+                      width="80" 
+                      height="80" 
+                      viewBox="0 0 24 24" 
+                      fill="#3A4D39"
+                      stroke="white" 
+                      strokeWidth="0.5"
+                    >
+                       <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                    </svg>
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))
+          )}
         </Swiper>
       </div>
     </section>

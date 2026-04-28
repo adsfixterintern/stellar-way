@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from "react";
-import { useSession } from "next-auth/react";
+import React, { useEffect, useRef, useState } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { applyForRiderApi } from "@/app/modules/rider/rider.api";
 import { IRider } from "@/app/modules/rider/rider.interface";
 import { toast } from "react-hot-toast";
 import SingleHero from "@/components/shared/SingleHero";
+import { countries } from "countries-list";
 
 const RiderApplyForm = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState<Partial<IRider>>({
     phoneNumber: "",
@@ -18,9 +20,48 @@ const RiderApplyForm = () => {
     identityCard: "",
     area: "",
   });
+  const [countryCode, setCountryCode] = useState("+880");
+  const [isCountryOpen, setIsCountryOpen] = useState(false);
+  const countryDropdownRef = useRef<HTMLDivElement>(null);
+
+  const countryCodeOptions = Object.values(countries)
+    .map((country) => ({
+      name: country.name,
+      dialCode: country.phone?.[0] ? `+${country.phone[0]}` : "",
+    }))
+    .filter((country) => country.dialCode)
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const selectedCountry =
+    countryCodeOptions.find((country) => country.dialCode === countryCode) ||
+    countryCodeOptions[0];
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (
+        countryDropdownRef.current &&
+        !countryDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsCountryOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (status === "loading") {
+      toast.error("Please wait, checking your session...");
+      return;
+    }
+
+    if (status !== "authenticated") {
+      toast.error("Please login to apply for a rider!");
+      signIn();
+      return;
+    }
 
     const userId = (session?.user as any)?.id || (session?.user as any)?._id;
 
@@ -35,8 +76,13 @@ const RiderApplyForm = () => {
     }
 
     try {
+      setIsSubmitting(true);
+      // Align with dashboard-style fresh session access before protected API hits.
+      await fetch("/api/auth/session", { cache: "no-store" });
+
       const response = await applyForRiderApi({
         ...formData,
+        phoneNumber: `${countryCode}${formData.phoneNumber}`,
         userId,
       });
 
@@ -49,9 +95,12 @@ const RiderApplyForm = () => {
           identityCard: "",
           area: "",
         });
+        setCountryCode("+880");
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Something went wrong!");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -81,19 +130,55 @@ const RiderApplyForm = () => {
               <label className="text-sm font-medium text-gray-700 mb-2 block">
                 Phone Number
               </label>
-              <input
-                required
-                type="text"
-                value={formData.phoneNumber}
-                placeholder="+880 1XXXXXXXXX"
-                className={inputClass}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    phoneNumber: e.target.value,
-                  })
-                }
-              />
+              <div className="w-full h-[56px] flex items-center bg-gray-50 border border-gray-200 rounded-xl focus-within:border-[#324a1f] focus-within:ring-2 focus-within:ring-[#324a1f]/20 transition-all">
+                <div
+                  ref={countryDropdownRef}
+                  className="relative h-full w-40 md:w-48 shrink-0 border-r border-gray-200 z-20"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setIsCountryOpen((prev) => !prev)}
+                    className="h-full w-full bg-gray-100 px-2 text-left text-xs md:text-sm outline-none flex items-center justify-between gap-2"
+                  >
+                    <span className="truncate">
+                      {selectedCountry?.name} ({countryCode})
+                    </span>
+                    <span className="text-gray-500">▼</span>
+                  </button>
+                  {isCountryOpen && (
+                    <div className="absolute top-full left-0 mt-1 w-72 max-h-56 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                      {countryCodeOptions.map((country) => (
+                        <button
+                          type="button"
+                          key={`${country.name}-${country.dialCode}`}
+                          onClick={() => {
+                            setCountryCode(country.dialCode);
+                            setIsCountryOpen(false);
+                          }}
+                          className="w-full text-left px-3 py-2 text-xs md:text-sm hover:bg-gray-50"
+                        >
+                          {country.name} ({country.dialCode})
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <input
+                  required
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={11}
+                  value={formData.phoneNumber}
+                  placeholder="01700000000"
+                  className="w-full min-w-0 h-full px-4 bg-transparent outline-none text-sm"
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      phoneNumber: e.target.value.replace(/\D/g, "").slice(0, 11),
+                    })
+                  }
+                />
+              </div>
             </div>
 
             {/* VEHICLE */}
@@ -188,9 +273,10 @@ const RiderApplyForm = () => {
             {/* BUTTON */}
             <button
               type="submit"
+              disabled={isSubmitting || status === "loading"}
               className="w-full mt-6 bg-[#324a1f] hover:bg-[#243515] text-white py-4 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg"
             >
-              Apply as Rider
+              {isSubmitting ? "Submitting..." : "Apply as Rider"}
             </button>
 
             <p className="text-[11px] text-gray-400 text-center mt-4 leading-relaxed">

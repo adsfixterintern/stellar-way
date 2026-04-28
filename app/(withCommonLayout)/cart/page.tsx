@@ -23,12 +23,13 @@ const CartPage = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
+  const userRole = (session?.user as any)?.role;
 
   useEffect(() => {
     if (cartItems.length > 0) {
       setSelectedItems(cartItems.map((item) => item._id));
     }
-    if (userEmail) {
+    if (userEmail && userRole === "user") {
       getMyOrdersFromDB(userEmail).then((res) => {
         if (res.success) {
           const unpaid = res.data.filter(
@@ -37,9 +38,11 @@ const CartPage = () => {
           setUnpaidOrders(unpaid);
         }
       });
+    } else if (userRole && userRole !== "user") {
+      setUnpaidOrders([]);
     }
     setIsLoaded(true);
-  }, [userEmail, cartItems.length]);
+  }, [userEmail, userRole, cartItems.length]);
 
   const toggleSelectItem = (id: string) => {
     setSelectedItems((prev) =>

@@ -4,11 +4,13 @@ import { NextResponse } from "next/server";
 export default withAuth(
   function middleware(req) {
     const url = req.nextUrl;
-    if (!url) return NextResponse.next();
-
     const pathname = url.pathname;
     const token = req.nextauth?.token;
     const userRole = token?.role;
+
+    if (token?.error === "RoleChanged") {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
 
     // =========================
     // PUBLIC ROUTES
@@ -23,15 +25,15 @@ export default withAuth(
       return NextResponse.next();
     }
 
-    // =========================
-    // PROTECTED ROUTES CHECK
-    // =========================
+  
     const protectedRoutes = [
       "/rider",
       "/dashboard",
       "/profile",
       "/checkout",
       "/apply-rider",
+      "/event-pay",
+      "/reservation/table-pay", 
     ];
 
     const isProtected = protectedRoutes.some((route) =>
@@ -39,7 +41,9 @@ export default withAuth(
     );
 
     if (isProtected && !token) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      const loginUrl = new URL("/login", req.url);
+      loginUrl.searchParams.set("callbackUrl", pathname); 
+      return NextResponse.redirect(loginUrl);
     }
 
     // =========================
@@ -72,5 +76,7 @@ export const config = {
     "/profile/:path*",
     "/dashboard/:path*",
     "/apply-rider",
+    "/event-pay",
+    "/reservation/:path*",
   ],
 };

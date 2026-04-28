@@ -93,6 +93,13 @@ export const getMyProfileApi = async (userId: string) => {
 };
 
 
+export const getMyDeliveriesApi = async (riderId: string) => {
+  const response = await api.get(`/riders/rider-deliveries/${riderId}`);
+  console.log(response)
+  return response.data;
+
+};
+
 export const updateProfileApi = async (updateData: {
   name: string;
   phone: string;

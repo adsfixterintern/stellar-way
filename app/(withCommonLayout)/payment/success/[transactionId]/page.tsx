@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import SingleHero from "@/components/shared/SingleHero";
 import Link from "next/link";
 import { updatePaymentStatusApi } from "@/app/modules/payment/payment.api";
@@ -37,7 +37,6 @@ const PaymentSuccessPage = () => {
 
   return (
     <div className="min-h-screen bg-white pb-20 font-sans">
-      <Toaster position="top-center" />
       
       <SingleHero
         subtitle="Success"

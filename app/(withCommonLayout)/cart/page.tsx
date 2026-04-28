@@ -24,6 +24,7 @@ const CartPage = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
+  console.log(localStorage.getItem("token"));
 
   useEffect(() => {
     if (cartItems.length > 0) {

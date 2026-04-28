@@ -17,7 +17,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Savory Nest - Exquisite Menu",
+  title: {
+    default: "SavoryNest",
+    template: "%s | SavoryNest",
+  },
   description: "Order your favorite food online",
 };
 

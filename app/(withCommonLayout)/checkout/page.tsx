@@ -117,6 +117,7 @@ const CheckoutPage = () => {
 
       if (response.success && response.data?.paymentUrl) {
         // Clear logic...
+        localStorage.removeItem("cart");
         localStorage.removeItem("temp_checkout");
         localStorage.removeItem("pending_order_id");
         window.location.href = response.data.paymentUrl;

@@ -101,14 +101,6 @@ export default function CustomerDashboardOverview() {
   const monthlyGoal = 5000;
   const spendingPercentage = Math.min((totalSpent / monthlyGoal) * 100, 100);
 
-  const handleCopy = (text: string) => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text);
-      setCopied(true);
-      toast.success("Coupon code copied!");
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
 
   // ─── Skeleton Loading ───
   if (ordersLoading || menuLoading || bookingsLoading || eventsLoading) {
@@ -117,10 +109,10 @@ export default function CustomerDashboardOverview() {
 
   // ─── Main UI ───
   return (
-    <div className="bg-[#FDFCFD] min-h-screen p-4 md:p-8 font-sans antialiased">
+    <div className="bg-[#FDFCFD] min-h-screen p-2  md:p-8 font-sans antialiased">
       {/* Header */}
-      <div className="flex justify-between items-center mb-10">
-        <div>
+      <div className="md:flex justify-between items-center mb-10">
+        <div className="text-center md:text-start mb-4 md:mb-0">
           <h1 className="text-3xl font-black text-gray-900 tracking-tighter">
             Welcome back, {session?.user?.name?.split(" ")[0] || "Guest"}!
           </h1>
@@ -130,7 +122,7 @@ export default function CustomerDashboardOverview() {
         </div>
         <Link
           href="/menu"
-          className="bg-[#1A4E11] text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-green-900/10 hover:opacity-90 transition-all"
+          className="bg-[#1A4E11] text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-green-900/10 hover:opacity-90 transition-all"
         >
           Order Now <ArrowRight size={16} />
         </Link>

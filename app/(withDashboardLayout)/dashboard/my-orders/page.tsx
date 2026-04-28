@@ -49,6 +49,7 @@ const MyOrdersPage = () => {
   const [riderRating, setRiderRating] = useState(0);
   const [riderComment, setRiderComment] = useState("");
   const [restaurantFeedback, setRestaurantFeedback] = useState("");
+  const [restaurantDesignation, setRestaurantDesignation] = useState("");
 
   const openReviewModal = (order: any) => {
     setSelectedOrder(order);
@@ -80,6 +81,8 @@ const MyOrdersPage = () => {
     }));
   };
 
+
+  console.log(selectedOrder)
   const handleSubmitReviews = async () => {
     const menuIds = Object.keys(reviewData);
     const hasMenuRatings = menuIds.some((id) => reviewData[id]?.rating > 0);
@@ -120,7 +123,7 @@ const MyOrdersPage = () => {
           createFeedbackApi({
             name: session?.user?.name as string,
             description: restaurantFeedback,
-            designation: "Customer",
+            designation: restaurantDesignation || "Customer", 
             userId: (session?.user as any)?.id,
           }),
         );
@@ -143,7 +146,7 @@ const MyOrdersPage = () => {
 
   console.log(selectedTrackOrder);
   return (
-    <div className="w-full p-6">
+    <div className="w-full p-2 md:p-8">
       <h1 className="text-2xl font-black text-gray-900 mb-8 uppercase tracking-tight">
         My Orders
       </h1>
@@ -337,7 +340,7 @@ const MyOrdersPage = () => {
                     <div className="w-16 h-16 rounded-full bg-white overflow-hidden relative shadow-md mb-3 border-2 border-white">
                       <Image
                         src={
-                          selectedOrder.riderId.image ||
+                          selectedOrder.riderId?.userId?.image ||
                           "https://i.pravatar.cc/150"
                         }
                         alt="rider"
@@ -371,27 +374,26 @@ const MyOrdersPage = () => {
               )}
 
               {/* SECTION 3: RESTAURANT TESTIMONIAL */}
-              <div className="pt-8 border-t border-dashed border-gray-200">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                    <IoRestaurantOutline size={18} />
-                  </div>
-                  <h3 className="font-black text-xs uppercase tracking-widest text-gray-500">
-                    Share on our Wall
-                  </h3>
-                </div>
-                <div className="bg-blue-50/30 p-6 rounded-2xl border border-blue-100">
-                  <p className="text-xs font-bold text-gray-700 mb-3 uppercase tracking-tighter">
-                    Would you like to be featured on our home page?
-                  </p>
-                  <textarea
-                    placeholder="Describe your overall experience with Savory Nest..."
-                    value={restaurantFeedback}
-                    onChange={(e) => setRestaurantFeedback(e.target.value)}
-                    className="w-full p-4 bg-white border border-blue-100 rounded-xl text-xs outline-none focus:border-blue-500 resize-none"
-                    rows={3}
-                  />
-                </div>
+              <div className="bg-blue-50/30 p-6 rounded-2xl border border-blue-100">
+                <p className="text-xs font-bold text-gray-700 mb-3 uppercase tracking-tighter">
+                  Would you like to be featured on our home page?
+                </p>
+
+                <input
+                  type="text"
+                  placeholder="Your designation (e.g. Food Lover, Blogger, Student)"
+                  value={restaurantDesignation}
+                  onChange={(e) => setRestaurantDesignation(e.target.value)}
+                  className="w-full p-3 mb-3 bg-white border border-blue-100 rounded-xl text-xs outline-none focus:border-blue-500"
+                />
+
+                <textarea
+                  placeholder="Describe your overall experience with Savory Nest..."
+                  value={restaurantFeedback}
+                  onChange={(e) => setRestaurantFeedback(e.target.value)}
+                  className="w-full p-4 bg-white border border-blue-100 rounded-xl text-xs outline-none focus:border-blue-500 resize-none"
+                  rows={3}
+                />
               </div>
             </div>
 
@@ -418,8 +420,8 @@ const MyOrdersPage = () => {
           }}
           status={selectedTrackOrder?.deliveryStatus || "preparing"}
           order={{
-            _id: selectedTrackOrder?._id, 
-            riderId: selectedTrackOrder?.riderId, 
+            _id: selectedTrackOrder?._id,
+            riderId: selectedTrackOrder?.riderId,
             otp: selectedTrackOrder?.deliveryOTP,
             deliveryLocation: selectedTrackOrder?.deliveryLocation,
             driver: {

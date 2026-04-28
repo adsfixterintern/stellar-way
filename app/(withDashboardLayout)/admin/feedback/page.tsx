@@ -4,33 +4,48 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { 
-  getAllFeedbacksForAdmin, 
-  updateFeedbackApi, 
-  deleteFeedbackApi 
+import {
+  getAllFeedbacksForAdmin,
+  updateFeedbackApi,
+  deleteFeedbackApi,
 } from "@/app/modules/feedback/feedback.api";
 import { IFeedback } from "@/app/modules/feedback/feedback.interface";
-import { 
-  IoCheckmarkCircleOutline, 
-  IoTrashOutline, 
-  IoTimeOutline, 
-  IoCreateOutline, 
-  IoCloseOutline 
+import {
+  IoTrashOutline,
+  IoCreateOutline,
+  IoCloseOutline,
 } from "react-icons/io5";
 import Swal from "sweetalert2";
+
+const FeedbackSkeleton = () => (
+  <div className="p-5 flex flex-col md:flex-row gap-6 animate-pulse items-center bg-white mb-2 rounded-xl">
+    <div className="flex items-center gap-4 w-full md:w-1/4">
+      <div className="w-10 h-10 rounded-full bg-gray-100 shrink-0" />
+      <div className="space-y-2 grow">
+        <div className="h-3 w-24 bg-gray-100 rounded" />
+        <div className="h-2 w-16 bg-gray-50 rounded" />
+      </div>
+    </div>
+    <div className="grow w-full space-y-2">
+      <div className="h-3 w-full bg-gray-50 rounded" />
+      <div className="h-3 w-4/5 bg-gray-50 rounded" />
+    </div>
+    <div className="flex gap-2 w-full md:w-auto justify-end">
+      <div className="h-10 w-20 bg-gray-50 rounded-lg" />
+    </div>
+  </div>
+);
 
 const AdminFeedbackPage = () => {
   const [feedbacks, setFeedbacks] = useState<IFeedback[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState<any>(null);
   const [editData, setEditData] = useState({
     name: "",
     designation: "",
     status: "pending",
-    description: ""
+    description: "",
   });
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -49,170 +64,291 @@ const AdminFeedbackPage = () => {
     fetchAllFeedbacks();
   }, []);
 
-
   const openEditModal = (fb: IFeedback) => {
     setSelectedFeedback(fb);
     setEditData({
       name: fb.name,
       designation: fb.designation,
       status: fb.status as string,
-      description: fb.description
+      description: fb.description,
     });
     setIsModalOpen(true);
   };
 
   const handleUpdateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFeedback) return;
-
     setIsUpdating(true);
     try {
       await updateFeedbackApi(selectedFeedback._id, editData as any);
-      toast.success("Feedback updated successfully!");
+      toast.success("Updated Successfully!");
       setIsModalOpen(false);
       fetchAllFeedbacks();
     } catch (error) {
-      toast.error("Update failed");
+      toast.error("Failed to update");
     } finally {
       setIsUpdating(false);
     }
   };
 
- const handleDelete = async (id: string) => {
-  const result = await Swal.fire({
-    title: "Are you sure?",
-    text: "You won't be able to revert this!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#1A4E11",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Yes, delete it!",
-    background: "#fff",
-    customClass: {
-      popup: "rounded-3xl",
-      title: "font-black uppercase text-lg",
-      confirmButton: "font-black uppercase text-xs tracking-widest px-6 py-3",
-      cancelButton: "font-black uppercase text-xs tracking-widest px-6 py-3",
-    }
-  });
+  const handleDelete = async (id: string) => {
+    const result = await Swal.fire({
+      title: "Delete review?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#1A4E11",
+      confirmButtonText: "Delete",
+      customClass: { popup: "rounded-2xl border-none" },
+    });
 
-  if (result.isConfirmed) {
-    try {
-      await deleteFeedbackApi(id);
-      
-  
-      Swal.fire({
-        title: "Deleted!",
-        text: "The feedback has been removed.",
-        icon: "success",
-        confirmButtonColor: "#1A4E11",
-      });
-      
-      fetchAllFeedbacks(); 
-    } catch (error) {
-      Swal.fire("Error!", "Failed to delete feedback.", "error");
+    if (result.isConfirmed) {
+      try {
+        await deleteFeedbackApi(id);
+        toast.success("Deleted");
+        fetchAllFeedbacks();
+      } catch (error) {
+        toast.error("Error");
+      }
     }
-  }
-};
-
-  if (loading) return <div className="p-10 text-center font-black uppercase">Loading Feedbacks...</div>;
+  };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-6xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tight">Guest Testimonials</h1>
-          <p className="text-sm text-gray-500 font-medium">Manage and approve feedback to be displayed on the homepage.</p>
+    <div className="  min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        <header className="mb-10">
+          <h1 className="text-3xl md:text-5xl font-black text-[#1A4E11] uppercase italic tracking-tight">
+            Guest Testimonials
+          </h1>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[4px] mt-2 ml-1">
+            Dashboard Management
+          </p>
         </header>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="p-5 text-[10px] font-black uppercase text-gray-400">User</th>
-                <th className="p-5 text-[10px] font-black uppercase text-gray-400">Feedback</th>
-                <th className="p-5 text-[10px] font-black uppercase text-gray-400">Status</th>
-                <th className="p-5 text-[10px] font-black uppercase text-gray-400 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {feedbacks.map((fb) => (
-                <tr key={fb._id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="p-5">
-                    <div className="flex items-center gap-3">
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 border border-gray-200">
-                        <Image src={(fb.userId as any)?.image || "/placeholder-avatar.png"} alt={fb.name} fill className="object-cover" />
+        <div className="space-y-4">
+          {loading ? (
+            [1, 2, 3, 4].map((i) => <FeedbackSkeleton key={i} />)
+          ) : (
+            <>
+              {/* Data Table / List */}
+              <div className="bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.03)] overflow-hidden">
+                <div className="hidden md:block">
+                  <table className="w-full text-left">
+                    <thead className="bg-[#F9FBFA]">
+                      <tr className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        <th className="p-6">Reviewer</th>
+                        <th className="p-6">Feedback</th>
+                        <th className="p-6">Status</th>
+                        <th className="p-6 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {feedbacks.map((fb) => (
+                        <tr
+                          key={fb._id}
+                          className="hover:bg-gray-50/50 transition-all group"
+                        >
+                          <td className="p-6">
+                            <div className="flex items-center gap-4">
+                              <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-gray-100 shadow-sm">
+                                <Image
+                                  src={
+                                    (fb.userId as any)?.image ||
+                                    "/placeholder-avatar.png"
+                                  }
+                                  alt={fb.name}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                              <div>
+                                <p className="text-sm font-black text-gray-900 uppercase">
+                                  {fb.name}
+                                </p>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase">
+                                  {fb.designation}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-6 text-xs text-gray-500 italic max-w-sm font-medium leading-relaxed">
+                            {fb.description}
+                          </td>
+                          <td className="p-6">
+                            <span
+                              className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider ${fb.status === "published" ? "bg-green-50 text-green-600" : "bg-orange-50 text-orange-600"}`}
+                            >
+                              {fb.status}
+                            </span>
+                          </td>
+                          <td className="p-6 text-right">
+                            <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all">
+                              <button
+                                onClick={() => openEditModal(fb)}
+                                className="w-10 h-10 flex items-center justify-center bg-white shadow-sm text-blue-500 hover:bg-blue-500 hover:text-white rounded-xl transition-all"
+                              >
+                                <IoCreateOutline size={18} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(fb._id)}
+                                className="w-10 h-10 flex items-center justify-center bg-white shadow-sm text-gray-300 hover:text-red-500 rounded-xl transition-all"
+                              >
+                                <IoTrashOutline size={18} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Card List */}
+                <div className="md:hidden divide-y divide-gray-50">
+                  {feedbacks.map((fb) => (
+                    <div key={fb._id} className="p-6 flex flex-col gap-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-3">
+                          <div className="relative w-12 h-12 rounded-2xl overflow-hidden shadow-sm">
+                            <Image
+                              src={
+                                (fb.userId as any)?.image ||
+                                "/placeholder-avatar.png"
+                              }
+                              alt={fb.name}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <div>
+                            <p className="text-sm font-black text-gray-800">
+                              {fb.name}
+                            </p>
+                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">
+                              {fb.designation}
+                            </p>
+                          </div>
+                        </div>
+                        <span
+                          className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase ${fb.status === "published" ? "bg-green-50 text-green-600" : "bg-orange-50 text-orange-600"}`}
+                        >
+                          {fb.status}
+                        </span>
                       </div>
-                      <div>
-                        <p className="text-sm font-bold text-gray-800">{fb.name}</p>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">{fb.designation}</p>
+                      <p className="text-xs text-gray-500 italic leading-relaxed font-medium bg-[#F9FBFA] p-4 rounded-2xl">
+                        {fb.description}
+                      </p>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => openEditModal(fb)}
+                          className="flex-1 py-3.5 bg-blue-50 text-blue-600 rounded-xl font-black text-[10px] uppercase tracking-[2px]"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(fb._id)}
+                          className="flex-1 py-3.5 bg-red-50 text-red-500 rounded-xl font-black text-[10px] uppercase tracking-[2px]"
+                        >
+                          Delete
+                        </button>
                       </div>
                     </div>
-                  </td>
-                  <td className="p-5 max-w-xs">
-                    <p className="text-xs text-gray-600 leading-relaxed italic line-clamp-2">&ldquo;{fb.description}&rdquo;</p>
-                  </td>
-                  <td className="p-5">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase ${fb.status === "published" ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-600"}`}>
-                      {fb.status === "published" ? <IoCheckmarkCircleOutline size={12}/> : <IoTimeOutline size={12}/>}
-                      {fb.status}
-                    </span>
-                  </td>
-                  <td className="p-5 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => openEditModal(fb)} className="p-2 text-blue-500 hover:bg-blue-50 rounded-full transition-colors" title="Edit Feedback">
-                        <IoCreateOutline size={20} />
-                      </button>
-                      <button onClick={() => handleDelete(fb._id)} className="p-2 text-gray-400 hover:text-red-500 transition-colors" title="Delete Feedback">
-                        <IoTrashOutline size={20} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      {/* --- EDIT MODAL --- */}
+      {/* --- Minimalist Modal (No Borders, Soft Shadows) --- */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b flex justify-between items-center bg-gray-50/50">
-              <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">Edit Testimonial</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-900 transition-colors">
-                <IoCloseOutline size={28} />
+        <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white w-full md:max-w-lg rounded-t-[32px] md:rounded-3xl shadow-[0_-20px_80px_rgba(0,0,0,0.15)] overflow-hidden animate-in slide-in-from-bottom duration-500">
+            <div className="p-6 flex justify-between items-center bg-white">
+              <h2 className="text-xl font-black text-[#1A4E11] uppercase italic tracking-tight">
+                Edit Feedback
+              </h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="w-10 h-10 flex items-center justify-center bg-gray-50 text-gray-400 rounded-full hover:bg-red-50 hover:text-red-500 transition-all"
+              >
+                <IoCloseOutline size={22} />
               </button>
             </div>
 
-            <form onSubmit={handleUpdateSubmit} className="p-6 space-y-5">
-              <div className="grid grid-cols-2 gap-4">
+            <form
+              onSubmit={handleUpdateSubmit}
+              className="p-6 md:p-8 space-y-6"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-gray-400">User Name</label>
-                  <input type="text" value={editData.name} onChange={(e) => setEditData({...editData, name: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:bg-white focus:border-[#1A4E11] outline-none transition-all" required />
+                  <label className="text-[9px] font-black uppercase text-gray-300 ml-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editData.name}
+                    onChange={(e) =>
+                      setEditData({ ...editData, name: e.target.value })
+                    }
+                    className="w-full p-4 bg-gray-50 rounded-2xl text-sm font-bold outline-none focus:bg-white focus:shadow-md transition-all"
+                    required
+                  />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-gray-400">Designation</label>
-                  <input type="text" value={editData.designation} onChange={(e) => setEditData({...editData, designation: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:bg-white focus:border-[#1A4E11] outline-none transition-all" required />
+                  <label className="text-[9px] font-black uppercase text-gray-300 ml-1">
+                    Designation
+                  </label>
+                  <input
+                    type="text"
+                    value={editData.designation}
+                    onChange={(e) =>
+                      setEditData({ ...editData, designation: e.target.value })
+                    }
+                    className="w-full p-4 bg-gray-50 rounded-2xl text-sm font-bold outline-none focus:bg-white focus:shadow-md transition-all"
+                    required
+                  />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-gray-400">Feedback Status</label>
-                <select value={editData.status} onChange={(e) => setEditData({...editData, status: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:bg-white focus:border-[#1A4E11] outline-none transition-all">
-                  <option value="pending">Pending (Draft)</option>
-                  <option value="published">Published (Visible on Home)</option>
-                </select>
+                <label className="text-[9px] font-black uppercase text-gray-300 ml-1">
+                  Visibility Status
+                </label>
+                <div className="flex gap-2 p-1.5 bg-gray-50 rounded-2xl">
+                  {["pending", "published"].map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setEditData({ ...editData, status: s })}
+                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${editData.status === s ? "bg-white text-[#1A4E11] shadow-sm" : "text-gray-400"}`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-gray-400">Review Text</label>
-                <textarea rows={4} value={editData.description} onChange={(e) => setEditData({...editData, description: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium focus:bg-white focus:border-[#1A4E11] outline-none transition-all resize-none" required />
+                <label className="text-[9px] font-black uppercase text-gray-300 ml-1">
+                  Review Message
+                </label>
+                <textarea
+                  rows={4}
+                  value={editData.description}
+                  onChange={(e) =>
+                    setEditData({ ...editData, description: e.target.value })
+                  }
+                  className="w-full p-5 bg-gray-50 rounded-2xl text-sm font-medium outline-none focus:bg-white focus:shadow-md transition-all resize-none leading-relaxed"
+                  required
+                />
               </div>
 
-              <button type="submit" disabled={isUpdating} className="w-full py-4 bg-[#1A4E11] text-white font-black rounded-2xl uppercase text-xs tracking-widest shadow-xl hover:opacity-90 transition-all disabled:bg-gray-300">
-                {isUpdating ? "Saving Changes..." : "Update Testimonial"}
+              <button
+                type="submit"
+                disabled={isUpdating}
+                className="w-full py-5 bg-[#1A4E11] text-white font-black rounded-2xl uppercase text-[10px] tracking-[4px] shadow-xl shadow-[#1A4E11]/20 hover:scale-[1.01] active:scale-95 transition-all"
+              >
+                {isUpdating ? "Saving..." : "Update Feedback"}
               </button>
             </form>
           </div>

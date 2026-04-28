@@ -183,7 +183,7 @@ function BlogAdminPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#F8FAF7] p-6 md:p-10">
+    <div className="w-full min-h-screen ">
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
         <div>

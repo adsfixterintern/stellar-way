@@ -36,6 +36,7 @@ export default withAuth(
       "/profile",
       "/checkout",
       "/apply-rider",
+      "/event-pay",
     ];
 
     const isProtected = protectedRoutes.some((route) =>
@@ -76,5 +77,6 @@ export const config = {
     "/profile/:path*",
     "/dashboard/:path*",
     "/apply-rider",
+    "/event-pay",
   ],
 };

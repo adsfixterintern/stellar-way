@@ -5,7 +5,7 @@ import Image from "next/image";
 import { getSingleBlog } from "@/app/modules/blog/blog.api";
 import { IBlog } from "@/types/blog.interface";
 import SingleHero from "@/components/shared/SingleHero";
-import { FaFacebookF, FaLinkedinIn, FaLink } from "react-icons/fa";
+import { FaFacebookF, FaLinkedinIn, FaLink, FaCheck } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 
 /* 🔥 Skeleton UI */
@@ -70,6 +70,7 @@ export default function BlogDetailsPage() {
   const { id } = useParams();
   const [blog, setBlog] = useState<IBlog | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isCopied, setIsCopied] = useState(false);
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
 
@@ -95,12 +96,19 @@ export default function BlogDetailsPage() {
     }
   };
 
+
+
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareUrl);
-    toast.success("Link copied to clipboard!");
+    setIsCopied(true); 
+
+    
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 2000);
   };
 
-  /* 🔥 Skeleton render */
   if (loading) {
     return (
       <>
@@ -115,8 +123,6 @@ export default function BlogDetailsPage() {
       </>
     );
   }
-
-  console.log(blog);
 
   if (!blog) return <div className="py-20 text-center">Blog not found!</div>;
 
@@ -260,9 +266,21 @@ export default function BlogDetailsPage() {
 
                   <button
                     onClick={handleCopyLink}
-                    className="flex-1 h-12 rounded-full bg-gray-100 font-bold flex items-center justify-center gap-2"
+                    className={`flex-1 h-12 rounded-full font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
+                      isCopied 
+                        ? "bg-[#3A4D39] text-white" // কপি হওয়ার পর কালার পরিবর্তন
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                   >
-                    <FaLink /> Copy Link
+                    {isCopied ? (
+                      <>
+                        <FaCheck /> Copied!
+                      </>
+                    ) : (
+                      <>
+                        <FaLink /> Copy Link
+                      </>
+                    )}
                   </button>
                 </div>
               </div>

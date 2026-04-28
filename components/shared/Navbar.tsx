@@ -18,10 +18,11 @@ import {
   Bell,
   Trash2,
 } from "lucide-react";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useCart } from "@/context/CartContext";
 import { useSocket } from "@/app/hooks/useSocket";
 import { toast } from "react-hot-toast";
+import { logoutAndClear } from "@/utils/authClient";
 
 // Import APIs
 import {
@@ -410,7 +411,7 @@ const Navbar = () => {
                         <LayoutDashboard size={16} /> Dashboard
                       </Link>
                       <button
-                        onClick={() => signOut({ callbackUrl: "/" })}
+                        onClick={() => logoutAndClear("/")}
                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-white/10"
                       >
                         <LogOut size={16} /> Sign out
@@ -485,7 +486,7 @@ const Navbar = () => {
                   <LayoutDashboard size={18} /> Dashboard
                 </Link>
                 <button
-                  onClick={() => signOut()}
+                  onClick={() => logoutAndClear("/")}
                   className="flex items-center justify-center gap-2 bg-red-500/10 text-red-400 p-3 rounded-xl border border-red-500/20 font-medium"
                 >
                   <LogOut size={18} /> Sign Out

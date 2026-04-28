@@ -12,7 +12,8 @@ export interface IAuthResponse {
   message: string;
   data: {
     user: IUser;
-    token: string; 
+    token: string;
+    refreshToken?: string;
   };
 }
 

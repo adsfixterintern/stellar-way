@@ -22,7 +22,8 @@ const AuthPage = () => {
     name: "", 
     email: "", 
     password: "", 
-    phone: "" 
+    phone: "",
+    countryCode: "+880",
   });
 
 
@@ -63,7 +64,11 @@ const AuthPage = () => {
       }
     } else {
       try {
-        const registrationData = { ...formData, role: "user" };
+        const registrationData = {
+          ...formData,
+          phone: `${formData.countryCode}${formData.phone}`,
+          role: "user",
+        };
         const res = await registerUserApi(registrationData);
         
         if (res.success) {

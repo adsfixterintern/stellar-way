@@ -7,7 +7,6 @@ export default withAuth(
     if (!url) return NextResponse.next();
 
     const pathname = url.pathname;
-
     const token = req.nextauth?.token;
     const userRole = token?.role;
 
@@ -16,17 +15,12 @@ export default withAuth(
     }
 
     // =========================
-    // PUBLIC ROUTES (NO AUTH REQUIRED)
+    // PUBLIC ROUTES
     // =========================
-    const publicRoutes = [
-      "/",
-      "/menu",
-      "/login",
-      "/register",
-    ];
+    const publicRoutes = ["/", "/menu", "/login", "/register"];
 
-    const isPublicRoute = publicRoutes.some((route) =>
-      pathname === route || pathname.startsWith(route)
+    const isPublicRoute = publicRoutes.some(
+      (route) => pathname === route || pathname.startsWith(route),
     );
 
     if (isPublicRoute) {
@@ -37,7 +31,6 @@ export default withAuth(
     // PROTECTED ROUTES CHECK
     // =========================
     const protectedRoutes = [
-      "/admin",
       "/rider",
       "/dashboard",
       "/profile",
@@ -46,10 +39,9 @@ export default withAuth(
     ];
 
     const isProtected = protectedRoutes.some((route) =>
-      pathname.startsWith(route)
+      pathname.startsWith(route),
     );
 
-    // 🔥 ONLY REDIRECT IF REALLY NO TOKEN + PROTECTED ROUTE
     if (isProtected && !token) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
@@ -57,19 +49,12 @@ export default withAuth(
     // =========================
     // ROLE BASED CONTROL
     // =========================
-    if (pathname.startsWith("/admin") && userRole !== "admin") {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
 
     if (pathname.startsWith("/rider") && userRole !== "rider") {
       return NextResponse.redirect(new URL("/", req.url));
     }
 
     if (pathname === "/dashboard") {
-      if (userRole === "admin") {
-        return NextResponse.redirect(new URL("/admin", req.url));
-      }
-
       if (userRole === "rider") {
         return NextResponse.redirect(new URL("/rider", req.url));
       }
@@ -81,12 +66,11 @@ export default withAuth(
     callbacks: {
       authorized: () => true,
     },
-  }
+  },
 );
 
 export const config = {
   matcher: [
-    "/admin/:path*",
     "/rider/:path*",
     "/checkout",
     "/profile/:path*",

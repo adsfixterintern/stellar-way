@@ -8,6 +8,10 @@ export default withAuth(
     const token = req.nextauth?.token;
     const userRole = token?.role;
 
+    if (token?.error === "RoleChanged") {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
     // =========================
     // PUBLIC ROUTES
     // =========================

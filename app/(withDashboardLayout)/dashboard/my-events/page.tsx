@@ -114,7 +114,7 @@ const MyEventsPage = () => {
                               {booking.eventId?.title || "Unknown Event"}
                             </p>
                             <p className="text-gray-400 text-[9px] font-black mt-1 uppercase tracking-tighter">
-                              TRX: {booking.transactionId?.toUpperCase()}
+                              TRX: {booking.transactionId}
                             </p>
                           </div>
                         </div>
@@ -203,7 +203,7 @@ const MyEventsPage = () => {
                       </span>
                     </div>
                     <p className="text-gray-400 text-[9px] font-black mt-1 uppercase tracking-tighter italic">
-                      ID: {booking.transactionId?.slice(-10).toUpperCase()}
+                      ID: {booking.transactionId}
                     </p>
                   </div>
                 </div>

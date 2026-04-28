@@ -37,7 +37,8 @@ const EventSuccessPage = ({
   }, [transactionId]);
 
   return (
-    <div className="min-h-screen bg-[#F4F7F2] pb-24">
+    <div className="min-h-screen bg-white pb-20">
+
       <SingleHero
         subtitle="Confirmation"
         title="Payment Success"

@@ -202,7 +202,7 @@ export default function CustomerDashboardOverview() {
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
-                      ID: #{recentOrder.transactionId?.slice(-6).toUpperCase()}
+                      ID: #{recentOrder.transactionId}
                     </p>
                     <h4 className="font-black text-lg text-gray-900">
                       {recentMenuDetails?.title || "Delicious Feast"}{" "}

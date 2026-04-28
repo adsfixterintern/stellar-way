@@ -21,7 +21,7 @@ const OrderDetailsModal: React.FC<IOrderDetailsModalProps> = ({ isOpen, onClose,
           <div>
             <h2 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Order Details</h2>
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
-              TXN: {order.transactionId?.toUpperCase()}
+              TXN: {order.transactionId}
             </p>
           </div>
           <button 

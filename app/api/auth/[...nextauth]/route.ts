@@ -68,18 +68,19 @@ const handler = NextAuth({
       name: "Credentials",
       credentials: {
         email: { type: "text" },
-        password: { type: "password" }
+        password: { type: "password" },
       },
       async authorize(credentials) {
         try {
           const res = await loginUserApi({
-            email: credentials?.email as string, 
+            email: credentials?.email as string,
             password: credentials?.password as string,
           });
           if (res.success && res.data.user) {
             return {
               ...res.data.user,
               id: res.data.user._id,
+              riderId: res.data.user?.riderId || null,
               accessToken: res.data.token,
               refreshToken: res.data.refreshToken,
               accessTokenExpires: getTokenExpiryMs(res.data.token),
@@ -89,14 +90,15 @@ const handler = NextAuth({
         } catch (error: any) {
           throw new Error(error.response?.data?.message || "Login failed");
         }
-      }
-    })
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = (user as any).id;
         token.role = (user as any).role;
+        token.riderId = (user as any).riderId;
         token.accessToken = (user as any).accessToken;
         token.refreshToken = (user as any).refreshToken;
         token.accessTokenExpires =
@@ -126,9 +128,10 @@ const handler = NextAuth({
           ...session.user,
           id: token.id,
           role: token.role,
+          riderId: token.riderId,
           email: token.email,
           name: token.name,
-          image: token.picture, 
+          image: token.picture,
           phone: token.phone,
         };
         session.accessToken = token.accessToken;
@@ -136,7 +139,7 @@ const handler = NextAuth({
         session.error = token.error;
       }
       return session;
-    }
+    },
   },
   pages: { signIn: "/login" },
   secret: process.env.NEXTAUTH_SECRET,

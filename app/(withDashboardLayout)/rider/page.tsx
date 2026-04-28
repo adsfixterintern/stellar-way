@@ -339,7 +339,7 @@ const RiderDashboard: React.FC = () => {
                       Delivery In Progress
                     </span>
                     <h3 className="text-3xl font-black text-[#E4F5DC] mt-2 italic">
-                      #{order.transactionId.slice(-8).toUpperCase()}
+                      #{order.transactionId}
                     </h3>
                   </div>
                   <div className="text-right">
@@ -472,7 +472,7 @@ const RiderDashboard: React.FC = () => {
                   className="hover:bg-[#E4F5DC]/10 transition-colors"
                 >
                   <td className="px-10 py-6 font-black text-gray-900">
-                    #{order.transactionId.slice(-6).toUpperCase()}
+                    #{order.transactionId}
                   </td>
                   <td className="px-10 py-6 text-[11px] font-bold text-gray-500">
                     {order.address}

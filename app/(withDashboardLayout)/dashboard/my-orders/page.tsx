@@ -190,7 +190,7 @@ const MyOrdersPage = () => {
                       >
                         <td className="p-5">
                           <p className="text-sm font-bold text-gray-800 uppercase tracking-tighter">
-                            {order.transactionId?.slice(-10)}
+                            {order.transactionId}
                           </p>
                           <p className="text-[10px] text-gray-400 font-black uppercase mt-1">
                             {new Date(order.createdAt).toLocaleDateString(
@@ -257,7 +257,7 @@ const MyOrdersPage = () => {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
-                        #{order.transactionId?.slice(-10)}
+                        #{order.transactionId}
                       </p>
                       <p className="text-xs font-bold text-gray-800">
                         {new Date(order.createdAt).toLocaleDateString("en-GB")}
@@ -321,7 +321,7 @@ const MyOrdersPage = () => {
                   Feedback Panel
                 </h2>
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                  Order #{selectedOrder.transactionId?.slice(-8)}
+                  Order #{selectedOrder.transactionId}
                 </p>
               </div>
               <button

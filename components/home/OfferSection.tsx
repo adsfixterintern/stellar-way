@@ -82,6 +82,8 @@ const OfferSection = () => {
     fetchOffers();
   }, []);
 
+  if(offers.length===0) return null;
+
   return (
     <section className="py-20 px-6 bg-[#FDFEFE] font-sans">
       <div className="max-w-7xl mx-auto">
@@ -256,7 +258,7 @@ const OfferCard = ({
       <div className="absolute top-6 left-6 z-10">
         <div className="bg-[#1A4E11] text-white px-5 py-2 rounded-2xl font-black text-xl shadow-lg">
           {offer.discountPercentage}%{" "}
-          <span className="text-[10px] block opacity-80 leading-none">Off</span>
+          <span className="text-[10px] block opacity-80 leading-none">Off (Dine-in Only)</span>
         </div>
       </div>
 

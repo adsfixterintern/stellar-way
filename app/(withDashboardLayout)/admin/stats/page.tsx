@@ -54,7 +54,6 @@ const AdminStatsPage = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // খালি স্ট্রিং থাকলে সেটাকে 0 হিসেবে সেভ করবে ডাটাবেজের জন্য
     setStats({ ...stats, [name]: value === "" ? 0 : Number(value) });
   };
 
@@ -67,7 +66,7 @@ const AdminStatsPage = () => {
         : await createRestaurantStats(stats);
 
       if (res.success) {
-        toast.success("Stats updated successfully!");
+        toast.success("Metrics updated successfully!");
         fetchStats();
       }
     } catch (err: any) {
@@ -80,21 +79,19 @@ const AdminStatsPage = () => {
   const handleReset = () => {
     Swal.fire({
       title: "Are you sure?",
-      text: "This will reset all stats to zero in the database!",
+      text: "This will reset all stats to zero!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#1A4E11",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, reset it!",
-      customClass: {
-        popup: "rounded-xl",
-      },
+      cancelButtonColor: "#f1f1f1",
+      confirmButtonText: "Yes, reset!",
+      customClass: { popup: "rounded-3xl shadow-xl" },
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           const res = await resetRestaurantStats();
           if (res.success) {
-            Swal.fire("Reset!", "Stats have been cleared.", "success");
+            Swal.fire("Reset!", "Stats cleared.", "success");
             fetchStats();
           }
         } catch (err: any) {
@@ -104,15 +101,8 @@ const AdminStatsPage = () => {
     });
   };
 
-  if (isLoading)
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1A4E11]"></div>
-      </div>
-    );
-
   return (
-    <div className="p-4 md:p-10 bg-[#F8FAFC] min-h-screen">
+    <div className="min-h-screen ">
       <style jsx>{`
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
@@ -124,95 +114,111 @@ const AdminStatsPage = () => {
         }
       `}</style>
 
-      <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-10">
-          <div>
-            <h1 className="text-3xl font-black text-gray-900 flex items-center gap-3">
-              <IoStatsChartOutline className="text-[#1A4E11]" /> Restaurant
-              Metrics
+      <div className="max-w-7xl mx-auto">
+        {/* HEADER */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-10">
+          <div className="text-center sm:text-left">
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 flex items-center justify-center sm:justify-start gap-3 italic uppercase tracking-tighter">
+              <IoStatsChartOutline className="text-[#1A4E11]" /> Metrics
             </h1>
-            <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">
-              Manage numbers for the Counter section
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[3px] mt-2">
+              Management Dashboard
             </p>
           </div>
           <button
             onClick={handleReset}
-            className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm"
+            className="w-full sm:w-auto p-4 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center"
           >
             <IoTrashOutline size={20} />
           </button>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-100 p-8 md:p-12"
-        >
-          <form onSubmit={handleUpdate} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                {
-                  label: "Happy Clients",
-                  name: "happyClients",
-                  icon: <IoPeopleOutline className="text-blue-500" />,
-                },
-                {
-                  label: "Years of Experience",
-                  name: "yearsOfExperience",
-                  icon: <IoRibbonOutline className="text-amber-500" />,
-                },
-                {
-                  label: "Total Dishes",
-                  name: "totalDishes",
-                  icon: <IoRestaurantOutline className="text-green-500" />,
-                },
-                {
-                  label: "Awards Won",
-                  name: "awards",
-                  icon: <IoTrophyOutline className="text-yellow-600" />,
-                },
-                {
-                  label: "Total Branches",
-                  name: "branches",
-                  icon: <IoGitBranchOutline className="text-purple-500" />,
-                },
-              ].map((item) => (
-                <div key={item.name} className="space-y-3">
-                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                    {item.icon} {item.label}
-                  </label>
-                  <input
-                    type="number"
-                    name={item.name}
-                    value={stats[item.name] === 0 ? "" : stats[item.name]}
-                    onChange={handleInputChange}
-                    placeholder="0"
-                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:border-[#1A4E11] outline-none font-black text-xl transition-all shadow-inner"
-                  />
-                </div>
-              ))}
-            </div>
+        {/* MAIN CONTENT */}
+        <div className="bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.02)] border border-gray-50 p-6 md:p-12">
+          {isLoading ? (
+            <StatsSkeleton />
+          ) : (
+            <form onSubmit={handleUpdate} className="space-y-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                {[
+                  {
+                    label: "Happy Clients",
+                    name: "happyClients",
+                    icon: <IoPeopleOutline className="text-blue-500" />,
+                  },
+                  {
+                    label: "Years Exp.",
+                    name: "yearsOfExperience",
+                    icon: <IoRibbonOutline className="text-amber-500" />,
+                  },
+                  {
+                    label: "Total Dishes",
+                    name: "totalDishes",
+                    icon: <IoRestaurantOutline className="text-green-500" />,
+                  },
+                  {
+                    label: "Awards Won",
+                    name: "awards",
+                    icon: <IoTrophyOutline className="text-yellow-600" />,
+                  },
+                  {
+                    label: "Total Branches",
+                    name: "branches",
+                    icon: <IoGitBranchOutline className="text-purple-500" />,
+                  },
+                ].map((item) => (
+                  <div key={item.name} className="flex flex-col gap-3 group">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                      {item.icon} {item.label}
+                    </label>
+                    <input
+                      type="number"
+                      name={item.name}
+                      value={stats[item.name] === 0 ? "" : stats[item.name]}
+                      onChange={handleInputChange}
+                      placeholder="0"
+                      className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:border-[#1A4E11] focus:bg-white outline-none font-black text-2xl transition-all shadow-inner"
+                    />
+                  </div>
+                ))}
+              </div>
 
-            <div className="pt-6">
-              <button
-                type="submit"
-                disabled={isUpdating}
-                className="w-full bg-[#1A4E11] text-white py-5 rounded-2xl font-black text-lg shadow-lg hover:bg-black active:scale-95 transition-all flex items-center justify-center gap-3 disabled:bg-gray-400"
-              >
-                {isUpdating ? (
-                  <IoRefreshOutline className="animate-spin" size={24} />
-                ) : (
-                  <>
-                    <IoSaveOutline size={24} /> UPDATE RESTAURANT STATS
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </motion.div>
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="w-full bg-[#1A4E11] text-white py-5 rounded-[1.5rem] font-black text-[11px] md:text-sm uppercase tracking-widest shadow-xl shadow-[#1A4E11]/10 hover:bg-black active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:bg-gray-300"
+                >
+                  {isUpdating ? (
+                    <IoRefreshOutline className="animate-spin" size={20} />
+                  ) : (
+                    <>
+                      <IoSaveOutline size={20} /> Update All Stats
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
 };
+
+// SKELETON COMPONENT
+const StatsSkeleton = () => (
+  <div className="space-y-10 animate-pulse">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div key={i} className="flex flex-col gap-3">
+          <div className="h-3 w-24 bg-gray-100 rounded-full"></div>
+          <div className="h-16 w-full bg-gray-50 rounded-2xl"></div>
+        </div>
+      ))}
+    </div>
+    <div className="h-16 w-full bg-gray-100 rounded-[1.5rem] mt-6"></div>
+  </div>
+);
 
 export default AdminStatsPage;

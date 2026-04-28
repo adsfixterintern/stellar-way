@@ -6,7 +6,7 @@ import { getSingleBlog } from "@/app/modules/blog/blog.api";
 import { IBlog } from "@/types/blog.interface";
 import SingleHero from "@/components/shared/SingleHero";
 import { FaFacebookF, FaLinkedinIn, FaLink } from "react-icons/fa";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 /* 🔥 Skeleton UI */
 const BlogDetailsSkeleton = () => {
@@ -104,7 +104,6 @@ export default function BlogDetailsPage() {
   if (loading) {
     return (
       <>
-        <Toaster position="top-center" />
         <SingleHero
           isCenter={true}
           subtitle="Loading..."
@@ -123,7 +122,6 @@ export default function BlogDetailsPage() {
 
   return (
     <main className="bg-white min-h-screen">
-      <Toaster position="top-center" />
 
       <SingleHero
         isCenter={true}

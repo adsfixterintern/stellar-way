@@ -3,7 +3,7 @@
 import React, { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import {
   Calendar,
   Clock,
@@ -93,7 +93,6 @@ const EventPayContent = () => {
 
   return (
     <div className="bg-[#F4F7F2] min-h-screen pb-24">
-      <Toaster />
 
       <SingleHero
         isCenter={true}

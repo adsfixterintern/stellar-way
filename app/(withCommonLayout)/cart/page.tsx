@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { Trash2, Plus, Minus, X, ShoppingBag, Clock, Eye } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import SingleHero from "@/components/shared/SingleHero";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { getMyOrdersFromDB } from "@/app/modules/order/order.api";
 import { useSession } from "next-auth/react";
 
@@ -83,7 +83,6 @@ const CartPage = () => {
 
   return (
     <div className="bg-white min-h-screen pb-20 relative font-sans">
-      <Toaster position="top-center" />
       <SingleHero
         subtitle="CART"
         title="Your Cart"

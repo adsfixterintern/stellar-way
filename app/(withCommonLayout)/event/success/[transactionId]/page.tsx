@@ -2,7 +2,6 @@
 
 import React, { use, useState, useEffect } from "react";
 import Link from "next/link";
-import { Toaster } from "react-hot-toast";
 import SingleHero from "@/components/shared/SingleHero";
 import axios from "axios";
 
@@ -40,7 +39,6 @@ const EventSuccessPage = ({
 
   return (
     <div className="min-h-screen bg-white pb-20">
-      <Toaster position="top-center" />
 
       <SingleHero
         subtitle="Success"

@@ -11,9 +11,10 @@ import {
 } from "lucide-react";
 import { useSocket } from "@/app/hooks/useSocket";
 import { toast } from "react-hot-toast";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from '@/assets/img/flogo.png'
+import { logoutAndClear } from "@/utils/authClient";
 
 // Importing the Notification API Module
 import { 
@@ -175,7 +176,7 @@ const RiderLayout: React.FC<RiderLayoutProps> = ({ children }) => {
     {/* Logout Section */}
     <div className="p-4 border-t border-gray-200/50">
       <button
-        onClick={() => signOut({ callbackUrl: "/" })}
+        onClick={() => logoutAndClear("/")}
         className="flex items-center gap-3 px-5 py-3 w-full text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all font-bold group"
       >
         <LogOut size={18} className="group-hover:rotate-12 transition-transform" />

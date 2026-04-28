@@ -4,7 +4,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { logoutAndClear } from "@/utils/authClient";
 import {
   IoCartOutline,
   IoLogOutOutline,
@@ -77,7 +78,7 @@ const SidebarContent = ({
 
     {/* Logout Button */}
     <button
-      onClick={() => signOut({ callbackUrl: "/" })}
+      onClick={() => logoutAndClear("/")}
       className="mt-auto flex items-center gap-3 px-4 py-3 w-full border border-gray-200 rounded-xl text-sm font-bold text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all duration-300"
     >
       <IoLogOutOutline className="text-xl" />

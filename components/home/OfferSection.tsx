@@ -82,6 +82,8 @@ const OfferSection = () => {
     fetchOffers();
   }, []);
 
+  if(offers.length===0) return null;
+
   return (
     <section className="py-20 px-6 bg-[#FDFEFE] font-sans">
       <div className="max-w-7xl mx-auto">

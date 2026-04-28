@@ -8,15 +8,13 @@ export default withAuth(
     const token = req.nextauth?.token;
     const userRole = token?.role;
 
-    if (token?.error === "RoleChanged") {
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
-
-
+    // =========================
+    // PUBLIC ROUTES
+    // =========================
     const publicRoutes = ["/", "/menu", "/login", "/register"];
+
     const isPublicRoute = publicRoutes.some(
-      (route) =>
-        pathname === route || (route !== "/" && pathname.startsWith(route)),
+      (route) => pathname === route || pathname.startsWith(route),
     );
 
     if (isPublicRoute) {
@@ -38,20 +36,24 @@ export default withAuth(
       pathname.startsWith(route),
     );
 
-
     if (isProtected && !token) {
       const loginUrl = new URL("/login", req.url);
       loginUrl.searchParams.set("callbackUrl", pathname); 
       return NextResponse.redirect(loginUrl);
     }
 
+    // =========================
+    // ROLE BASED CONTROL
+    // =========================
 
     if (pathname.startsWith("/rider") && userRole !== "rider") {
       return NextResponse.redirect(new URL("/", req.url));
     }
 
-    if (pathname.startsWith("/dashboard") && userRole === "rider") {
-      return NextResponse.redirect(new URL("/rider", req.url));
+    if (pathname === "/dashboard") {
+      if (userRole === "rider") {
+        return NextResponse.redirect(new URL("/rider", req.url));
+      }
     }
 
     return NextResponse.next();

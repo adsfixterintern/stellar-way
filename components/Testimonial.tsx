@@ -14,6 +14,28 @@ import "swiper/css";
 import { getAllPublishedFeedbacks } from "@/app/modules/feedback/feedback.api";
 import { IFeedback } from "@/app/modules/feedback/feedback.interface";
 
+/* -------------------- SKELETON -------------------- */
+const TestimonialSkeleton = () => {
+  return (
+    <div className="flex flex-col items-center text-center max-w-2xl mx-auto py-10 animate-pulse">
+      {/* Description Skeleton */}
+      <div className="w-full space-y-3 mb-14 px-4">
+        <div className="h-4 bg-gray-300/50 rounded-full w-full"></div>
+        <div className="h-4 bg-gray-300/50 rounded-full w-5/6 mx-auto"></div>
+        <div className="h-4 bg-gray-300/50 rounded-full w-4/6 mx-auto"></div>
+      </div>
+
+      {/* Profile Image Skeleton */}
+      <div className="w-20 h-20 rounded-full bg-gray-300/50 mb-4 shadow-xl"></div>
+      
+      {/* Name and Designation Skeleton */}
+      <div className="h-6 bg-gray-300/50 rounded-md w-32 mb-2"></div>
+      <div className="h-3 bg-gray-300/50 rounded-md w-24"></div>
+    </div>
+  );
+};
+
+/* -------------------- COMPONENT -------------------- */
 const Testimonial = () => {
   const swiperRef = useRef<any>(null);
   const [feedbacks, setFeedbacks] = useState<IFeedback[]>([]);
@@ -83,7 +105,7 @@ const Testimonial = () => {
           modules={[Navigation, Autoplay]}
           spaceBetween={50}
           slidesPerView={1}
-          loop={true}
+          loop={!loading} 
           speed={1000} 
           autoplay={{ 
             delay: 2000,
@@ -92,49 +114,53 @@ const Testimonial = () => {
           }}
           className="testimonial-swiper relative"
         >
-          {loading
-            ? <div className="text-center py-20">Loading...</div>
-            : feedbacks.map((item) => (
-                <SwiperSlide key={item._id}>
-                  <div className="flex flex-col items-center text-center max-w-2xl mx-auto py-10 relative">
-                    
-                    <p className="text-[#555] text-[18px] md:text-[22px] leading-[1.8] italic mb-14 px-4 font-medium">
-                      &quot;{item.description}&quot;
+          {loading ? (
+            <SwiperSlide>
+              <TestimonialSkeleton />
+            </SwiperSlide>
+          ) : (
+            feedbacks.map((item) => (
+              <SwiperSlide key={item._id}>
+                <div className="flex flex-col items-center text-center max-w-2xl mx-auto py-10 relative">
+                  
+                  <p className="text-[#555] text-[18px] md:text-[22px] leading-[1.8] italic mb-14 px-4 font-medium">
+                    &quot;{item.description}&quot;
+                  </p>
+
+                  <div className="flex flex-col items-center">
+                    <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-xl bg-gray-50 mb-4">
+                      <Image
+                        src={item?.userId?.image || "https://ui-avatars.com/api/?name=User"}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <h4 className="text-[24px] font-bold text-[#1a1a1a]">
+                      {item.name}
+                    </h4>
+                    <p className="text-[#3A4D39]/70 text-[12px] font-black uppercase tracking-widest mt-1">
+                      {item.designation}
                     </p>
-
-                    <div className="flex flex-col items-center">
-                      <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-xl bg-gray-50 mb-4">
-                        <Image
-                          src={item?.userId?.image || "https://ui-avatars.com/api/?name=User"}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <h4 className="text-[24px] font-bold text-[#1a1a1a]">
-                        {item.name}
-                      </h4>
-                      <p className="text-[#3A4D39]/70 text-[12px] font-black uppercase tracking-widest mt-1">
-                        {item.designation}
-                      </p>
-                    </div>
-
-                   
-                    <div className="absolute bottom-0 right-0 md:right-10 opacity-30 hidden md:block transform rotate-180">
-                      <svg 
-                        width="80" 
-                        height="80" 
-                        viewBox="0 0 24 24" 
-                        fill="#3A4D39"
-                        stroke="white" 
-                        strokeWidth="0.5"
-                      >
-                         <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                      </svg>
-                    </div>
                   </div>
-                </SwiperSlide>
-              ))}
+
+                  {/* Quotation SVG */}
+                  <div className="absolute bottom-0 right-0 md:right-10 opacity-30 hidden md:block transform rotate-180">
+                    <svg 
+                      width="80" 
+                      height="80" 
+                      viewBox="0 0 24 24" 
+                      fill="#3A4D39"
+                      stroke="white" 
+                      strokeWidth="0.5"
+                    >
+                       <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                    </svg>
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))
+          )}
         </Swiper>
       </div>
     </section>

@@ -10,6 +10,9 @@ export const clearCartStorage = () => {
   localStorage.removeItem("pending_order_id");
 };
 
+
+// flkj
+
 export const logoutAndClear = async (callbackUrl = "/login") => {
   clearCartStorage();
   await signOut({ callbackUrl });

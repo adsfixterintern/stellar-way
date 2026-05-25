@@ -52,8 +52,8 @@ const MONTHS = [
 ];
 
 // ─── Skeleton Components (কোনো পরিবর্তন নেই) ────────────────────────────────
-const SkeletonPulse = ({ className }: { className?: string }) => (
-  <div className={`animate-pulse bg-gray-200 rounded-xl ${className}`} />
+const SkeletonPulse = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
+  <div className={`animate-pulse bg-gray-200 rounded-xl ${className}`} style={style} />
 );
 
 const StatCardSkeleton = () => (

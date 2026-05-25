@@ -32,7 +32,7 @@ const HotDeliciousItem = () => {
         ? item.reviews.reduce((acc, rev) => acc + rev.rating, 0) / item.reviews.length 
         : 0;
 
-      const catId = categoryObj ? categoryObj._id : item.categoryId;
+      const catId = (categoryObj ? categoryObj._id : item.categoryId) as any;
       const catName = categoryObj ? categoryObj.name : "Category";
 
       if (!catStats[catId]) {

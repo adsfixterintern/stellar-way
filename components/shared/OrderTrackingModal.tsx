@@ -192,7 +192,7 @@ const OrderTrackingModal = ({ isOpen, onClose, order, status }: any) => {
       orderId,
       sender: currentUser?.id || currentUser?._id,
       senderModel:
-        currentUser?.role?.toLowerCase() === "rider" ? "Rider" : "User",
+        (currentUser?.role?.toLowerCase() === "rider" ? "Rider" : "User") as "Rider" | "User",
       message: message.trim(),
     };
 

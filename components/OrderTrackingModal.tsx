@@ -77,6 +77,7 @@ const OrderTrackingModal = ({
 
   const orderId = order?.orderId;
   console.log(orderId);
+  const current = STATUS_CONFIG[status] || STATUS_CONFIG.preparing;
 
   const scrollToBottom = () => {
     setTimeout(() => {

@@ -58,6 +58,8 @@ const AuthPage = () => {
           redirect: false,
         });
 
+        console.log(res)
+
         if (res?.error) {
           if (res.error.toLowerCase().includes("admin")) {
             toast.error("Admin access is not allowed on this portal!");

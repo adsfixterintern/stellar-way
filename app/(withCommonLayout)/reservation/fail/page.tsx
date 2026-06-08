@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { XCircle, ArrowLeft, Home, AlertCircle, PhoneCall } from "lucide-react";
 
-const BookingFailPage = () => {
+const BookingFailContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -82,5 +82,11 @@ const BookingFailPage = () => {
     </div>
   );
 };
+
+const BookingFailPage = () => (
+  <Suspense fallback={<div className="text-center mt-20">Loading...</div>}>
+    <BookingFailContent />
+  </Suspense>
+);
 
 export default BookingFailPage;

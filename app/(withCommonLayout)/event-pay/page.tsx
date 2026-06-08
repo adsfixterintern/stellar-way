@@ -16,7 +16,7 @@ import {
   ChevronDown,
   LogIn,
 } from "lucide-react";
-import { countries } from "countries-list";
+import { countries, getEmojiFlag, TCountryCode } from "countries-list";
 import {
   createSSLBooking,
   createStripeBooking,
@@ -34,11 +34,11 @@ const EventPayContent = () => {
   const [countryCode, setCountryCode] = useState("+880");
 
   const countryOptions = useMemo(() => {
-    return Object.values(countries)
-      .map((country) => ({
+    return Object.entries(countries)
+      .map(([code, country]) => ({
         name: country.name,
         phone: `+${country.phone[0]}`,
-        emoji: country.emoji,
+        emoji: getEmojiFlag(code as TCountryCode),
       }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, []);

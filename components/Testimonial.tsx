@@ -130,7 +130,7 @@ const Testimonial = () => {
                     <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-xl bg-gray-50 mb-4">
                       <Image
                         src={
-                          item?.userId?.image ||
+                          (item?.userId as any)?.image ||
                           "https://ui-avatars.com/api/?name=User"
                         }
                         alt={item.name}

@@ -181,7 +181,7 @@ const RiderDashboard: React.FC = () => {
 
     const currentUser: any = session?.user;
 
-    const senderModel: SenderModel =
+    const senderModel: "User" | "Rider" =
       currentUser?.role?.toLowerCase() === "rider" ? "Rider" : "User";
 
     const payload = {

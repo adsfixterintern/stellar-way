@@ -40,7 +40,13 @@
 
 
 import api from "@/utils/apiInstance";
-import { IBooking } from "./booking.interface";
+import { IBooking, ICreateBookingRequest } from "./booking.interface";
+
+// Create
+export const createBooking = async (bookingData: ICreateBookingRequest) => {
+  const response = await api.post('/bookings/create-booking', bookingData);
+  return response.data;
+};
 
 // ১. SSLCommerz এর মাধ্যমে বুকিং তৈরি
 export const createSSLBookingApi = async (bookingData: any) => {

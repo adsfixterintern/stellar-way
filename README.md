@@ -68,7 +68,7 @@ A full-featured e-commerce and delivery management platform built with **Next.js
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/stellar-way.git
+git clone https://github.com/imamhossenbu/stellar-way.git
 cd stellar-way
 npm install
 ```
